@@ -1,0 +1,2437 @@
+{
+  "schema_version": 1,
+  "scope": "Unmodified vendored dependencies for current window compatibility; not upstream contributions, a complete application port or a release/legal certification",
+  "packages": [
+    {
+      "name": "gl4es",
+      "repository": "ptitSeb/gl4es",
+      "revision": "bc4314d8369f169d3fa81c5ed1b46b3dba4e74a5",
+      "archive_sha256": "0e5dd1f8c61dd9a81c9619250ea3a41c4587d2324de8b6d9a46db596a8de90ff",
+      "directory": "vendor/gl4es",
+      "excluded_archive_prefixes": [
+        "traces/"
+      ],
+      "files": [
+        {
+          "path": ".github/FUNDING.yml",
+          "bytes": 588,
+          "sha256": "0fc5cf74b0f4707d1c0106fe312315a60d06c281ab2d563d1d435da5258ebea3"
+        },
+        {
+          "path": ".gitignore",
+          "bytes": 151,
+          "sha256": "191ac7c17a3a9af9fdc5229d1162a52a827c0600d9bd53595e696f4e6ec355f7"
+        },
+        {
+          "path": ".travis.yml",
+          "bytes": 314,
+          "sha256": "e8255e6f8973687fc4681b0eccd336c465dbd8eab5c5a5d0e4e974109be0d155"
+        },
+        {
+          "path": "AGENTS.md",
+          "bytes": 4185,
+          "sha256": "1f7ac480714669b3a95da47bea58b70301cb27f51d6518e13657baf30ce4a8e3"
+        },
+        {
+          "path": "Android.mk",
+          "bytes": 2200,
+          "sha256": "7d4b3abde1134421131f5b8fa89bcd7f47ab8d4acc314947319b3246ff244a34"
+        },
+        {
+          "path": "CHANGELOG.md",
+          "bytes": 9276,
+          "sha256": "43d99c7c863c37355ff6f39531f0c594f1a63fd073756f8a0c322c88e5275a87"
+        },
+        {
+          "path": "CMakeLists.txt",
+          "bytes": 11571,
+          "sha256": "3ea6228a4b3e527a01645fe223afd8b7c170281ed358020c7efa979bb7feda2e"
+        },
+        {
+          "path": "COMPILE.md",
+          "bytes": 6870,
+          "sha256": "fdd7a2d8f08bb3cf7d41b881114eb15e666a76dc6755b1dc8037dd96cce70360"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "bytes": 1701,
+          "sha256": "19d60c6c2732ea308a4860a797d693763df5911e14123eec80cfedac9c22f1cd"
+        },
+        {
+          "path": "GL4ES.cbp",
+          "bytes": 11930,
+          "sha256": "ad92d0d86b41297c19d38d08aa09d88c154ffc0ad72d10ef343d13216a7d1788"
+        },
+        {
+          "path": "LICENSE",
+          "bytes": 1105,
+          "sha256": "69a3049c77abd88658f6ad7cf6a5b6ceb5cf03b80e60f7c4657d90322cfab7bd"
+        },
+        {
+          "path": "MEDIA.md",
+          "bytes": 3414,
+          "sha256": "8bd55e56a25fcb6f3551d12aceee9ce9b15075ae5752478c2cf32c1401db950d"
+        },
+        {
+          "path": "README.md",
+          "bytes": 4681,
+          "sha256": "3009610981bd589f29e5b3efe06331041a69899f8dfa4c684e36217775cafe2c"
+        },
+        {
+          "path": "USAGE.md",
+          "bytes": 18107,
+          "sha256": "d30d7ee6162272a660ad4b7970ef40166f707dd8ce00be08a447d9ee069445cc"
+        },
+        {
+          "path": "_config.yml",
+          "bytes": 78,
+          "sha256": "8b7276f5c714f42236ba4835fc69ec3ebaf041753e71dc1e7e19f70fc5651813"
+        },
+        {
+          "path": "bc_cat.h",
+          "bytes": 2970,
+          "sha256": "dec3e093bd92812572e0e07d46d163400d0715e378a409882d7f6d94c1378cc3"
+        },
+        {
+          "path": "debian/README.Debian",
+          "bytes": 100,
+          "sha256": "b7ac4326de86783d06d2d01176e74fbdd2f960ec48602fcd96f8951adb509abd"
+        },
+        {
+          "path": "debian/README.source",
+          "bytes": 102,
+          "sha256": "cf555d0c1ec82caba584b3cc97509d883162774568605a7cba7ce3f78e14e21c"
+        },
+        {
+          "path": "debian/changelog",
+          "bytes": 129,
+          "sha256": "e3c72350dadec463c80d16bb1996e50db4e8ce3fe6f26118988a44404d7935a5"
+        },
+        {
+          "path": "debian/compat",
+          "bytes": 3,
+          "sha256": "25d4f2a86deb5e2574bb3210b67bb24fcc4afb19f93a7b65a057daa874a9d18e"
+        },
+        {
+          "path": "debian/control",
+          "bytes": 1164,
+          "sha256": "8885387e8eba7146b256bda924334623a685e692f8d61c0233e9f7cade9b6d71"
+        },
+        {
+          "path": "debian/copyright",
+          "bytes": 2142,
+          "sha256": "dc249251d23aa80b14400509565d2c17f459fbf1f4d3911c04fe47738e20c065"
+        },
+        {
+          "path": "debian/libgl4es-dev.install",
+          "bytes": 79,
+          "sha256": "f1921ca2e39787dc4abbb6261f0a004dca8d8b07a9079836295ee453ea4ad900"
+        },
+        {
+          "path": "debian/libgl4es.install",
+          "bytes": 31,
+          "sha256": "c7b7469c704ea9187655e7ede7641251abf5f4f803b578380eafcf85a54b9d94"
+        },
+        {
+          "path": "debian/patches/fix_lintian_error",
+          "bytes": 392,
+          "sha256": "78ea9c12c6d895c95294def2fd26100b6d48d3de39311a92841247f4fe91adcd"
+        },
+        {
+          "path": "debian/patches/series",
+          "bytes": 18,
+          "sha256": "ff4805da75613b6e7f0fad6f55b69ba3dfbe88ade85010c10c65279109588ba2"
+        },
+        {
+          "path": "debian/rules",
+          "bytes": 153,
+          "sha256": "5880090a73a7393f90f1fe52e10d8a34b43322cf8451bbc316304c200618dc05"
+        },
+        {
+          "path": "debian/source/format",
+          "bytes": 12,
+          "sha256": "1be7080d72e6b566df3e236ce2c55efdfbbb8fa1c972d825e5b672ff8773be1a"
+        },
+        {
+          "path": "gl4es.png",
+          "bytes": 3440,
+          "sha256": "ca707996db404001f866a40b3204c532d8b793cbc7e355eeb7583d27ccb66fad"
+        },
+        {
+          "path": "include/EGL/egl.h",
+          "bytes": 20345,
+          "sha256": "70207b48ccd7257473ae7517c2a9cab3f8268e073df303e58df66a2ac171f75c"
+        },
+        {
+          "path": "include/EGL/eglext.h",
+          "bytes": 65858,
+          "sha256": "5045357621c4c0729e6f3c425788a5837dcfdcb09d256cb7e9f96918fb2836a0"
+        },
+        {
+          "path": "include/EGL/eglplatform.h",
+          "bytes": 6303,
+          "sha256": "4e139d5211b9b83a25499157bb0c95981e4616ab157cc91e70e78136324986b6"
+        },
+        {
+          "path": "include/GL/gl.h",
+          "bytes": 84831,
+          "sha256": "d03e03f7874502bcb5125dac530993555d37ebcfcf602354426a812f68160366"
+        },
+        {
+          "path": "include/GL/gl_mangle.h",
+          "bytes": 110193,
+          "sha256": "49435cf6648ecae3fa91e3c8e437a3f11eab0a7f2f03fc7f9846020b4bcfe29f"
+        },
+        {
+          "path": "include/GL/glext.h",
+          "bytes": 634031,
+          "sha256": "7c937b3ed60ab0b8164bb0164b50a9e03c41bbfd7d00ae56dc0dd9bbcd4547a7"
+        },
+        {
+          "path": "include/GL/glu.h",
+          "bytes": 17255,
+          "sha256": "84187ce0fd0153769675cb7f3301583eb27393f66b57c5604999a1d805a9184c"
+        },
+        {
+          "path": "include/GL/glu_mangle.h",
+          "bytes": 3315,
+          "sha256": "d3705c78eab49795c2488b8c94962d1ae7010c5ecd3206ff2aaed2a87b90784c"
+        },
+        {
+          "path": "include/GL/glx.h",
+          "bytes": 17200,
+          "sha256": "2b22d904c84327f9b60ef485e35faab2b0d30e735dd765b6d835f2f777147109"
+        },
+        {
+          "path": "include/GL/glx_mangle.h",
+          "bytes": 3463,
+          "sha256": "baefcb978bf5ea6737f9a1f530d3fb8efe2b9d437e4d2465473ef06b509d3eea"
+        },
+        {
+          "path": "include/GL/glxext.h",
+          "bytes": 43887,
+          "sha256": "a75af4284585e7439a57d979fb253c55df6c083c41469a37bc0cd1ca03f22334"
+        },
+        {
+          "path": "include/GL/internal/dri_interface.h",
+          "bytes": 28955,
+          "sha256": "a7bf23d8f976efb87f3d5be4ddfa8e2795211e0c090ac41c9b3be6e07d9601de"
+        },
+        {
+          "path": "include/GLES/egl.h",
+          "bytes": 371,
+          "sha256": "4fc9171c5104c1ef3219c477820150cec7aa4bc23ff7ca39b5864e7885c0530a"
+        },
+        {
+          "path": "include/GLES/gl.h",
+          "bytes": 34332,
+          "sha256": "db17471cc869dfdc7243b44d3acbc574d5088d89988c328426a34a3c5388d5ea"
+        },
+        {
+          "path": "include/GLES/gl2.h",
+          "bytes": 31871,
+          "sha256": "cea3377b3b3253b1999321d7735c9f2fa7aeb179ab9eedefbd4795d054c7620a"
+        },
+        {
+          "path": "include/GLES/gl2ext.h",
+          "bytes": 87605,
+          "sha256": "01c1e51a7abf311b840717c53611d4cc5864c67c118b12423e179377ec69cfa4"
+        },
+        {
+          "path": "include/GLES/gl2platform.h",
+          "bytes": 909,
+          "sha256": "d9ea63aa7ecc16f06e8321674702ceaacaf0a81777c616a0a3f859f21ce1c085"
+        },
+        {
+          "path": "include/GLES/gl3.h",
+          "bytes": 69257,
+          "sha256": "524607e4522dae0e2bc53f5ffc3ba8c4607cee775d2180ae144b6b18ef4e793c"
+        },
+        {
+          "path": "include/GLES/gl3ext.h",
+          "bytes": 741,
+          "sha256": "5730da902cec04b86f93152a219b379eabbf4eac97387f271fb8141fdfe4c5c5"
+        },
+        {
+          "path": "include/GLES/gl3platform.h",
+          "bytes": 909,
+          "sha256": "018c3f086a7186b87b472bae8fb03e6c795dce02b95829a286e8a11fb3d8ab5e"
+        },
+        {
+          "path": "include/GLES/glext.h",
+          "bytes": 63998,
+          "sha256": "f3ba39d389d850e3df353b7aadffdb1997c42276d40878d1f56fd8d6cbc14a05"
+        },
+        {
+          "path": "include/GLES/glplatform.h",
+          "bytes": 901,
+          "sha256": "03552610f3dd821c020264745d7aa37d760ca68ab44d3c7314b0959a0a24ae8e"
+        },
+        {
+          "path": "include/KHR/khrplatform.h",
+          "bytes": 9599,
+          "sha256": "f6bae597d069a21eea4e0f9805998289342ea60af79ae7e6250a596fd1a8620e"
+        },
+        {
+          "path": "include/android_debug.h",
+          "bytes": 308,
+          "sha256": "db98da137e96ea73062fc779a51c53af9a7e08e18e697f2abd486262cecdf36e"
+        },
+        {
+          "path": "include/gl4eshint.h",
+          "bytes": 1582,
+          "sha256": "eb13c4d3a6147ee93764a88633233d37a4dbaa8afd3fadf49e8145f1bddae863"
+        },
+        {
+          "path": "include/gl4esinit.h",
+          "bytes": 903,
+          "sha256": "3da0beccca54312010e74e1e99814ae64b38e9ccceb782648afcaa83283af6ad"
+        },
+        {
+          "path": "include/khash.h",
+          "bytes": 22529,
+          "sha256": "5608eeca6cbb87a875809a4fff75bc1e80f306b20506d59192ece78d71b59353"
+        },
+        {
+          "path": "media/assaultcube.jpg",
+          "bytes": 185057,
+          "sha256": "d8d7e20840fe54db20b4dc0f51a3a4c34b927c9747580274def282da28cf6f7c"
+        },
+        {
+          "path": "media/minecraft.png",
+          "bytes": 285766,
+          "sha256": "20a26c53d131cd8eb38cb5d3ce0ed74df2b2feb2897ee2bf89bf792a81769759"
+        },
+        {
+          "path": "refs/descent3.0000284192.png",
+          "bytes": 461646,
+          "sha256": "f89040ed2f2bfa1e15c5acbda23c0f2bb65db36e9bdd514e144d0f08269e8a41"
+        },
+        {
+          "path": "refs/foobillardplus.0000014748.png",
+          "bytes": 344040,
+          "sha256": "443dfb765b4bcfdd14e55dd76594ac7ceac321408255eb9efec42776256b3d79"
+        },
+        {
+          "path": "refs/glsl_lighting.0000505393.png",
+          "bytes": 34269,
+          "sha256": "e4fab028f28735adeea63abf07d12f01619ecd5c99e70df9b831c7f35ed19183"
+        },
+        {
+          "path": "refs/glxgears.0000008203.png",
+          "bytes": 8771,
+          "sha256": "be432afde060d03e26a2fa60e45a1695d77bdedf96ebddab26f82a25a5bbc467"
+        },
+        {
+          "path": "refs/neverball.0000078749.png",
+          "bytes": 226508,
+          "sha256": "090b539d7e2e7213ff5c5eaf0244545341aef1fa4e3a5b702ed7548215b98541"
+        },
+        {
+          "path": "refs/neverball.0000078750.png",
+          "bytes": 231071,
+          "sha256": "b25f458900cf298e42d7979ba6b65f111cae3a6815303191d855991700f2f05b"
+        },
+        {
+          "path": "refs/openra.0000031249.png",
+          "bytes": 403752,
+          "sha256": "3fa47a8e5a648f99c79ddad9904644273ab904e6a39c805da135581d4e47aed5"
+        },
+        {
+          "path": "refs/pointsprite.0000248810.png",
+          "bytes": 117410,
+          "sha256": "ad250336a0ed99a0ca7d8902f77c71027e1bf47b8a96e61ada2b55bd264c0986"
+        },
+        {
+          "path": "refs/stuntcarracer.0000118817.png",
+          "bytes": 84943,
+          "sha256": "e31068d4510559a15f0842e59f61122cca282724beef2b9e179260ae9f5a7613"
+        },
+        {
+          "path": "spec/build",
+          "bytes": 839,
+          "sha256": "4551b85f7566ea5e235bfc92ad32369d3264c98e0a0bcf9d3e0358382688145c"
+        },
+        {
+          "path": "spec/gen.py",
+          "bytes": 4603,
+          "sha256": "d6386d1f889f64eb99ad9c979c0fc6c38c723cea54d549a7f1795986c0887fe2"
+        },
+        {
+          "path": "spec/requirements.txt",
+          "bytes": 14,
+          "sha256": "0ee1370036fec6afc484a159b5937f6492a77c73b657c0de0fd24b3c12d1a2a2"
+        },
+        {
+          "path": "spec/template/base/base.j2",
+          "bytes": 189,
+          "sha256": "d175ff03ddfa01dd7660d2f81385d7ef16c1ae35fdb8182d09c1fad212b49208"
+        },
+        {
+          "path": "spec/template/base/copy_packed_call.j2",
+          "bytes": 470,
+          "sha256": "9db0308171925c7595ad9277cae57409198b073aae2edd3585c6edeeaf66aa8f"
+        },
+        {
+          "path": "spec/template/base/fprint.j2",
+          "bytes": 161,
+          "sha256": "81dbe6420b83fd5d076ca007da3da5a34ac90a4c5808ab331b45324837ab8850"
+        },
+        {
+          "path": "spec/template/base/header.j2",
+          "bytes": 225,
+          "sha256": "1cc1526704258b806a642b9a5387170949aedde6058f3be7d0c87e4b801412f8"
+        },
+        {
+          "path": "spec/template/base/headers.j2",
+          "bytes": 168,
+          "sha256": "4e11058e18b74323e35edd3f79fb73b03c2003be9ac697af733219fb72573fb4"
+        },
+        {
+          "path": "spec/template/base/indexed_call.j2",
+          "bytes": 742,
+          "sha256": "4f4e79ca84d9d585e6ab52744ac52d80df3d95635f5e193eb989621a4224f4fb"
+        },
+        {
+          "path": "spec/template/base/packed_call.j2",
+          "bytes": 540,
+          "sha256": "5eda788de98ca1c3beb93416dddc8aaa7ae0054c7b8ce4c2a340c843f195085d"
+        },
+        {
+          "path": "spec/template/base/wrap.c.j2",
+          "bytes": 586,
+          "sha256": "367badb5fea131ce72c4e66d4158e4599b3a41155d11d6fc1e84b14ea9b46a0f"
+        },
+        {
+          "path": "spec/template/base/wrap.h.j2",
+          "bytes": 1747,
+          "sha256": "702e376ef246662c8dc7882a793e0608cb2bc3858042d2d1e702808c8144a817"
+        },
+        {
+          "path": "spec/template/client.c.j2",
+          "bytes": 1282,
+          "sha256": "785ff119936664141aaedabad9bee8f13f025de00af3dc5d7ae6fcf512cb3882"
+        },
+        {
+          "path": "spec/template/eglwrap.c.j2",
+          "bytes": 1134,
+          "sha256": "c80328f156544fb6c2d3bef43d43f61f90c80d8afe9354523069be646e397b71"
+        },
+        {
+          "path": "spec/template/gleswrap.c.j2",
+          "bytes": 528,
+          "sha256": "3b945172e09c0ce84ed58ae728dd789abe7c1550d3baed8d228e24eda892f987"
+        },
+        {
+          "path": "spec/template/glextwrap.c.j2",
+          "bytes": 407,
+          "sha256": "a85628739486b6377db5c5ae0ac0bf33ad41ae368183e642659b4585e895e096"
+        },
+        {
+          "path": "spec/template/glwrap.h.j2",
+          "bytes": 614,
+          "sha256": "0af133daf6eab60ff844fe4d3706a9e47a5409cc7def72cacdf0734b4da7d1c4"
+        },
+        {
+          "path": "spec/template/glxfuncs.j2",
+          "bytes": 63,
+          "sha256": "35ab84169cbdf2729f4156afadbd01fe6cb7db9545c780bc047462eecf77f16c"
+        },
+        {
+          "path": "spec/template/host.c.j2",
+          "bytes": 105,
+          "sha256": "c53e4391519d0ea7ef3ae9e7d64934fa29b447f463f2c3e02220b4fde97eb52e"
+        },
+        {
+          "path": "spec/template/proxy.h.j2",
+          "bytes": 31,
+          "sha256": "b9c9473f70cd4e1e2417a5ff2e8e9b325e5e0d4bb479ca68ff84ef76122e1fed"
+        },
+        {
+          "path": "spec/xml/egl.xml",
+          "bytes": 85943,
+          "sha256": "b866bd3ee4973a83bf0716f1117df328ae5e5d790822a5befa2d4757051ed4f0"
+        },
+        {
+          "path": "spec/xml/gles-2.0.xml",
+          "bytes": 47944,
+          "sha256": "241306624ec8ae4f4cdb0f760f3b8d635e0ade56ef5f2bbc8b6a53b492d2fdda"
+        },
+        {
+          "path": "spec/xml/glx.xml",
+          "bytes": 44062,
+          "sha256": "beb7e5ac4a2355dc7e8e2960b8f7d81b16fbc652311f5ae89ee8e52ae9115bd3"
+        },
+        {
+          "path": "spec/xml/glxext.xml",
+          "bytes": 67382,
+          "sha256": "9b813bae0a5d4f43d25667aa6db899768392484caeecac07bf1139d370ef430d"
+        },
+        {
+          "path": "spec/xml/opengl.xml",
+          "bytes": 1549752,
+          "sha256": "8152a0c1e7f87b8493ec18eabbbe85df5d7cb9789a0c2ed13d333c8d61c47ed6"
+        },
+        {
+          "path": "spec/xml/toyml.py",
+          "bytes": 3091,
+          "sha256": "c2bc01d30c679a280749ee1ad6a8c31c2400e5da7463f9f2c01a6913984c3132"
+        },
+        {
+          "path": "spec/xml/wgl.xml",
+          "bytes": 65853,
+          "sha256": "67e39fc3edc4a8c541efefb976e282424ce3d35923ce72ae7268318036ac7ce6"
+        },
+        {
+          "path": "spec/yml/alsa.yml",
+          "bytes": 94405,
+          "sha256": "8067618908b959718c21c78e0a534bb8bd7ca3770a2c47d78c7ef7822b236223"
+        },
+        {
+          "path": "spec/yml/egl.yml",
+          "bytes": 6281,
+          "sha256": "8ff2964e9d28809f593773b5183cde8d1fae18831e25e31c4676a6224fd81e97"
+        },
+        {
+          "path": "spec/yml/gles-1.1.yml",
+          "bytes": 9198,
+          "sha256": "6c004440d7fb0494ea320ac95b6721e6d61f64590786a9a82ec361402211bc06"
+        },
+        {
+          "path": "spec/yml/gles-2.0.yml",
+          "bytes": 9795,
+          "sha256": "169957c460e8a00ae6220bae3646b1c024931e4b879839e501c2d28b6cc7ba40"
+        },
+        {
+          "path": "spec/yml/glext-1.1.yml",
+          "bytes": 2502,
+          "sha256": "c98711e3aa96644f31f11acdb65377a20871aacb08a2c929c17fd773b6fc63a9"
+        },
+        {
+          "path": "spec/yml/glext-es2-1.1.yml",
+          "bytes": 5340,
+          "sha256": "ef6371f494dda7cb05aae206529a58b424082879fb039665cdd86426c7cbfee7"
+        },
+        {
+          "path": "spec/yml/glx.yml",
+          "bytes": 3570,
+          "sha256": "f76b3e181074713aacacbf2d1b072a6f58769fd8fd95c793f12dd2234c92c6f1"
+        },
+        {
+          "path": "spec/yml/glxext.yml",
+          "bytes": 9754,
+          "sha256": "d6144eadad6aec460c0f9476096699d58f1a113af62d5ff1e5a14b46a776c5e4"
+        },
+        {
+          "path": "spec/yml/my_glx.yml",
+          "bytes": 4296,
+          "sha256": "8e0368a696ef9b1fc5a1106c08639116d7acfeb0b737c664b39e0c8926a1b8d5"
+        },
+        {
+          "path": "spec/yml/opengl.yml",
+          "bytes": 215856,
+          "sha256": "fddb8d32afbe9f29308d4a0bf2ebf61be093c1f4bc0495081f7eee8f655b8f8c"
+        },
+        {
+          "path": "spec/yml/wgl.yml",
+          "bytes": 9730,
+          "sha256": "05db0d5efd5d6cbf2dbf676828fd1f7495862fffb1645face427347cc423b6fb"
+        },
+        {
+          "path": "src/CMakeLists.txt",
+          "bytes": 9559,
+          "sha256": "141450dea053a650fbf2e0a6d22f930eda7fa801563e59004ddb73daa85264ce"
+        },
+        {
+          "path": "src/agl/agl.c",
+          "bytes": 4564,
+          "sha256": "ef6472c90d172d2b48a142635b482318d47a7b4994902a55a2b751cf328bc012"
+        },
+        {
+          "path": "src/agl/agl.h",
+          "bytes": 906,
+          "sha256": "3c0d6cfb0a4147d0e9b2810ab26dee6dcdb8c3faa14bbef1c3b143209a393309"
+        },
+        {
+          "path": "src/agl/amigaos.c",
+          "bytes": 26819,
+          "sha256": "59669809ce2e7a89a5d0935c630608822728f016ea54d27cda633ce17a1629b0"
+        },
+        {
+          "path": "src/agl/amigaos.h",
+          "bytes": 155,
+          "sha256": "430ce1de9106f7a9e8bf11aafc1abdbb6d145122e2988306b26b4547f550394a"
+        },
+        {
+          "path": "src/agl/lookup.c",
+          "bytes": 1493,
+          "sha256": "ebfd811148e8bdc316763e290ebcd8f224a750795b5d99b76f882f8bd382ca80"
+        },
+        {
+          "path": "src/config.h",
+          "bytes": 600,
+          "sha256": "82f4d36f616c3eb5938f21bd41411d320fa8230f63cdf03b0fe0cda002699a88"
+        },
+        {
+          "path": "src/egl/egl.c",
+          "bytes": 10997,
+          "sha256": "c5078f2ff1c9f8af990232fce1ef9e076061e9b1dd73195e1b368284d62787d0"
+        },
+        {
+          "path": "src/egl/egl.h",
+          "bytes": 3431,
+          "sha256": "b87c86a2a71e055eece982ef9406bb731861eeb6bb871e5d2f903bc99f4e4d97"
+        },
+        {
+          "path": "src/egl/lookup.c",
+          "bytes": 1707,
+          "sha256": "a86b1337dd5939d7bbe461a8b1d60643ff257cb48cde57d7bf24938d6db390fd"
+        },
+        {
+          "path": "src/gl/arbconverter.c",
+          "bytes": 31176,
+          "sha256": "d741c1a9dc28ed4643e8b251923eab4ce92c1d1e5fbd16a5d5ef52bc7c8bfd22"
+        },
+        {
+          "path": "src/gl/arbconverter.h",
+          "bytes": 212,
+          "sha256": "2d8361629b2a33d956e50a5f281c93d9786addb5da05023c3bbb336167dab672"
+        },
+        {
+          "path": "src/gl/arbgenerator.c",
+          "bytes": 31863,
+          "sha256": "abb4e7eac731d560c4a42babde317ab8bb1d2625a0656a15b63f8137ba5d4890"
+        },
+        {
+          "path": "src/gl/arbgenerator.h",
+          "bytes": 648,
+          "sha256": "5caeaff86372eb5da65e85df35c6916b4487d6fcfaae0926ddd69a6899c978c7"
+        },
+        {
+          "path": "src/gl/arbhelper.c",
+          "bytes": 10348,
+          "sha256": "48fc7d6f518c394836c06388c167036ca79dd23a98208b30c15d3da3daa91055"
+        },
+        {
+          "path": "src/gl/arbhelper.h",
+          "bytes": 8770,
+          "sha256": "a684cde0479edbf30d781573878787a30606498cfed3f377ba222038ee859f21"
+        },
+        {
+          "path": "src/gl/arbparser.c",
+          "bytes": 148303,
+          "sha256": "c79ccb2f3587751c59dc0897f78f5711fa94fa73de8dfa444e5649c7fa9975e7"
+        },
+        {
+          "path": "src/gl/arbparser.h",
+          "bytes": 359,
+          "sha256": "76763c505a6cf192ba37f8e74da14e60e0ba2f9a5400c828c818ad58f641993a"
+        },
+        {
+          "path": "src/gl/array.c",
+          "bytes": 18149,
+          "sha256": "2aa8f7f022902d03f773b6e8728db7deae62f823e70fa53c76e34861cd841e53"
+        },
+        {
+          "path": "src/gl/array.h",
+          "bytes": 2647,
+          "sha256": "d315361ea20947274826aac56b178a3bf43f97a20aef98ac8246d5ee5594e17a"
+        },
+        {
+          "path": "src/gl/attributes.h",
+          "bytes": 5920,
+          "sha256": "c65c44765d2c00bb1f360f7ce51fcd7c0d2d25edd56e732810bb4421106f1467"
+        },
+        {
+          "path": "src/gl/blend.c",
+          "bytes": 10196,
+          "sha256": "82f5d2341f6ee2a21a97bae59cc00c288810c9d36a4e8571287fc464d5debc82"
+        },
+        {
+          "path": "src/gl/blend.h",
+          "bytes": 530,
+          "sha256": "fc2a1e04927a26f489556b51a9811a2d4fee6dfaafe32f369769d20f41af1d54"
+        },
+        {
+          "path": "src/gl/blit.c",
+          "bytes": 16276,
+          "sha256": "b6c783d2d7f8942343b70f3f2d1031d24ff48979181099c17763e1a207fa10dd"
+        },
+        {
+          "path": "src/gl/blit.h",
+          "bytes": 427,
+          "sha256": "4c26875a9a8c90d49ca2cdec022ce29bd7cc13bfe72c7bba1f4db777c4efaa8f"
+        },
+        {
+          "path": "src/gl/buffers.c",
+          "bytes": 32507,
+          "sha256": "1b4e361bb88461288b67b38c56f380abdeb22a0d45d321d097af1fce3c1d5f96"
+        },
+        {
+          "path": "src/gl/buffers.h",
+          "bytes": 10388,
+          "sha256": "a3e2129beaf1b584922f86d9d889d9c9301369948e69e85cafa111dc8e5e9c53"
+        },
+        {
+          "path": "src/gl/build_info.c",
+          "bytes": 204,
+          "sha256": "56972c9f23647f858eb504e21ee234a77f2369a695804c9c6ad02eee772f5bcb"
+        },
+        {
+          "path": "src/gl/build_info.h",
+          "bytes": 117,
+          "sha256": "8ee5acaacaecab4b3ebd29e5fdccbaa7c93c64992eef67ac993edcd6fcb63410"
+        },
+        {
+          "path": "src/gl/const.h",
+          "bytes": 39667,
+          "sha256": "ef64a283a5a92dc3b551e050416c70011df244648f0eed6ea44d340069777046"
+        },
+        {
+          "path": "src/gl/debug.c",
+          "bytes": 12488,
+          "sha256": "15942fe7f445a567369be33e93fd841613eade135516355d7df7a2a37c98e96c"
+        },
+        {
+          "path": "src/gl/debug.h",
+          "bytes": 203,
+          "sha256": "0cd0887186db31582c7afd20353a2af2c2c8c973c55cca99365e1acfb1dd6cad"
+        },
+        {
+          "path": "src/gl/decompress.c",
+          "bytes": 10580,
+          "sha256": "a4d88217280fa39707b5ec2e7362760824275b23771e873c246165b091a4d266"
+        },
+        {
+          "path": "src/gl/decompress.h",
+          "bytes": 624,
+          "sha256": "27bd44617d08cf8c8461b0bb1b628fc34127bc0a67326adb42d1ed046ccd2ce6"
+        },
+        {
+          "path": "src/gl/depth.c",
+          "bytes": 1800,
+          "sha256": "ba17a37f3a83ad95489a8b00b62ea3511ea6e0ff62d1f3488ee73334139de244"
+        },
+        {
+          "path": "src/gl/depth.h",
+          "bytes": 383,
+          "sha256": "8574da4094084ff6fa72c58e43d0ecfcc58e34083bd7affba2043e61fbcc70d2"
+        },
+        {
+          "path": "src/gl/directstate.c",
+          "bytes": 42219,
+          "sha256": "a805b7631f331a2437eeaa358037fc69fe42c9d9450800ecc04aac2944dde613"
+        },
+        {
+          "path": "src/gl/directstate.h",
+          "bytes": 14122,
+          "sha256": "223889455185e8a7a89b3ab6ba73a50b33e5dddba7b0d9857067b3be7a7ade24"
+        },
+        {
+          "path": "src/gl/drawing.c",
+          "bytes": 67238,
+          "sha256": "63d219560c0ef068644039e9227917285fb52068b67afc91e3d18db0b6614390"
+        },
+        {
+          "path": "src/gl/enable.c",
+          "bytes": 19951,
+          "sha256": "d942daa3fb79c7dceb2a32ac054e23b1e5abd5f71bcddac3288c6ea6acaeb8e3"
+        },
+        {
+          "path": "src/gl/enum_info.h",
+          "bytes": 4400,
+          "sha256": "88ff2fb94332e34938cb41fd74453d1bdcab61d45c9417242689df5f2471f806"
+        },
+        {
+          "path": "src/gl/envvars.c",
+          "bytes": 2354,
+          "sha256": "2a1ec21bf871a7250cd0fe49ec6b07b4b3c34c0061954e1628e7e6baebc552b0"
+        },
+        {
+          "path": "src/gl/envvars.h",
+          "bytes": 1046,
+          "sha256": "80136c245055570a3899d08955e8ed246bb4c724b6a0679d3a8df70a2d735409"
+        },
+        {
+          "path": "src/gl/eval.c",
+          "bytes": 15504,
+          "sha256": "9e46d53eff34b780e917a041f2d7e46e331dae0224386df16891c42023d73198"
+        },
+        {
+          "path": "src/gl/eval.h",
+          "bytes": 3318,
+          "sha256": "993cecd3439bc467a34f4b59a8210c8547fd551bdd90c8e4f348cccaf3d0d976"
+        },
+        {
+          "path": "src/gl/face.c",
+          "bytes": 1035,
+          "sha256": "b3a9e30c3ee2e80dc77dc2b1762abcead19e4c6025f2efa9e83f234111779cda"
+        },
+        {
+          "path": "src/gl/face.h",
+          "bytes": 195,
+          "sha256": "6f8eb1793e2aa5d70efc401797d17b4480759f654c7feb9887a6ac9f51346118"
+        },
+        {
+          "path": "src/gl/fog.c",
+          "bytes": 3758,
+          "sha256": "f7eeb7355987519e9dd04633c283300323e1495c443f6f9eef6494e5852597e7"
+        },
+        {
+          "path": "src/gl/fog.h",
+          "bytes": 593,
+          "sha256": "d41d69fa7f812957f458881b043c657057f97ea467b64b1c0851a6278eeeaad4"
+        },
+        {
+          "path": "src/gl/fpe.c",
+          "bytes": 103317,
+          "sha256": "583ace4a86e6c61b072485f55f72c6a59a9278914ff9ff03e9310b8172de0cfa"
+        },
+        {
+          "path": "src/gl/fpe.h",
+          "bytes": 12988,
+          "sha256": "ae2cf77755b1277bee8354a248038a32b772e1373d3e059f61250436575fb0f9"
+        },
+        {
+          "path": "src/gl/fpe_cache.c",
+          "bytes": 7372,
+          "sha256": "750967266aae605c51ab3dbe41372f0f7ebc63629e2d1003dd885dd90e1c5172"
+        },
+        {
+          "path": "src/gl/fpe_cache.h",
+          "bytes": 1786,
+          "sha256": "14abbd7733283e0eb8ff908ade870d9aa6388b1e5fb3f602c00c08f0d9f4bc2d"
+        },
+        {
+          "path": "src/gl/fpe_shader.c",
+          "bytes": 98767,
+          "sha256": "aac9f4bb992789f0f2896acce8a715eb23ebd17cd17d6a53d14532ee6729b335"
+        },
+        {
+          "path": "src/gl/fpe_shader.h",
+          "bytes": 509,
+          "sha256": "af818403a207f052fd010231571a369fe07d383d40c8c8a449b4df861cfbe104"
+        },
+        {
+          "path": "src/gl/framebuffers.c",
+          "bytes": 82753,
+          "sha256": "cbfc4826089f0dfa987d9e87aacb6fc581c620f786a7f0180c43ad7e00f9d925"
+        },
+        {
+          "path": "src/gl/framebuffers.h",
+          "bytes": 4001,
+          "sha256": "1f32f5a8d611db872966a8c82030d899f822c4bdd67c48d354d4724144030849"
+        },
+        {
+          "path": "src/gl/getter.c",
+          "bytes": 50068,
+          "sha256": "a0d59fb7ab5b902740a3cb88858f8551bc38b70ad6f445b4cad83c4ec75f18a3"
+        },
+        {
+          "path": "src/gl/gl4es.c",
+          "bytes": 47080,
+          "sha256": "4cb1b104f729ad1b79533d37fab03fb849e2423b254219c9d853a7898255706c"
+        },
+        {
+          "path": "src/gl/gl4es.h",
+          "bytes": 8251,
+          "sha256": "bd421bddf17c0db03db46c52192568f1888e4d4770d1e7c06b1f9671e5d8c299"
+        },
+        {
+          "path": "src/gl/gl_lookup.c",
+          "bytes": 31018,
+          "sha256": "2cf48d4aaacdf8c698d811afd7f5b60de2acaf8325587d72b2352c887cb0ac9b"
+        },
+        {
+          "path": "src/gl/gl_lookup.h",
+          "bytes": 1352,
+          "sha256": "cb207cfed2b0607e0946af34dde453fbf215e18b76de979661b4953258ae6d98"
+        },
+        {
+          "path": "src/gl/glcase.h",
+          "bytes": 4705,
+          "sha256": "9e96feff78c2a0c62f7a4663dfc179b8b6e5d8d637598ba09e136f8c9110863f"
+        },
+        {
+          "path": "src/gl/gles.h",
+          "bytes": 46265,
+          "sha256": "c01666945dd299bf402c3739b3e4dd76a225a844d05eaf70c7d4242ca1200266"
+        },
+        {
+          "path": "src/gl/glesfuncs.inc",
+          "bytes": 5104,
+          "sha256": "57d60de4b131f1b7873b191792f40efccb16a41a8568513d218dbe8c01d78d92"
+        },
+        {
+          "path": "src/gl/glstate.c",
+          "bytes": 24074,
+          "sha256": "0affa41a2da0787e1702435a6de2696cd34cfa697dedf43abfd34b37c8430842"
+        },
+        {
+          "path": "src/gl/glstate.h",
+          "bytes": 5814,
+          "sha256": "b852d506073d1c27f258991ecb163e2ecd2704b8c677d5fb77095ac4c1977ee3"
+        },
+        {
+          "path": "src/gl/hint.c",
+          "bytes": 4413,
+          "sha256": "010135a1c178660621b04809ae64d3c90ca5636a28bd91fd2e6b4d825d66d01a"
+        },
+        {
+          "path": "src/gl/hint.h",
+          "bytes": 153,
+          "sha256": "4d049a1c331f5d5159462aca1e61f60a4f6c66bb2c6435fbce8eacab2e4c61c6"
+        },
+        {
+          "path": "src/gl/init.c",
+          "bytes": 25313,
+          "sha256": "58aa9369bd4ecd95dccc2734f91192e2a84d018f17abeaff58c4fe2986a40ba2"
+        },
+        {
+          "path": "src/gl/init.h",
+          "bytes": 1760,
+          "sha256": "41897763c91d28394d511329eed35139eabbc61a6f6e9e019596a9cdb162fe2b"
+        },
+        {
+          "path": "src/gl/light.c",
+          "bytes": 19335,
+          "sha256": "826b071a60447b6496242aca93e4540b3385cb4332aad35337b110f9e766136b"
+        },
+        {
+          "path": "src/gl/light.h",
+          "bytes": 1954,
+          "sha256": "77175677f44209921fa1dbca0ceac1ac4c961102e581705a252f0dc603b98581"
+        },
+        {
+          "path": "src/gl/line.c",
+          "bytes": 29395,
+          "sha256": "16df3906d38f80377eace51087eb78d46a62519f5c6f605d16b03c74a7619b0d"
+        },
+        {
+          "path": "src/gl/line.h",
+          "bytes": 1077,
+          "sha256": "a15dcc70d0dccd1637cc00bf967828bac99f1e9d1269c265cae60f053e5b360d"
+        },
+        {
+          "path": "src/gl/list.c",
+          "bytes": 37509,
+          "sha256": "41730ad818481c93222b777b811c35346a9896fbf8a51724cd80acc380207da5"
+        },
+        {
+          "path": "src/gl/list.h",
+          "bytes": 11057,
+          "sha256": "7a38f6e79de72e27126cd7caaeaee9800b1222c04a82f1428440c70a6f91fe2d"
+        },
+        {
+          "path": "src/gl/listdraw.c",
+          "bytes": 57784,
+          "sha256": "4b7d6283d65d4c4d73d1cb37f2f32a71b1aeb1389356ca28a1bd657cc1385f20"
+        },
+        {
+          "path": "src/gl/listrl.c",
+          "bytes": 20240,
+          "sha256": "f1a24cb2635b570ae512270be64dbe14143939f9eac0852c45fa426f3ae65b52"
+        },
+        {
+          "path": "src/gl/loader.c",
+          "bytes": 5241,
+          "sha256": "62896167f73fe5fcb38acad339750f6cfbb4a7db2573df34415fb1b43c078bde"
+        },
+        {
+          "path": "src/gl/loader.h",
+          "bytes": 12059,
+          "sha256": "3a3de23684db3957a3843850e5d3399ee9afb03b92bae6ea433aee74bd42f625"
+        },
+        {
+          "path": "src/gl/logs.c",
+          "bytes": 1422,
+          "sha256": "65da1cf0c53134f5b0c696ad18be71b3c366ef17e1f3701db8a72265b7662dd3"
+        },
+        {
+          "path": "src/gl/logs.h",
+          "bytes": 1120,
+          "sha256": "240f0bdbcf3a99c68238b4f244f906fa80580ae3d2bf3485b4497ee481361b00"
+        },
+        {
+          "path": "src/gl/math/eval.h",
+          "bytes": 3571,
+          "sha256": "b37b704b7e93bd9f1962ebbcf6b63c73a2633ff3b474fccca0a7c6b40f414d33"
+        },
+        {
+          "path": "src/gl/math/matheval.c",
+          "bytes": 17502,
+          "sha256": "b315775e4d89ebe7fb6c9b98750d52b834841207faada69f8dee21168ffce499"
+        },
+        {
+          "path": "src/gl/matrix.c",
+          "bytes": 15857,
+          "sha256": "eef57e50fe9a1ef5f0d30bd0590045b267e2ed0e126649e8aa6acd895ce6098d"
+        },
+        {
+          "path": "src/gl/matrix.h",
+          "bytes": 2695,
+          "sha256": "cd499d5556afd8605fddb2d67257ebfc3cf3cae30d994d75c4d33e329de0d9bd"
+        },
+        {
+          "path": "src/gl/matvec.c",
+          "bytes": 15013,
+          "sha256": "90d0e7f29b3e448c160803e2414aaab365f81cc0383b1d57770d347ab79a1bce"
+        },
+        {
+          "path": "src/gl/matvec.h",
+          "bytes": 1126,
+          "sha256": "3cb9d28193788b186e117efe071a93d1132fc68834914b4a7431b0d9499e2ca8"
+        },
+        {
+          "path": "src/gl/oldprogram.c",
+          "bytes": 33468,
+          "sha256": "a834b6ae68beaaf80d0e5579363e2438c1eeab2e93038080111643214d011fef"
+        },
+        {
+          "path": "src/gl/oldprogram.h",
+          "bytes": 3608,
+          "sha256": "7acfe71cdba41b5b2f53812df81581db0c0d3ec4988857483bfb218012064e94"
+        },
+        {
+          "path": "src/gl/pixel.c",
+          "bytes": 61862,
+          "sha256": "04f80c106db619ec7fdac6aff6b3ac10a470804c8c0dba2e7f0cf4775fa121fa"
+        },
+        {
+          "path": "src/gl/pixel.h",
+          "bytes": 1928,
+          "sha256": "37851fd5a4ade33cde56c1fad91dd15d8ac441c1d3379ee85dcaffd0d09509bc"
+        },
+        {
+          "path": "src/gl/planes.c",
+          "bytes": 1411,
+          "sha256": "2f06b129a18f7b92d7a6e6bfaf75a75cb5ed61e063ce5e1fcb68ff395ffe5ffb"
+        },
+        {
+          "path": "src/gl/planes.h",
+          "bytes": 177,
+          "sha256": "148da2a3245701a41c3d12b1327ba2f13569be26461a529a61c702f20b52618f"
+        },
+        {
+          "path": "src/gl/pointsprite.c",
+          "bytes": 4935,
+          "sha256": "009b02ea793eef95954c91d2239e59b546e2b566df7576b904b31c22582f8fba"
+        },
+        {
+          "path": "src/gl/pointsprite.h",
+          "bytes": 655,
+          "sha256": "4bd4d5e13b9b66b7c4e773af229af7b44906a48bee989ee2f43c8dc6aeb69708"
+        },
+        {
+          "path": "src/gl/preproc.c",
+          "bytes": 29204,
+          "sha256": "4c6bddad3e7347329374c6a138f74db335c01b4d1d2ef7d7efd52767b52c3f93"
+        },
+        {
+          "path": "src/gl/preproc.h",
+          "bytes": 405,
+          "sha256": "16011900844217e8c4c5837b4a115a6b7fd6d30dab8dd8b6569b8b6ba30bbaa8"
+        },
+        {
+          "path": "src/gl/program.c",
+          "bytes": 36127,
+          "sha256": "7e0ea0a37737555ec3eb3cfeccd808f6a910fc52769c8ce64a8de73e14432f2b"
+        },
+        {
+          "path": "src/gl/program.h",
+          "bytes": 14727,
+          "sha256": "9e133ab69782118ab6b3d28cb6df072192524fe10e538bfd08d10db9d0458ef3"
+        },
+        {
+          "path": "src/gl/queries.c",
+          "bytes": 8646,
+          "sha256": "4d0765cb9bb1ca00ae5e9f8485bfa91af66d8c968bf3ea363467e518ee13b97f"
+        },
+        {
+          "path": "src/gl/queries.h",
+          "bytes": 973,
+          "sha256": "1897cf54af76044be45a304dee62e31ada330783fd323bd34baffa56ca699a36"
+        },
+        {
+          "path": "src/gl/raster.c",
+          "bytes": 30233,
+          "sha256": "0e581c4f657478f7087b4bda1c5c621d08f224297cb00b0ffecd5aca3982ef7e"
+        },
+        {
+          "path": "src/gl/raster.h",
+          "bytes": 1780,
+          "sha256": "1152db5e0582f3acdcee491e45c8ca8cbfceccc9495e7d93a6189fe1b34140e3"
+        },
+        {
+          "path": "src/gl/render.c",
+          "bytes": 14691,
+          "sha256": "b796796f8d7e8989bbba1e9ed3688b18c5c321f931195f94995fc0a826cc0aaa"
+        },
+        {
+          "path": "src/gl/render.h",
+          "bytes": 643,
+          "sha256": "dff790eece5f8fb13c4d57f7daa845fca3329e7043cd02e49302012877788544"
+        },
+        {
+          "path": "src/gl/samplers.c",
+          "bytes": 12010,
+          "sha256": "9fe856b682e5891c7f14f2f4c8171b759827d80d989a247abcf7edd42c61e14c"
+        },
+        {
+          "path": "src/gl/samplers.h",
+          "bytes": 1117,
+          "sha256": "5fa16b1e461c7265d03c6ca3a91a06ef2891f40f59e399e1389d0f7f9659da9c"
+        },
+        {
+          "path": "src/gl/shader.c",
+          "bytes": 13743,
+          "sha256": "4acf50bd5f255c13662ae23ac690d58061f211c234cea189f321aae5ce8853a9"
+        },
+        {
+          "path": "src/gl/shader.h",
+          "bytes": 3551,
+          "sha256": "de174c6b938bd9e41870fa2238ad7f31930400219df2a09496226ed8cfcb1bf3"
+        },
+        {
+          "path": "src/gl/shader_hacks.c",
+          "bytes": 17927,
+          "sha256": "5523427678bf9fc132bdba99616e7bf0b77295eb3e4d996c33ebcb377b246fb9"
+        },
+        {
+          "path": "src/gl/shader_hacks.h",
+          "bytes": 116,
+          "sha256": "bb79a3b10b468f4c97310047a2d48ed25e024844beeb87dd5de079fe131c5e05"
+        },
+        {
+          "path": "src/gl/shaderconv.c",
+          "bytes": 58487,
+          "sha256": "c5fee25a31d02d864cc812839332010a8fc0969ad6d67fca656c06c1d78b1e5a"
+        },
+        {
+          "path": "src/gl/shaderconv.h",
+          "bytes": 465,
+          "sha256": "116bb7f2082b869e150924aa1157ee79ea1014ae0e59b6e3c9e1792c9c7cd5e4"
+        },
+        {
+          "path": "src/gl/stack.c",
+          "bytes": 31185,
+          "sha256": "8050c1f507b5869edd97ae70f1238e9bc24c1b2d383fdfcd11c06228a5b100bc"
+        },
+        {
+          "path": "src/gl/stack.h",
+          "bytes": 4579,
+          "sha256": "a8b007cdc8f7ed5e598058420324a916f202ef164dec9c6a959ecd267d25f3bd"
+        },
+        {
+          "path": "src/gl/state.h",
+          "bytes": 9997,
+          "sha256": "85ce349cd9aa80a7ea72f89787dbb6e3825112fa07292c06ea11b8718fd74eff"
+        },
+        {
+          "path": "src/gl/stb_dxt_104.h",
+          "bytes": 18655,
+          "sha256": "4d1901035d60ce7913dc94e8bd4efa3091e5fc1783ef75727cbca34bdf6bfc2e"
+        },
+        {
+          "path": "src/gl/stencil.c",
+          "bytes": 6213,
+          "sha256": "475c70265d3c2cb805404ac972eecac3c7dc3bd9e4434e19eeaf5d6fa5354259"
+        },
+        {
+          "path": "src/gl/stencil.h",
+          "bytes": 337,
+          "sha256": "c22b7e3da4b9d54a32cc174054ff78c58f0dc073cd4bb21788492693cbfe5665"
+        },
+        {
+          "path": "src/gl/string_utils.c",
+          "bytes": 6023,
+          "sha256": "5a3f7e564fbf89aeaaffcf91c3c01324344e50ab0d990eb2919b5c1a01b33b80"
+        },
+        {
+          "path": "src/gl/string_utils.h",
+          "bytes": 1634,
+          "sha256": "3de326b8c58aef15bdcba5fba884b6614b6ab622ab34e914fa02400b1103710b"
+        },
+        {
+          "path": "src/gl/stubs.c",
+          "bytes": 164,
+          "sha256": "c34736b748b0cf365230d038dd35f7022a57e5babb2b6df4279a0a90499cbc40"
+        },
+        {
+          "path": "src/gl/texenv.c",
+          "bytes": 38218,
+          "sha256": "0643418e70e7022d82cbee97b0e95cf288a5f8ee6ad5602d6b5b3cd4a4b9aa36"
+        },
+        {
+          "path": "src/gl/texenv.h",
+          "bytes": 1377,
+          "sha256": "9fc6f42e6cadf4bafdd1aab910b94b9d78ea334db51b6cc88cd65401f716175c"
+        },
+        {
+          "path": "src/gl/texgen.c",
+          "bytes": 19413,
+          "sha256": "2510ee6a9c8521f31c5148ff6a6661698b6a6abab9f5f7e7be1599db57a34ce9"
+        },
+        {
+          "path": "src/gl/texgen.h",
+          "bytes": 820,
+          "sha256": "7b858e0e427c8c8fa16aacc078d6f71f77bee7f80eb8f0b1e57d0a5aa5fc2586"
+        },
+        {
+          "path": "src/gl/texture.c",
+          "bytes": 75383,
+          "sha256": "72b4bc006a4e6792b2662ed4b3784ed069ac8abe9db8984549cef9ee7d964295"
+        },
+        {
+          "path": "src/gl/texture.h",
+          "bytes": 10754,
+          "sha256": "50769605a6be39645942c00c8f269889d759519d29a8a8ef4d4a0a7a8f97603b"
+        },
+        {
+          "path": "src/gl/texture_3d.c",
+          "bytes": 3616,
+          "sha256": "128a2117a5c5e19f26b82c94c31d8eb91ffc861f5570366be9ad8c9858b991f2"
+        },
+        {
+          "path": "src/gl/texture_compressed.c",
+          "bytes": 24048,
+          "sha256": "e60cb5c69bf199331877732f945c35b916e67b11baa1fed0e35d4c38aece2b4d"
+        },
+        {
+          "path": "src/gl/texture_params.c",
+          "bytes": 37793,
+          "sha256": "79aff26e32bc8621eb641f99ce6e8449d09994301a568c2a4bf8ca63ecae2edf"
+        },
+        {
+          "path": "src/gl/texture_read.c",
+          "bytes": 15192,
+          "sha256": "5509cf2487b514b9603606523a482afad31c486817b36bd06b13485450398d9c"
+        },
+        {
+          "path": "src/gl/uniform.c",
+          "bytes": 36164,
+          "sha256": "9868b1d82f2cdefb968b9a3cc67d0fe879ee480fa7d11a39b7034e566b242d34"
+        },
+        {
+          "path": "src/gl/uniform.h",
+          "bytes": 6211,
+          "sha256": "989c0182124a846798a386b362f851daa88200f20f0f9046fe6dd23681da3306"
+        },
+        {
+          "path": "src/gl/vertexattrib.c",
+          "bytes": 8533,
+          "sha256": "3b523a591f23efd9066194b4ff2eee2a031c41dadcbb1db93e94d82d860e06a3"
+        },
+        {
+          "path": "src/gl/vertexattrib.h",
+          "bytes": 1320,
+          "sha256": "fa332910760bdbfb19593127aad930c1da93a3fac26f50368e8013baa040981c"
+        },
+        {
+          "path": "src/gl/wrap/gl4es.h",
+          "bytes": 15773,
+          "sha256": "73b47a59ceb5a62e83b07c45687db7e57fc3aff02a0da6c83dc7803b3e1e3135"
+        },
+        {
+          "path": "src/gl/wrap/gl4eswraps.c",
+          "bytes": 44331,
+          "sha256": "ce31543ca34e088e25ec28fb5ee8866a7358acc23530c90ce18ad80db9d605f6"
+        },
+        {
+          "path": "src/gl/wrap/gles.c",
+          "bytes": 179356,
+          "sha256": "d2d3e20b2a7ed8b5f0b01532b3311eb9f0f3f1114d82ec666217731367dc1477"
+        },
+        {
+          "path": "src/gl/wrap/gles.h",
+          "bytes": 311188,
+          "sha256": "61fc6f0594cf905d1ac25da7540b7299d7bd4c501ae0c18e6747cbb4e489e7d4"
+        },
+        {
+          "path": "src/gl/wrap/glstub.c",
+          "bytes": 2291,
+          "sha256": "baf095c9ca55b7cdbab11b473f8b657d4246882dafb843ac091b8bcd00eaf0b3"
+        },
+        {
+          "path": "src/gl/wrap/skips.h",
+          "bytes": 7672,
+          "sha256": "b797497042beb07f90293bae5b8967ac6e4e3fc29a09ae36c5ae99d32b9db49c"
+        },
+        {
+          "path": "src/gl/wrap/stub.h",
+          "bytes": 2835,
+          "sha256": "a373f93d54723bb4b6df8ba3fe0556396ff804b43f65303a44ce8b9bffdbafe1"
+        },
+        {
+          "path": "src/glx/drmfunc.h",
+          "bytes": 707,
+          "sha256": "f094375db2c44d940f059839104ae1f08305b933678c97583be27545982f6f52"
+        },
+        {
+          "path": "src/glx/gbm.c",
+          "bytes": 10423,
+          "sha256": "706c1b82de6e5970321f9d9f497a79e316a2e1dc6631bc8f949f6fa3f62f30aa"
+        },
+        {
+          "path": "src/glx/gbmfunc.h",
+          "bytes": 1703,
+          "sha256": "aa162e34e9cfa738dab2a44e78fb1cb366f916817bfff20b54b3072c65f1854c"
+        },
+        {
+          "path": "src/glx/glx.c",
+          "bytes": 114496,
+          "sha256": "90a8e521324f811ffa8403e4d222fbbffd33bdffa0e50e31be86c87d5ab38381"
+        },
+        {
+          "path": "src/glx/glx.h",
+          "bytes": 10996,
+          "sha256": "101a9b826c1cbe30ba9bcb2e1e301333a89a4b3608265bd7b1b74a195c55f9e1"
+        },
+        {
+          "path": "src/glx/glx_gbm.h",
+          "bytes": 487,
+          "sha256": "6bff22c22d9b02185c1e492ec2b11fe72d976e514ce1d54bdad19ca39d94e7d2"
+        },
+        {
+          "path": "src/glx/glx_stubs.c",
+          "bytes": 6750,
+          "sha256": "550b1cf4c9fb4928008a0af3d7560c10a1277380557e37c736f0fa29bc4dae4a"
+        },
+        {
+          "path": "src/glx/hardext.c",
+          "bytes": 20508,
+          "sha256": "ea1f460109070696fe0d56971f21a178bc978cfda5455876c843f4fd239e752a"
+        },
+        {
+          "path": "src/glx/hardext.h",
+          "bytes": 4385,
+          "sha256": "e9ec75cf365790aaad2a1bc70c1e92aaf126c48220d6393f1bd89154a1a37abd"
+        },
+        {
+          "path": "src/glx/lookup.c",
+          "bytes": 2144,
+          "sha256": "364f8573c066384e1b82453565951bc949289f7247e3aa05018d9558b31ac62a"
+        },
+        {
+          "path": "src/glx/rpi.c",
+          "bytes": 4327,
+          "sha256": "e9d9c27ae024b5e5becd7c6c3aa3f079ebdb31dce7905d69de0ff684662f2ae8"
+        },
+        {
+          "path": "src/glx/rpi.h",
+          "bytes": 197,
+          "sha256": "0f99ff752d409482aa6119b609d19d4145c5d531eb1693e4391a577386ed60a3"
+        },
+        {
+          "path": "src/glx/streaming.c",
+          "bytes": 7620,
+          "sha256": "cc85ff45117cd4a4255fa1de4520543369c4cbc5fcad9601f4fead438c6526e7"
+        },
+        {
+          "path": "src/glx/streaming.h",
+          "bytes": 2124,
+          "sha256": "5fc2dbc9eca2a336e1554b3530adaa44a495cf0e860c1cd391823599184af9b5"
+        },
+        {
+          "path": "src/glx/utils.c",
+          "bytes": 2352,
+          "sha256": "7828f9bb5c92250273ea88683c09f1078f7d5961858f4f17c801e13c71b8476b"
+        },
+        {
+          "path": "src/glx/utils.h",
+          "bytes": 459,
+          "sha256": "a8d7a672d67f023bcb6fe29da7c137f586eb31772b2caa6997c4ee14c74a2d7b"
+        },
+        {
+          "path": "test.cmake",
+          "bytes": 1738,
+          "sha256": "6168aba99503b5a8ebfb0539c30b2a781cb615d226d60b1a40b762f481f246d0"
+        },
+        {
+          "path": "tests/test.sh",
+          "bytes": 960,
+          "sha256": "d9ee4da86a4ae63d916e64a9e5bab5099eb0736bdb3c6e2dfcda1c24b60e48f5"
+        },
+        {
+          "path": "tests/tests.sh",
+          "bytes": 3940,
+          "sha256": "188371ce1324796b070ef9e92615eda39aaf968e433d82a0c359ba94b1a01861"
+        },
+        {
+          "path": "version.h",
+          "bytes": 129,
+          "sha256": "76ba529790159538eafd53704a656e317bceee0453e54910f4d3eb2c88b0536b"
+        }
+      ],
+      "local_changes": []
+    },
+    {
+      "name": "glu",
+      "repository": "ptitSeb/GLU",
+      "revision": "2fed2bda2b725d2b9e32c435b48d5141cc95827f",
+      "archive_sha256": "a5553912ba17601d86204382111f342ce764ea7e6ee064a7791438ed24ae8e2c",
+      "directory": "vendor/glu",
+      "excluded_archive_prefixes": [],
+      "files": [
+        {
+          "path": ".gitignore",
+          "bytes": 103,
+          "sha256": "7df781838ddce10cf98c751750ec0807fb68d53b9004441759db61129e0e95f0"
+        },
+        {
+          "path": "Android.mk",
+          "bytes": 4035,
+          "sha256": "aac231d81bb5da544e051d84944be490dea6ec1fc03a0abb0dd02ad81ab0bcaf"
+        },
+        {
+          "path": "Makefile.am",
+          "bytes": 9348,
+          "sha256": "43ca7f467a407748201abe4372b0af672d4d01954b581360c364d4b44a371b67"
+        },
+        {
+          "path": "Makefile.in",
+          "bytes": 64195,
+          "sha256": "0f6e28f01ca7c4b444df500bb7cb228ec0b4749d0f676df18fd4d82ad328ada6"
+        },
+        {
+          "path": "aclocal.m4",
+          "bytes": 346166,
+          "sha256": "8a162a869ea9ef3f9c43a261b24f335bcb1bfce1049ac892bc23ede85209ec40"
+        },
+        {
+          "path": "config.guess",
+          "bytes": 45146,
+          "sha256": "9f7d333fe8a8dff8078b754077846144ec9ec4138ee12f522a9ede97193b747e"
+        },
+        {
+          "path": "config.sub",
+          "bytes": 35692,
+          "sha256": "684a5a093efd2624d93bcc1098f4a44191bd1794e2b3c5e15b8aed409996a5ba"
+        },
+        {
+          "path": "configure",
+          "bytes": 582804,
+          "sha256": "4001ebf47f77b98569f9304c6d0b8844f040d41c99e94258ad7b065d18bfe0b1"
+        },
+        {
+          "path": "configure.ac",
+          "bytes": 4624,
+          "sha256": "bb6dd4d91e61df17354cb67afb4da1f382af9a8bb5284d16991fbb832cc1c1e6"
+        },
+        {
+          "path": "depcomp",
+          "bytes": 20842,
+          "sha256": "8bcbd21856a09766128cf790afe0a7e612615d47e64eaf51669bdf5713edad05"
+        },
+        {
+          "path": "glu.pc.in",
+          "bytes": 216,
+          "sha256": "fc2f5d151370895aac6f161f22e9a48fd1792a9fdaa5511075b28b20aa70b747"
+        },
+        {
+          "path": "include/GL/glu.h",
+          "bytes": 17255,
+          "sha256": "84187ce0fd0153769675cb7f3301583eb27393f66b57c5604999a1d805a9184c"
+        },
+        {
+          "path": "include/GL/glu_mangle.h",
+          "bytes": 3315,
+          "sha256": "d3705c78eab49795c2488b8c94962d1ae7010c5ecd3206ff2aaed2a87b90784c"
+        },
+        {
+          "path": "install-sh",
+          "bytes": 13997,
+          "sha256": "608b76d735bb2ec2bcb1271644c3d5e7a428fb8d2338e114e8a48ebf91ccfd23"
+        },
+        {
+          "path": "jni/Android.mk",
+          "bytes": 64,
+          "sha256": "8ba540f56b4045de0d26694165a8ac5c3243fa588eff9413124d20d5759b65f4"
+        },
+        {
+          "path": "jni/Application.mk",
+          "bytes": 192,
+          "sha256": "a1b4ae1bf98292454f583e8ff6d058a14ba850e2e16c0b02a3c5c0ff224342d7"
+        },
+        {
+          "path": "ltmain.sh",
+          "bytes": 282745,
+          "sha256": "ca69e7ebd830bb4ed17977252b59d2ec532df07b6b9174355d247a222d4416c4"
+        },
+        {
+          "path": "missing",
+          "bytes": 10179,
+          "sha256": "2d48d0a343fd0e039c9894c070e4d5e804bff261b5a502eb9468b8949908a958"
+        },
+        {
+          "path": "src/include/GL/gl.h",
+          "bytes": 80615,
+          "sha256": "8a2e853417b46d205c068e092efdbcad8e1325cee7c7815667efdebb5e1c6be3"
+        },
+        {
+          "path": "src/include/GL/glext.h",
+          "bytes": 828827,
+          "sha256": "4bd2c08dbf5b41c348455c7ba31592051ff89e1e32169aba6b51813f32504683"
+        },
+        {
+          "path": "src/include/gluos.h",
+          "bytes": 1593,
+          "sha256": "160a598791b734e84ddb42bda4cb559f217e57279ebfc2e8153f1ec8fa1f452a"
+        },
+        {
+          "path": "src/libnurbs/interface/bezierEval.cc",
+          "bytes": 7929,
+          "sha256": "32f1c8d5fd1746dc03b79336b9bc9b198c509fd28912dc27347fdfd61249103a"
+        },
+        {
+          "path": "src/libnurbs/interface/bezierEval.h",
+          "bytes": 2587,
+          "sha256": "79af4ccdb849df613427f55a77d149b9f27ac85908f866af6fc4cbfa28e496f4"
+        },
+        {
+          "path": "src/libnurbs/interface/bezierPatch.cc",
+          "bytes": 6777,
+          "sha256": "9812db2be54e569e0fa34034d9f6505c054b98fd5229e0d2f466dfc16f0751ad"
+        },
+        {
+          "path": "src/libnurbs/interface/bezierPatch.h",
+          "bytes": 3504,
+          "sha256": "fae9b7132d27ea9df9415a4ba4ff7bab79ecd8816192001175b395c4e7148600"
+        },
+        {
+          "path": "src/libnurbs/interface/bezierPatchMesh.cc",
+          "bytes": 17508,
+          "sha256": "cdd07103034f1f420687b5ef9acd8a6f227a7ecc9ad57e6b573359ff26114952"
+        },
+        {
+          "path": "src/libnurbs/interface/bezierPatchMesh.h",
+          "bytes": 4629,
+          "sha256": "0fb341b442a23dea574465c6877741cfe8082871eeb043d3285e7bd38a3a7c9d"
+        },
+        {
+          "path": "src/libnurbs/interface/glcurveval.cc",
+          "bytes": 10546,
+          "sha256": "9166fff25617d2cbafe12c680bcb0b00e87154e63341d40782e8cebe559f8980"
+        },
+        {
+          "path": "src/libnurbs/interface/glcurveval.h",
+          "bytes": 5376,
+          "sha256": "87c8086178a7cda006b969c3df708f5e2bf0b968cab4b750e5ac86c0dba3233a"
+        },
+        {
+          "path": "src/libnurbs/interface/glimports.h",
+          "bytes": 1716,
+          "sha256": "050272a343bc01c1333853cbb760bf20cb88792a9fc1d77443cff701081e96ee"
+        },
+        {
+          "path": "src/libnurbs/interface/glinterface.cc",
+          "bytes": 11836,
+          "sha256": "6813cda8694dc1905cb6a5640c49647981605ac63518ee3a4a1dcdb7f279a4b6"
+        },
+        {
+          "path": "src/libnurbs/interface/glrenderer.cc",
+          "bytes": 10218,
+          "sha256": "3ff9f88da6d50c31d16fc2d5c25c2a089815dd4fb56418bc57d6d7d4fa47daf2"
+        },
+        {
+          "path": "src/libnurbs/interface/glrenderer.h",
+          "bytes": 4438,
+          "sha256": "5d528daa158797280aee0e7d19445a82dd983b4b126b40eaad628e2e5dd13a5a"
+        },
+        {
+          "path": "src/libnurbs/interface/glsurfeval.cc",
+          "bytes": 30059,
+          "sha256": "a492fb48b04988df6ac91a6eb5008675d183b028778e1997d9c858321ebdecf0"
+        },
+        {
+          "path": "src/libnurbs/interface/glsurfeval.h",
+          "bytes": 13218,
+          "sha256": "c91fce13427b94e0803d88a8ba1d459d3c180a56528112e867842b254d198277"
+        },
+        {
+          "path": "src/libnurbs/interface/incurveeval.cc",
+          "bytes": 5813,
+          "sha256": "12c6481e8a16798d23a809577b819f6528e8edde55cc3fc0a65ec6554f7a42fc"
+        },
+        {
+          "path": "src/libnurbs/interface/insurfeval.cc",
+          "bytes": 52838,
+          "sha256": "7d7d8d69f118a8ef11ea0382b91e6523d49b22ab3e5881bd362a5a702b7bc134"
+        },
+        {
+          "path": "src/libnurbs/interface/mystdio.h",
+          "bytes": 2009,
+          "sha256": "8cc705e9a8ff62770c681d823c3f3aa6e1af9bca5f11a87e958d5b496dc9ecf5"
+        },
+        {
+          "path": "src/libnurbs/interface/mystdlib.h",
+          "bytes": 2031,
+          "sha256": "b22afa0f74f08dfa0837a975cd7367a4ec222b42b7d9c570ddba0097c79c3025"
+        },
+        {
+          "path": "src/libnurbs/internals/arc.cc",
+          "bytes": 9644,
+          "sha256": "33d9ec50fcb05afb447930c35f9023f61e2aa8e8dbea0f649e1271ac0a34e507"
+        },
+        {
+          "path": "src/libnurbs/internals/arc.h",
+          "bytes": 4714,
+          "sha256": "b44e8e5898b0372309244ca01a9c2326d250a009fed492c15b728e50dad1a54c"
+        },
+        {
+          "path": "src/libnurbs/internals/arcsorter.cc",
+          "bytes": 5048,
+          "sha256": "6e2b21b8a7ed921d5fceca7c3648495bf2b34aebc7c5e54693793d904de6ec47"
+        },
+        {
+          "path": "src/libnurbs/internals/arcsorter.h",
+          "bytes": 2314,
+          "sha256": "971c6d9207e61e63f3af2ba9816e57bcf7984434c8b359d9a57d9b7bb0ff10e2"
+        },
+        {
+          "path": "src/libnurbs/internals/arctess.cc",
+          "bytes": 17933,
+          "sha256": "f1264d950ef101eb16b7a8026bcb0effc54b6c0d7dfad67dedbb991094695109"
+        },
+        {
+          "path": "src/libnurbs/internals/arctess.h",
+          "bytes": 2534,
+          "sha256": "7d74f704ba6eaef8ea6bd851e684d35cccd63f1593537831c5ce6326792362ea"
+        },
+        {
+          "path": "src/libnurbs/internals/backend.cc",
+          "bytes": 15756,
+          "sha256": "2ac34c3397e559b8e3160ddad9b79d7c7fd622e953006ff01057f5c9a9c048f0"
+        },
+        {
+          "path": "src/libnurbs/internals/backend.h",
+          "bytes": 4037,
+          "sha256": "7b2ce69e4435000e76b64bdb7081f2ea4b2ed1455733f083681b5bdf0f1913c9"
+        },
+        {
+          "path": "src/libnurbs/internals/basiccrveval.cc",
+          "bytes": 3282,
+          "sha256": "36506bddb0979f5051c6f54ff9549a1a5c4950a3a309e8770aaa576b87c6cdf4"
+        },
+        {
+          "path": "src/libnurbs/internals/basiccrveval.h",
+          "bytes": 2402,
+          "sha256": "a6f8225c533970e4e72462ba74e38e358344afdf40288844dd1d5165dcac7334"
+        },
+        {
+          "path": "src/libnurbs/internals/basicsurfeval.cc",
+          "bytes": 4687,
+          "sha256": "486ccae54180fac5ddc963233ade87e126c5606a07731df4ffa91170cadb5a86"
+        },
+        {
+          "path": "src/libnurbs/internals/basicsurfeval.h",
+          "bytes": 3622,
+          "sha256": "4da36fad0f102c161003ff3472f5e12ca7899c9eaf32482f3ed79ebe76c0f228"
+        },
+        {
+          "path": "src/libnurbs/internals/bezierarc.h",
+          "bytes": 1971,
+          "sha256": "6b53697438f167aafcc99429b1740258e1605215566aead5304ac2999507e50c"
+        },
+        {
+          "path": "src/libnurbs/internals/bin.cc",
+          "bytes": 4982,
+          "sha256": "0a187956a7c7be4cd67a28f27b83f5029caa7793647436c72256df1c15e30333"
+        },
+        {
+          "path": "src/libnurbs/internals/bin.h",
+          "bytes": 3682,
+          "sha256": "bb35d5691b3272dcc6d06a3659e3cc56db1fb7b827b264d648d5560a48486f4d"
+        },
+        {
+          "path": "src/libnurbs/internals/bufpool.cc",
+          "bytes": 3745,
+          "sha256": "70c06ff64174d9c9b6e621a3f3c1ea2a34109c53e2d2f8e8ae45932e779de1ad"
+        },
+        {
+          "path": "src/libnurbs/internals/bufpool.h",
+          "bytes": 4230,
+          "sha256": "a12776651e32e80fbdaf600590ab6293828211dd39b78d1689a60a06d5381b3b"
+        },
+        {
+          "path": "src/libnurbs/internals/cachingeval.cc",
+          "bytes": 2309,
+          "sha256": "c027ab4636a2c90dae167b43ce2fc76e2bbe173e5a2c6a7dd187a887a1e57290"
+        },
+        {
+          "path": "src/libnurbs/internals/cachingeval.h",
+          "bytes": 2156,
+          "sha256": "d0ab5535376c6777ea3cf3dc81bb7b66b825383cc52dfb51cd42dcc7ccfbf066"
+        },
+        {
+          "path": "src/libnurbs/internals/ccw.cc",
+          "bytes": 13994,
+          "sha256": "571c987b261191496d45bb199e2e8dfcd0f78dc016493658db0c79f646f24dfb"
+        },
+        {
+          "path": "src/libnurbs/internals/coveandtiler.cc",
+          "bytes": 10546,
+          "sha256": "29565fc5786704779113e2643e2447e2e75c58d509f54211e1ceac767f57077e"
+        },
+        {
+          "path": "src/libnurbs/internals/coveandtiler.h",
+          "bytes": 2610,
+          "sha256": "08489be830ad797faa17f9ec5c0e299c4d6a4dbee9dfafde0db748754c6cb6dc"
+        },
+        {
+          "path": "src/libnurbs/internals/curve.cc",
+          "bytes": 6762,
+          "sha256": "bbbb59c26a175b82c6f30fb1ca844d0361c9f48e3cdd84f82791422be8c88532"
+        },
+        {
+          "path": "src/libnurbs/internals/curve.h",
+          "bytes": 2301,
+          "sha256": "5cc773c848906ca4c7960e1d1a13273f6862884ecacf21902a219ac17fa8492c"
+        },
+        {
+          "path": "src/libnurbs/internals/curvelist.cc",
+          "bytes": 3363,
+          "sha256": "bcabea22aa5f95fe49eab297a1fbf6ebfbbf4ebe0b5b6f06f2c9c4e5424a0141"
+        },
+        {
+          "path": "src/libnurbs/internals/curvelist.h",
+          "bytes": 2111,
+          "sha256": "9cfb0b87970cbdeff7716358295b0a768cd26746cbd0afa6519e730829635ec7"
+        },
+        {
+          "path": "src/libnurbs/internals/curvesub.cc",
+          "bytes": 3628,
+          "sha256": "ffc9212a0752c11f922fc58b421bde86f557f16ce2066f0191d4481b21d0e933"
+        },
+        {
+          "path": "src/libnurbs/internals/dataTransform.cc",
+          "bytes": 6000,
+          "sha256": "254eaa5ab258c3bd1cc60611df18e7b86d78f7f168340dad4fe1a6c0edfb9f15"
+        },
+        {
+          "path": "src/libnurbs/internals/dataTransform.h",
+          "bytes": 2303,
+          "sha256": "0664dc325fced595f3c58c86401e9bf98cd4befd33006dfdab2df865042946a1"
+        },
+        {
+          "path": "src/libnurbs/internals/defines.h",
+          "bytes": 1909,
+          "sha256": "486689f60dcc8f9fa7d293593b986ed4d70821ebfbcf5c95d4430264ac34355c"
+        },
+        {
+          "path": "src/libnurbs/internals/displaylist.cc",
+          "bytes": 2745,
+          "sha256": "550b30dd167bce9ae2c2609b398b13d8b09bd66bc76e3e7c0f919a2b3f4b4fed"
+        },
+        {
+          "path": "src/libnurbs/internals/displaylist.h",
+          "bytes": 2444,
+          "sha256": "17f1fbb49b51d4071ae9245ea2519c95addaa82ffaf0679f5942963719e9cc79"
+        },
+        {
+          "path": "src/libnurbs/internals/displaymode.h",
+          "bytes": 1729,
+          "sha256": "a43e670cda17703794b59e6330eec73f8012b511b6fdfe43110811a733f70c18"
+        },
+        {
+          "path": "src/libnurbs/internals/flist.cc",
+          "bytes": 3751,
+          "sha256": "457cbd9cf1aea82467e30c5a13e6cd3ce71580600881973bf893bcbabe6dd75f"
+        },
+        {
+          "path": "src/libnurbs/internals/flist.h",
+          "bytes": 2108,
+          "sha256": "41790ad8d5361db6cf467cef31efe9fffe56399a17d95c17f0045bece0284c6e"
+        },
+        {
+          "path": "src/libnurbs/internals/flistsorter.cc",
+          "bytes": 2569,
+          "sha256": "c3731e03f63030e9c0d5a898802a3787b79bf4a5a739ee1a9b4543680d94b719"
+        },
+        {
+          "path": "src/libnurbs/internals/flistsorter.h",
+          "bytes": 2083,
+          "sha256": "b935cd7146fcbdd9349441b27b8aa08b53075f37c4393f33b3f8740cb1bf5fd3"
+        },
+        {
+          "path": "src/libnurbs/internals/gridline.h",
+          "bytes": 1780,
+          "sha256": "a2379f3a38b0d2d511777a2599841f2bb1a188ad0fc72e07b6436388fbae00de"
+        },
+        {
+          "path": "src/libnurbs/internals/gridtrimvertex.h",
+          "bytes": 2666,
+          "sha256": "c881543cb13452707bcab30219717b2fec15ce5c558983f1ccd21e69a9d06667"
+        },
+        {
+          "path": "src/libnurbs/internals/gridvertex.h",
+          "bytes": 2000,
+          "sha256": "2344046c9924dff0994effb8da12c67c4485c5202e148f7c78062ba4e6fd44f0"
+        },
+        {
+          "path": "src/libnurbs/internals/hull.cc",
+          "bytes": 4925,
+          "sha256": "64e8a226bdaa04e75687f0b18d63a0def2443068d4b64197ca0bbf69d8999dcb"
+        },
+        {
+          "path": "src/libnurbs/internals/hull.h",
+          "bytes": 2209,
+          "sha256": "207dbc4332c207a2bb38a7ee51bfa122a4a945d8ba00978403306b4856ef663e"
+        },
+        {
+          "path": "src/libnurbs/internals/intersect.cc",
+          "bytes": 17249,
+          "sha256": "93c710b971b7d68ce60a848750d1067182663a9c95c6f19e398b1ddb2542af84"
+        },
+        {
+          "path": "src/libnurbs/internals/jarcloc.h",
+          "bytes": 2669,
+          "sha256": "bd445335061deddad7c3c79e829e54efd41ea555bcc6176c5e46a2bc6459cdfe"
+        },
+        {
+          "path": "src/libnurbs/internals/knotvector.cc",
+          "bytes": 4129,
+          "sha256": "9d99100b11d794618b5fd3161cdefb85a35d9c0a8d0b2bfdceacb70f5973013d"
+        },
+        {
+          "path": "src/libnurbs/internals/knotvector.h",
+          "bytes": 2232,
+          "sha256": "6b526d8817feb6f510860f478cd08f603fd46cbbc621441844fa728d45380540"
+        },
+        {
+          "path": "src/libnurbs/internals/mapdesc.cc",
+          "bytes": 24260,
+          "sha256": "aa8c51c2cd163b010826ebc3844d5061f9a79cc9798f4d5e8a795cff483de917"
+        },
+        {
+          "path": "src/libnurbs/internals/mapdesc.h",
+          "bytes": 7984,
+          "sha256": "7ea39c66010132d60ba3b47ada4d36569c457a01d6d2d12ecde8886da2171f20"
+        },
+        {
+          "path": "src/libnurbs/internals/mapdescv.cc",
+          "bytes": 7262,
+          "sha256": "631a337a8a4a2237005801cf5e541f841f9a52fe46fdb43e7773f75d57a67bfd"
+        },
+        {
+          "path": "src/libnurbs/internals/maplist.cc",
+          "bytes": 3309,
+          "sha256": "f653260f38e580838734c32fadf42334cc871e36e29d397f8203a562b1069a3d"
+        },
+        {
+          "path": "src/libnurbs/internals/maplist.h",
+          "bytes": 2412,
+          "sha256": "902afe667241c4b395476a25b09a2a31455a5239a862f3e5b5e250035cae0a42"
+        },
+        {
+          "path": "src/libnurbs/internals/mesher.cc",
+          "bytes": 11023,
+          "sha256": "e690a04888476967666cbb823e03d405c3166bbf3554858d51713dcab53db3e7"
+        },
+        {
+          "path": "src/libnurbs/internals/mesher.h",
+          "bytes": 2712,
+          "sha256": "5b92a51c393886bb84de5f0af6dcf75151643b9b6113df83be45b9dda4b8ac56"
+        },
+        {
+          "path": "src/libnurbs/internals/monoTriangulationBackend.cc",
+          "bytes": 12098,
+          "sha256": "ca84472b3004c2e24d408d7370b105c2f690f6ad9b079922405d83de32918199"
+        },
+        {
+          "path": "src/libnurbs/internals/monotonizer.cc",
+          "bytes": 7853,
+          "sha256": "9816a2c9602f9443cdca90e50d9e362bc4f9f3cfc899cfda76c54d2b515ba54f"
+        },
+        {
+          "path": "src/libnurbs/internals/monotonizer.h",
+          "bytes": 2284,
+          "sha256": "0eb823d286250002072531e017e7f81d46ff22365cd447dad12cb2f0ed71ffdc"
+        },
+        {
+          "path": "src/libnurbs/internals/myassert.h",
+          "bytes": 1829,
+          "sha256": "4dc9d097d3523c0ce40a0c6e1a54e63c8621e0e1eb21ac2beefaa7a2ed1fff56"
+        },
+        {
+          "path": "src/libnurbs/internals/mycode.cc",
+          "bytes": 2310,
+          "sha256": "f9cc9125a5e23a0e75c9d92e359dd6641b38d49ed3df3221f302f8ade0e9c185"
+        },
+        {
+          "path": "src/libnurbs/internals/mymath.h",
+          "bytes": 2237,
+          "sha256": "4d5852cac0f75440c76f56fb588380b1b5030a3328e4fad97ca242d2cac116f1"
+        },
+        {
+          "path": "src/libnurbs/internals/mysetjmp.h",
+          "bytes": 2449,
+          "sha256": "3b8536b2b18fe443ad53675a9902520d372726e345de9cb6beb81cea3f93c425"
+        },
+        {
+          "path": "src/libnurbs/internals/mystring.h",
+          "bytes": 2059,
+          "sha256": "fe76c47681fb76e3000f1efdb8451f4898c556b23abbae9b0b42ed79dd840abf"
+        },
+        {
+          "path": "src/libnurbs/internals/nurbsconsts.h",
+          "bytes": 3863,
+          "sha256": "f3f4b52c0a95802090c27f2b22c20ca5eebe611859fb6fb4574d71268be9616b"
+        },
+        {
+          "path": "src/libnurbs/internals/nurbsinterfac.cc",
+          "bytes": 14783,
+          "sha256": "e49047b24b5bafab27b55a3cd727c11a3407563868ee0dfcedbfaaf72f3efe10"
+        },
+        {
+          "path": "src/libnurbs/internals/nurbstess.cc",
+          "bytes": 16789,
+          "sha256": "2c95423b0cf3bdea08fa266ba55b71ec7aaa1921370c981eca986b0071235609"
+        },
+        {
+          "path": "src/libnurbs/internals/nurbstess.h",
+          "bytes": 5876,
+          "sha256": "9cfaaf50e036ea718863886ee9c5b16ff0b5c7c13e962acf757453f9822d50fe"
+        },
+        {
+          "path": "src/libnurbs/internals/patch.cc",
+          "bytes": 20085,
+          "sha256": "e86ed6fa9887c26176a674ae4fec281f8c15bc5670d7aaa91495236830831f82"
+        },
+        {
+          "path": "src/libnurbs/internals/patch.h",
+          "bytes": 2967,
+          "sha256": "f85a5404a401b08e97d99dedaa07d786e2f2e12fd6cbcd16ddee9d179403d6bc"
+        },
+        {
+          "path": "src/libnurbs/internals/patchlist.cc",
+          "bytes": 5566,
+          "sha256": "8e0bf2c5725ee6fbb0b6c69bcfabf216d20c7d78e48af45a85503b4d190d90f4"
+        },
+        {
+          "path": "src/libnurbs/internals/patchlist.h",
+          "bytes": 2614,
+          "sha256": "2ce15a99045db2d1bfb2fc799947c5e6ba86ab61a457cbd1a3f85f1d3a8a1873"
+        },
+        {
+          "path": "src/libnurbs/internals/pwlarc.h",
+          "bytes": 2361,
+          "sha256": "a9fa109a67988e6aff7e31d73fc4cfee89f2f7bb8c84ff6be6489fae874f7f64"
+        },
+        {
+          "path": "src/libnurbs/internals/quilt.cc",
+          "bytes": 8390,
+          "sha256": "199580a28050722d94bec8c8d5b14aee008b6091b534ca4a9b24d64fecf618f3"
+        },
+        {
+          "path": "src/libnurbs/internals/quilt.h",
+          "bytes": 3327,
+          "sha256": "e51986e2886f293a9f4bb50b3d7f41a8eea1484a1b0cc79d5f5654b938d78c64"
+        },
+        {
+          "path": "src/libnurbs/internals/reader.cc",
+          "bytes": 4608,
+          "sha256": "6229d3c8d176f58f41d98b0889e826843cbb20407f8c38764038e731ceabc565"
+        },
+        {
+          "path": "src/libnurbs/internals/reader.h",
+          "bytes": 4800,
+          "sha256": "57c24abdb62955e66bdd4e23f908886dcbe6bb68770a89a8773f012d78db5e59"
+        },
+        {
+          "path": "src/libnurbs/internals/renderhints.cc",
+          "bytes": 3790,
+          "sha256": "57fc1440c18d4169c3bd21422d253f22c37992dab7304c73570fcb381d0b230a"
+        },
+        {
+          "path": "src/libnurbs/internals/renderhints.h",
+          "bytes": 2193,
+          "sha256": "4a1f94f78c5b43048bbd5f57ee0b2bc08e844adce8a5f3c2af67978842dc521b"
+        },
+        {
+          "path": "src/libnurbs/internals/simplemath.h",
+          "bytes": 1926,
+          "sha256": "26b359164916b4c6efdca7be3e672e225c914ef9910bec1ad772bd004081606d"
+        },
+        {
+          "path": "src/libnurbs/internals/slicer.cc",
+          "bytes": 30971,
+          "sha256": "b8c4fa3288707e45ab92f21d558a651fb0c3d55bfeb056c828ec94105c3a327b"
+        },
+        {
+          "path": "src/libnurbs/internals/slicer.h",
+          "bytes": 2791,
+          "sha256": "5b5def6fd6dfcd3c05c26d490d39617c8fdcfcf9859f3952caefe31d1bca5ca4"
+        },
+        {
+          "path": "src/libnurbs/internals/sorter.cc",
+          "bytes": 3273,
+          "sha256": "92023a045bdda74bf70fcd506bb51c34ab2d1c5d9b1810f6d46602099b393a0d"
+        },
+        {
+          "path": "src/libnurbs/internals/sorter.h",
+          "bytes": 2036,
+          "sha256": "82e6e973139822a4ef6009f757e3d8e65efd0cd8b7f6127b3146723ca27de35f"
+        },
+        {
+          "path": "src/libnurbs/internals/splitarcs.cc",
+          "bytes": 8954,
+          "sha256": "38f079f40cf745cbd5135a2cf25b891ba1a3209b4abb9d59356ff0d74f6e2eb0"
+        },
+        {
+          "path": "src/libnurbs/internals/subdivider.cc",
+          "bytes": 25431,
+          "sha256": "f70462088cf2bd8beef74c268564583a97e750b08d62cfa6dce73d64a70e7e09"
+        },
+        {
+          "path": "src/libnurbs/internals/subdivider.h",
+          "bytes": 6683,
+          "sha256": "77dd691cb600d624790fa5a7f301a34023a439f05ed64aef390fcdb558d430c4"
+        },
+        {
+          "path": "src/libnurbs/internals/tobezier.cc",
+          "bytes": 20634,
+          "sha256": "74adffc4c2d9d80b93db710c9ba1ace54f0e572bd73d4cf0d47a86bca4783b80"
+        },
+        {
+          "path": "src/libnurbs/internals/trimline.cc",
+          "bytes": 5842,
+          "sha256": "db0a0105e98fa589931baedff5a9b4a88305303077cd0bde74d6326f304862b2"
+        },
+        {
+          "path": "src/libnurbs/internals/trimline.h",
+          "bytes": 2996,
+          "sha256": "5651ed5a80394fc60d4085541e2e841a691972455a829fa492d9c01937e76da1"
+        },
+        {
+          "path": "src/libnurbs/internals/trimregion.cc",
+          "bytes": 3654,
+          "sha256": "f29c6bebe1587c42927f3c74b094522507562159037e38f55b18d574703007b8"
+        },
+        {
+          "path": "src/libnurbs/internals/trimregion.h",
+          "bytes": 2574,
+          "sha256": "0f52a8c85b0ac47710e4f718a0dc7a1618b6e347f06a347bd87ff43a9b869f37"
+        },
+        {
+          "path": "src/libnurbs/internals/trimvertex.h",
+          "bytes": 2268,
+          "sha256": "bacf70101f65b235e22fbf2e55d9144abd621fdf5d92f54b089db56843150bee"
+        },
+        {
+          "path": "src/libnurbs/internals/trimvertpool.cc",
+          "bytes": 4207,
+          "sha256": "3cb9d2efe452d6c16a5e67d8cac965c16f6107cfebb7f38b809c1c61de08cc23"
+        },
+        {
+          "path": "src/libnurbs/internals/trimvertpool.h",
+          "bytes": 2012,
+          "sha256": "f8bc527542a41ce077e66b2741e17b54bb250b2eb21d2a21da5810d72e9c43c7"
+        },
+        {
+          "path": "src/libnurbs/internals/types.h",
+          "bytes": 1908,
+          "sha256": "3334f506c817b99ffac84b2e58b5d82e9324ab45dfee5162d32fbab915e8ae2a"
+        },
+        {
+          "path": "src/libnurbs/internals/uarray.cc",
+          "bytes": 2525,
+          "sha256": "54aaa3b39b4ee7c3530a7bae907801ab60f0f1bcaf8510d6cd29d66a7fd0b2b4"
+        },
+        {
+          "path": "src/libnurbs/internals/uarray.h",
+          "bytes": 1886,
+          "sha256": "eb479eec9b7eb399d6e8ebfc00af3935f131ebe8ed70ea472035c61ec7f7f44e"
+        },
+        {
+          "path": "src/libnurbs/internals/varray.cc",
+          "bytes": 4389,
+          "sha256": "2a343f06f122d066244f1e7de2f278fb5f4b8203b983e45fb1381258a373177d"
+        },
+        {
+          "path": "src/libnurbs/internals/varray.h",
+          "bytes": 2115,
+          "sha256": "fa3d557848ce3cb765540c7f1d2742afc88261515b4ec011094b3985e9a31526"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/definitions.h",
+          "bytes": 1691,
+          "sha256": "ec6ef104a726952d96230e95503ff0b2c120a718308e16134e42f9c0e14fee0a"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/directedLine.cc",
+          "bytes": 20756,
+          "sha256": "37f535d793f0514ddd46f85caaba7809dd5dbaadcb6bea24dac555ab374f97aa"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/directedLine.h",
+          "bytes": 5536,
+          "sha256": "fc9e7e4a120ec758d3b27e8e873a8fa4269171903533c6b62b3e2e4d2f79117f"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/glimports.h",
+          "bytes": 1716,
+          "sha256": "050272a343bc01c1333853cbb760bf20cb88792a9fc1d77443cff701081e96ee"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/gridWrap.cc",
+          "bytes": 8067,
+          "sha256": "b6959e3fbd8ae2df5c3a21160296fc68a17f23abb7f971fcf1be9922e21fdfa2"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/gridWrap.h",
+          "bytes": 4398,
+          "sha256": "5a8422d3b9c7e2c6091f5b1b1fddd8da0c5fab8b6a15846fa0e608595edbb9f9"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/monoChain.cc",
+          "bytes": 25275,
+          "sha256": "486c0e0e5e8f892bc4aec9555464cc55997374098a4e7b7e47c520463966b3fc"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/monoChain.h",
+          "bytes": 3582,
+          "sha256": "a34f7e703d8298d53c36d28b7c96228ec61fb44b6d294eda845e515dd91ef142"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/monoPolyPart.cc",
+          "bytes": 8196,
+          "sha256": "fe609ae924529a1f285829c2bb64c440b1d848cb0d7753c1f89c401660355838"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/monoPolyPart.h",
+          "bytes": 1726,
+          "sha256": "15ea1c8d12ddc3f4103818a8b95c600c69481cf0d0082ea23c16919eb6e7cdb6"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/monoTriangulation.cc",
+          "bytes": 42790,
+          "sha256": "6918e52785dd8e0e5332e9deef15d9ead8ccf3acdb67a544739ff92bab2ae133"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/monoTriangulation.h",
+          "bytes": 6612,
+          "sha256": "3413e0e3bf61967da3a2d048fe85c3630ec72594bc286ecfac9a64370036719a"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/mystdio.h",
+          "bytes": 1991,
+          "sha256": "275e50538443b1f808a10d934a68e9ea308bd3336794057746a09951ed02f7cc"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/mystdlib.h",
+          "bytes": 2031,
+          "sha256": "b22afa0f74f08dfa0837a975cd7367a4ec222b42b7d9c570ddba0097c79c3025"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/partitionX.cc",
+          "bytes": 4550,
+          "sha256": "953ea8eb4f8ae7325c271ede6f421c363d569c277b8def9999e3896e4653e2e0"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/partitionX.h",
+          "bytes": 2137,
+          "sha256": "c163be7ad9d1532482bfd955ea450298573a73c0278a37807ef9352b49e0147f"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/partitionY.cc",
+          "bytes": 22634,
+          "sha256": "2b20224793f99d8df86f07a62c9d61ec76db076cc82d524156f86e0ec6cbd34a"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/partitionY.h",
+          "bytes": 3954,
+          "sha256": "7d70b50daea856dffed48abaa19a1332078b198eee20515f6c2d3e03a1440a46"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/polyDBG.cc",
+          "bytes": 18777,
+          "sha256": "b9fab5ad13ca6c462fcb09d065c1500438a9626012e27e62dc7427225fbbd6c8"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/polyDBG.h",
+          "bytes": 2944,
+          "sha256": "17659c4fd301c5887a8162ace11e3b47e2327d24ad03396172f2643df9ec00f7"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/polyUtil.cc",
+          "bytes": 3314,
+          "sha256": "111be3a05b077a85a8ee4915288049f22c87fd4eabaec590efe964ae47553b19"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/polyUtil.h",
+          "bytes": 1877,
+          "sha256": "fc98938ae2c73b15cef6834acf5f7b5689417c12f65d78a5a0d51e7116ec9504"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/primitiveStream.cc",
+          "bytes": 4897,
+          "sha256": "473142e499f9f5234ce0020536026e6f414fc5957edae2d1c00e110229255f4d"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/primitiveStream.h",
+          "bytes": 3273,
+          "sha256": "a429b992c70b788744f5127b5d52ce4c0897aa4c0a58bb7569734a4cb4cb9e7b"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/quicksort.cc",
+          "bytes": 2838,
+          "sha256": "857de35fce052351989c9a19aa2ebc3633eb6764b193807508f67a1fac1d4250"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/quicksort.h",
+          "bytes": 1751,
+          "sha256": "5575ff53c7f348160ebc22b72477ddd10c90751e8d3967a20218a2ac87a831ee"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/rectBlock.cc",
+          "bytes": 4826,
+          "sha256": "ea758ba6fc4a6203ed2e18dc9fe15f51ec7da78b943437e5b9c5f98f86191827"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/rectBlock.h",
+          "bytes": 2702,
+          "sha256": "f3c69ad860674b4005a58c81f07f630ed5f110bd8a25b92e1d46967fce17a2fe"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/sampleComp.cc",
+          "bytes": 10841,
+          "sha256": "b88fc8363a586fad874e8c5af2c54b454dc4d996a1974b5e43f69acc4c88d1ef"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/sampleComp.h",
+          "bytes": 3212,
+          "sha256": "b35082fe0839b142bc4a83124aaf33e26622becb645b47cb2fe0f2b68401b577"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/sampleCompBot.cc",
+          "bytes": 25074,
+          "sha256": "fbef080f19e04b25139bc4709c339ef3f86b8c171fd402f0cbb29150b765de19"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/sampleCompBot.h",
+          "bytes": 4009,
+          "sha256": "a4b5995dddd936b29eaebe31d82e6d012b934b68af7722257fa60123a6d74a4b"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/sampleCompRight.cc",
+          "bytes": 21081,
+          "sha256": "069212038b98d94562c9f24d4da5413a61c03d5cb0902bbe0dec48363896ef7b"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/sampleCompRight.h",
+          "bytes": 4664,
+          "sha256": "13e4217816eb047f784312574c0849f83b875540ee7b63e1677b382a0a2cdc6f"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/sampleCompTop.cc",
+          "bytes": 31351,
+          "sha256": "8b96d8e1dd4484764e7ae7a273f0ce005b376e08b1b40534fcb1d27cd93900cf"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/sampleCompTop.h",
+          "bytes": 2788,
+          "sha256": "b07ac944b64afdb471a098f488c7ca86c954e0dd377e60c3251c99da3543d336"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/sampleMonoPoly.cc",
+          "bytes": 71958,
+          "sha256": "a209e59909fa6260bdb9e4dfe3300be5b1fc17bafe001ad4982232e319e9bf20"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/sampleMonoPoly.h",
+          "bytes": 6183,
+          "sha256": "aec20dfd7debf530f8d2394f3c9505bd16dda52a8d20512f1b4a37e307c3cd85"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/sampledLine.cc",
+          "bytes": 4639,
+          "sha256": "0fe601a091dc458ac2526f72db2a2b438b431310d1a04dcf4315c75cd18e25ea"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/sampledLine.h",
+          "bytes": 2366,
+          "sha256": "43fef297f4fe193c5a2a9ab65bd12f6786f5d7adac42806895d6f254741ea4af"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/searchTree.cc",
+          "bytes": 7066,
+          "sha256": "880efb50d10ba1d822bd43cdc5e20ec9583691c214322ec4e84ec72121a87d4a"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/searchTree.h",
+          "bytes": 2437,
+          "sha256": "8e35a46f68c71ba33ea84e54930143b7cdf387cd6a082815602c30ee919176bb"
+        },
+        {
+          "path": "src/libnurbs/nurbtess/zlassert.h",
+          "bytes": 1636,
+          "sha256": "646a7bcc86283b2b57241463436c43eb7975d8bc4e02cfb314a92052b964d955"
+        },
+        {
+          "path": "src/libtess/dict-list.h",
+          "bytes": 3528,
+          "sha256": "a827d8f1f2b257d4afc60c80c62b73db53322fba44899efd32468dd8b7e54bb1"
+        },
+        {
+          "path": "src/libtess/dict.c",
+          "bytes": 3203,
+          "sha256": "07f6a8488d6921dab42e20d372eda6974a622a5c64b75efb3d7df9a6ed1d6ad8"
+        },
+        {
+          "path": "src/libtess/dict.h",
+          "bytes": 3528,
+          "sha256": "a827d8f1f2b257d4afc60c80c62b73db53322fba44899efd32468dd8b7e54bb1"
+        },
+        {
+          "path": "src/libtess/geom.c",
+          "bytes": 8865,
+          "sha256": "41b2145a31cd473d2ce2071091849565714053f5ae34b52d1456aa4d0996df9f"
+        },
+        {
+          "path": "src/libtess/geom.h",
+          "bytes": 3404,
+          "sha256": "f87f7d9bdb9f456769b93c9bc4b44abfcc4a5e199c66db99f9bf5a30910bed21"
+        },
+        {
+          "path": "src/libtess/memalloc.c",
+          "bytes": 1926,
+          "sha256": "9305978404fb4f7cfd681024c5f337ddcc1cfd57a7f2df0b806a2e47b313ef58"
+        },
+        {
+          "path": "src/libtess/memalloc.h",
+          "bytes": 1986,
+          "sha256": "d568d7a17033f7d8fcdb613bdd965c160ec38194a613b481225676be7bb393b9"
+        },
+        {
+          "path": "src/libtess/mesh.c",
+          "bytes": 22333,
+          "sha256": "ee0cdb02d8faae7b42409a4a37a3c8cf86f7acb792d269623680391e6b8bcfbf"
+        },
+        {
+          "path": "src/libtess/mesh.h",
+          "bytes": 12010,
+          "sha256": "391fa9b9f6089930d5363189091111533722d620d7fa4c56cd9e07047bd004ee"
+        },
+        {
+          "path": "src/libtess/normal.c",
+          "bytes": 7774,
+          "sha256": "5aebfdc101177b08ef8b0bfbc1f5ae00d9a3bb18260f7ce2260a924634d74bdd"
+        },
+        {
+          "path": "src/libtess/normal.h",
+          "bytes": 1848,
+          "sha256": "4f5ae030627bde442f1bc4a47b45cae13dbaf438be13257717aaecc4ddf91212"
+        },
+        {
+          "path": "src/libtess/priorityq-heap.c",
+          "bytes": 6546,
+          "sha256": "f04c7011cb0095f2dcb31cfbeeda2acb1dab97b22d0bbaa0308b985fc7cdfc0e"
+        },
+        {
+          "path": "src/libtess/priorityq-heap.h",
+          "bytes": 4111,
+          "sha256": "7d8c09f4199fef8033cb72e7759668c27b2823cd8578d0a8b1a86bc6cc3c7a35"
+        },
+        {
+          "path": "src/libtess/priorityq-sort.h",
+          "bytes": 4182,
+          "sha256": "15903957a221456c67a67d9264cd804bfe0bbe490478f92a2d1e577a51177c48"
+        },
+        {
+          "path": "src/libtess/priorityq.c",
+          "bytes": 7159,
+          "sha256": "ba27182d0985b81c76e747cd98355e2edc0f1bea6b5b8f9609dbe02282cc32f3"
+        },
+        {
+          "path": "src/libtess/priorityq.h",
+          "bytes": 4182,
+          "sha256": "15903957a221456c67a67d9264cd804bfe0bbe490478f92a2d1e577a51177c48"
+        },
+        {
+          "path": "src/libtess/render.c",
+          "bytes": 15847,
+          "sha256": "6a5b99a2b15163a110024b7e8be57b0bca7b1ed028c7437330d8748c074302a3"
+        },
+        {
+          "path": "src/libtess/render.h",
+          "bytes": 2180,
+          "sha256": "6b4df96ab22fd956dff115842f1d4316e41b80f73c8477f7f0560e83584ca0ff"
+        },
+        {
+          "path": "src/libtess/sweep.c",
+          "bytes": 48623,
+          "sha256": "ab7cf22128931ea96a2589d0e2c77b42e0c3a23f2c851166d84c0f6d2ade6a1c"
+        },
+        {
+          "path": "src/libtess/sweep.h",
+          "bytes": 3379,
+          "sha256": "0504a196f8d28944c754571d8a99325d2fa8a6c91b1b0bba8b6eb9898daefe7f"
+        },
+        {
+          "path": "src/libtess/tess.c",
+          "bytes": 17605,
+          "sha256": "ee3de810d719b2d445a1e79041ff45071209c58254f0cf451eb9a7e1d946d6b9"
+        },
+        {
+          "path": "src/libtess/tess.h",
+          "bytes": 6437,
+          "sha256": "2b9c51057636cae467dfa205bb327adbddafbda64021e870ff6de16edc29647e"
+        },
+        {
+          "path": "src/libtess/tessmono.c",
+          "bytes": 7246,
+          "sha256": "00d525bc4e9dc57db3c4ce321f7b9a6b0a345df9b580e6be0e69368c1506d04a"
+        },
+        {
+          "path": "src/libtess/tessmono.h",
+          "bytes": 3184,
+          "sha256": "be3b4090b0b5e7002a80e6e7f5445cfa6128d29e2a64effde7351cbf5fd0cd16"
+        },
+        {
+          "path": "src/libutil/error.c",
+          "bytes": 3101,
+          "sha256": "01b338a3a59fd5453dc74cff253e587cfdee442a7450d90456e044430f05dcae"
+        },
+        {
+          "path": "src/libutil/glue.c",
+          "bytes": 4579,
+          "sha256": "0f9e986f070d2a35997fdc6314852f3bd2a90b32d47e89cd3af602effb9593e1"
+        },
+        {
+          "path": "src/libutil/gluint.h",
+          "bytes": 1905,
+          "sha256": "28fb94a6ce155d46d8a079cff94cf39f4f4722a31d28eaa69fb6fda8ca8a9ced"
+        },
+        {
+          "path": "src/libutil/mipmap.c",
+          "bytes": 270872,
+          "sha256": "2e6420b66b6ca58d6ce5498bdf62de508a938e71f3286c94a1111262a8623911"
+        },
+        {
+          "path": "src/libutil/project.c",
+          "bytes": 10883,
+          "sha256": "13dd3204fe0a7d70ce1af57eb388861c9562f3ccdab22ea019b55f7e727fa29f"
+        },
+        {
+          "path": "src/libutil/quad.c",
+          "bytes": 29473,
+          "sha256": "958dcd0ed3f95c84a3fcfacc08233caa90ed517fe632e52a873144ebbaa843e3"
+        },
+        {
+          "path": "src/libutil/registry.c",
+          "bytes": 3105,
+          "sha256": "e43954fafae277d37ad9d1f97cd239bebdd269e00e7ee85c9ec6e830c4eaa559"
+        }
+      ],
+      "local_changes": []
+    }
+  ],
+  "extra_files": [
+    {
+      "path": "vendor/GLU-original-source.tar.gz",
+      "bytes": 742366,
+      "sha256": "a5553912ba17601d86204382111f342ce764ea7e6ee064a7791438ed24ae8e2c"
+    }
+  ]
+}

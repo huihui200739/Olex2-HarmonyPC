@@ -1,0 +1,46 @@
+{
+  "version": "0.22.20",
+  "base": "0.22.19",
+  "base_manifest_sha256": "c1e73c711c8801544afa41429b435c3256f9684fc904a24b7f93800260fec378",
+  "scope": "Genuine original CreateHershey @ fonts, original vector scale semantics, retained native raster stages; direct-table GL reference explicitly shares GPU backend",
+  "files": {
+    "native/platform_font_factory.cpp": {
+      "sha256": "6450ab21aa37be161936721bebbc792425630991e6b6eb261374277abe1f10b5",
+      "bytes": 3813
+    },
+    "native/platform_font_factory.h": {
+      "sha256": "f31f18f0b2d26ec5254ec5b6bae4c3c61867011fc59b567145bb1421610d27f7",
+      "bytes": 952
+    },
+    "native/font_description.h": {
+      "sha256": "d26541d01349b69c7e7777ce519d41adf3c13dbefe61ea59b64235de5b8c3b18",
+      "bytes": 2625
+    },
+    "native/original_vector_font_window_probe.cpp": {
+      "sha256": "0e36c6c4258301137c52da7e7ec792de08466a3a3b65c29d478e62cf897e2046",
+      "bytes": 5904
+    },
+    "native/original_vector_font_window_probe.h": {
+      "sha256": "b2bef9793cd122cf10ac97991c9119e02978418af9fea211d3f235a72ced5db7",
+      "bytes": 181
+    },
+    "native/original_font_window_probe.cpp": {
+      "sha256": "4dd8c3ce971afbb56a19b4224d861d52991f41797609b627bc67dd23d27945e1",
+      "bytes": 4395
+    },
+    "app/entry/src/main/cpp/CMakeLists.txt": {
+      "sha256": "e50409c4ebc1fe5f36bbeb64bd2f8c4c29055e254e96564dfc413f5011ee0c93",
+      "bytes": 4399
+    },
+    "app/AppScope/app.json5": {
+      "sha256": "c2e77f28cc693ba783c83425af5e8adfe04310ee09b32abd3b0d790382c0aeb9",
+      "bytes": 225
+    }
+  },
+  "original_vector_source": {
+    "path": "upstream/glib/glfont.cpp",
+    "sha256": "7cfb4ec4000079be3c450eabbdd8841b8f6d4d3841d421bd93067d869778087e"
+  },
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

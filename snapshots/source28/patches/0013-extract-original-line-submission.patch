@@ -1,0 +1,125 @@
+--- a/glib/glprimitive.cpp
++++ b/glib/glprimitive.cpp
+@@ -9,6 +9,7 @@
+ 
+ #include "glprimitive.h"
+ #include "trianglesubmit.h"
++#include "linesubmit.h"
+ #include "polygonsubmit.h"
+ #include "glmaterial.h"
+ #include "glrender.h"
+@@ -28,6 +29,21 @@
+   }
+   void DrawVertex3(size_t i) { primitive.DrawVertex3(i); }
+   void DrawVertex3c(size_t i) { primitive.DrawVertex3c(i); }
++};
++
++// Real desktop API wrapper; no target GL stub is introduced.
++struct TGlPrimitive::LineSubmissionSink {
++  const TGlPrimitive& primitive;
++  explicit LineSubmissionSink(const TGlPrimitive& value) : primitive(value) {}
++  bool IsSelecting() const { return primitive.GetRenderer().IsSelecting(); }
++  void GetLineWidth(float* value) const { olx_gl::get(GL_LINE_WIDTH, value); }
++  void SetLineWidth(float value) const { olx_gl::lineWidth(value); }
++  void SetColor(const uint32_t& value) const { primitive.SetColor(value); }
++  void DrawVertex(const vec3f& value) const { primitive.DrawVertex(value); }
++  void DrawVertex(const vec3f& value, const uint32_t& color) const {
++    primitive.DrawVertex(value, color);
++  }
++  void DrawVertex2(size_t i) const { primitive.DrawVertex2(i); }
+ };
+ 
+ TGlPrimitive::TGlPrimitive(TObjectGroup& ParentG, TGlRenderer& ParentR, short type)
+@@ -316,30 +332,8 @@
+   }
+   case sgloLines: {
+     PrepareColorRendering(GL_LINES);
+-    float LW = 0;
+-    if (Params[0] != 1) {
+-      olx_gl::get(GL_LINE_WIDTH, &LW);
+-      olx_gl::lineWidth(Params[0] * LW);
+-    }
+-    if (Colors.IsEmpty() || GetRenderer().IsSelecting()) {
+-      for (size_t i = 0; i < Vertices.Count(); i++) {
+-        DrawVertex(Vertices[i]);
+-      }
+-    }
+-    else if (Colors.Count() == Vertices.Count()) {
+-      for (size_t i = 0; i < Vertices.Count(); i++) {
+-        DrawVertex(Vertices[i], Colors[i]);
+-      }
+-    }
+-    else if (Colors.Count() * 2 == Vertices.Count()) {
+-      for (size_t i = 0; i < Colors.Count(); i++) {
+-        SetColor(Colors[i]);
+-        DrawVertex2(i * 2);
+-      }
+-    }
+-    if (LW != 0) {
+-      olx_gl::lineWidth(LW);
+-    }
++    LineSubmissionSink sink(*this);
++    SubmitPrimitiveLines(Vertices, Colors, Params, sink);
+     EndColorRendering();
+     break;
+   }
+--- a/glib/glprimitive.h
++++ b/glib/glprimitive.h
+@@ -91,6 +91,7 @@
+   void SetType(short T);
+ 
+   struct TriangleSubmissionSink;
++  struct LineSubmissionSink;
+ 
+   // helper functions
+   void DrawVertex2(size_t i) const {
+--- /dev/null
++++ b/glib/linesubmit.h
+@@ -0,0 +1,47 @@
++/******************************************************************************
++* Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
++*                                                                             *
++* This file is part of the OlexSys Development Framework.                     *
++*                                                                             *
++* This source file is distributed under the terms of the licence located in   *
++* the root folder.                                                            *
++******************************************************************************/
++
++// Exact sgloLines body, excluding begin/end. Material, lighting, clipping,
++// transforms and display lists remain the caller's responsibility.
++#ifndef __olx_primitive_line_submit_H
++#define __olx_primitive_line_submit_H
++#include <cstddef>
++#include "glnamespace.h"
++BeginGlNamespace()
++template <class V, class C, class P, class Sink>
++void SubmitPrimitiveLines(const V& Vertices, const C& Colors,
++  const P& Params, Sink& sink)
++{
++    float LW = 0;
++    if (Params[0] != 1) {
++      sink.GetLineWidth(&LW);
++      sink.SetLineWidth(Params[0] * LW);
++    }
++    if (Colors.IsEmpty() || sink.IsSelecting()) {
++      for (size_t i = 0; i < Vertices.Count(); i++) {
++        sink.DrawVertex(Vertices[i]);
++      }
++    }
++    else if (Colors.Count() == Vertices.Count()) {
++      for (size_t i = 0; i < Vertices.Count(); i++) {
++        sink.DrawVertex(Vertices[i], Colors[i]);
++      }
++    }
++    else if (Colors.Count() * 2 == Vertices.Count()) {
++      for (size_t i = 0; i < Colors.Count(); i++) {
++        sink.SetColor(Colors[i]);
++        sink.DrawVertex2(i * 2);
++      }
++    }
++    if (LW != 0) {
++      sink.SetLineWidth(LW);
++    }
++}
++EndGlNamespace()
++#endif

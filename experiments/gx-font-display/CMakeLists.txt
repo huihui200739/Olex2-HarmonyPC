@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.20)
+project(olex2_font_display_metrics LANGUAGES CXX)
+enable_testing()
+add_executable(isolated_font_display_metrics tests/metrics.cpp)
+target_include_directories(isolated_font_display_metrics PRIVATE native)
+target_compile_features(isolated_font_display_metrics PRIVATE cxx_std_17)
+target_compile_options(isolated_font_display_metrics PRIVATE -Wall -Wextra -Werror -pedantic)
+add_test(NAME isolated_font_display_metrics COMMAND isolated_font_display_metrics)

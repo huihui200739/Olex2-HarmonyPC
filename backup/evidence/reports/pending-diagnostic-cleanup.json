@@ -1,0 +1,701 @@
+{
+  "status": "completed",
+  "recorded_at": "2026-11-10T07:00:03+08:00",
+  "scope": "Only exact old successful synthetic graphics diagnostic directories; no application reset/uninstall or user/runtime/configuration data",
+  "target": "127.0.0.1:5555",
+  "bundle_name": "com.example.olex2harmonypc",
+  "deletion_authorized": true,
+  "deleted_files": 4502,
+  "local_backups_must_be_retained": true,
+  "failed_diagnostics_must_be_retained": true,
+  "current25_diagnostics_must_be_retained": true,
+  "backup_audit": {
+    "path": "out/gx-application-evaluation/diagnostic-backup-audit-old-success-attempt1/local-backup-audit.json",
+    "bytes": 1596964,
+    "sha256": "b5bf4f4c2fbcda9aeb8b158c4f9748b5b30ba67079e39fb4ccc89b2613a3f8b9"
+  },
+  "device_audit": {
+    "path": "out/gx-application-evaluation/diagnostic-backup-audit-old-success-attempt1/device-backup-audit.json",
+    "bytes": 554,
+    "sha256": "1e8a6bd66a22d20e5538dbd4f3f846995f4112068aa0445a4910af0230dfaf43"
+  },
+  "exclusion_audit": {
+    "path": "out/gx-application-evaluation/diagnostic-backup-audit-old-success-attempt1/exclusion-audit.json",
+    "bytes": 33499,
+    "sha256": "351072734beba8b0b1f3147710d936f7921aa1e45ce426162fa08b8c4e8b60bc"
+  },
+  "directory_count": 81,
+  "file_count": 4502,
+  "payload_bytes": 826026629,
+  "device_audit_is_a_point_in_time_observation": true,
+  "revalidation_required_before_any_later_authorized_cleanup": true,
+  "candidates": [
+    {
+      "directory": "original-font-pid-10798-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-10798-run-1",
+      "file_count": 26,
+      "bytes": 6351173,
+      "receipt": "reports/emulator/native-font-raster-window-20261110-024306-ff62b82f/runtime/font-1/received-artifacts.json",
+      "receipt_sha256": "04139bc572e69d481d76ac350b219091e872ca5937a331eaa21d2c4d7b8a8d68"
+    },
+    {
+      "directory": "original-font-pid-10798-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-10798-run-2",
+      "file_count": 23,
+      "bytes": 6350122,
+      "receipt": "reports/emulator/native-font-raster-window-20261110-024306-ff62b82f/runtime/font-2/received-artifacts.json",
+      "receipt_sha256": "f199ea54a1d95f40b9e5f8c42d4e1179aae8d012c95ba0de79efddb3f733b3ff"
+    },
+    {
+      "directory": "original-font-pid-10798-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-10798-run-3",
+      "file_count": 23,
+      "bytes": 6350122,
+      "receipt": "reports/emulator/native-font-raster-window-20261110-024306-ff62b82f/runtime/font-3/received-artifacts.json",
+      "receipt_sha256": "6bb7d21416083db2ff97a990b62e80b69853ea1cf482644d31b42321279a5d0e"
+    },
+    {
+      "directory": "original-font-pid-26625-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-26625-run-1",
+      "file_count": 62,
+      "bytes": 14541143,
+      "receipt": "reports/emulator/vector-font-state-window-20261110-033453-61ef788e/runtime/font-1/received-artifacts.json",
+      "receipt_sha256": "4bce960d66938b354ac3ba17d39c5d60482c3f2cd874573a212854439179e781"
+    },
+    {
+      "directory": "original-font-pid-26625-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-26625-run-2",
+      "file_count": 59,
+      "bytes": 14540093,
+      "receipt": "reports/emulator/vector-font-state-window-20261110-033453-61ef788e/runtime/font-2/received-artifacts.json",
+      "receipt_sha256": "3af6c39d5009edad1a07711f2aa917f2a38dc0b690e3b04cceb3e14a18cbb56d"
+    },
+    {
+      "directory": "original-font-pid-26625-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-26625-run-3",
+      "file_count": 59,
+      "bytes": 14540093,
+      "receipt": "reports/emulator/vector-font-state-window-20261110-033453-61ef788e/runtime/font-3/received-artifacts.json",
+      "receipt_sha256": "fb7bdeb5da7861c3528ae7b0816d8daee840758e1c44ae9f050f0c8285f6dd83"
+    },
+    {
+      "directory": "original-font-pid-28183-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-28183-run-1",
+      "file_count": 78,
+      "bytes": 17643939,
+      "receipt": "reports/emulator/olex-font-resource-window-20261110-045504-1e7a4257/runtime/font-1/received-artifacts.json",
+      "receipt_sha256": "9423afc15cb7bd730e54bceff1f513763c434d36108027ad64ee0b4a1d71bb21"
+    },
+    {
+      "directory": "original-font-pid-28183-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-28183-run-2",
+      "file_count": 75,
+      "bytes": 17642889,
+      "receipt": "reports/emulator/olex-font-resource-window-20261110-045504-1e7a4257/runtime/font-2/received-artifacts.json",
+      "receipt_sha256": "db6db5790ed3408454ea886d904736e1fdb6fb4fc476a55dc571c10a263b70f5"
+    },
+    {
+      "directory": "original-font-pid-28183-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-28183-run-3",
+      "file_count": 75,
+      "bytes": 17642889,
+      "receipt": "reports/emulator/olex-font-resource-window-20261110-045504-1e7a4257/runtime/font-3/received-artifacts.json",
+      "receipt_sha256": "da3b953bb021f6ba67501dd24cdb24534baca595dc379c02d42966acc2ff48c2"
+    },
+    {
+      "directory": "original-font-pid-7338-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-7338-run-1",
+      "file_count": 23,
+      "bytes": 6350120,
+      "receipt": "reports/emulator/native-font-mixed-20261110-030559-e27d3d09/runtime/original-first-3-font-native/received-artifacts.json",
+      "receipt_sha256": "14666c9df618beee6e7eeabcd7bd9569302b908175cadb2bf2c1e830cc4914af"
+    },
+    {
+      "directory": "original-font-pid-7338-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-7338-run-2",
+      "file_count": 23,
+      "bytes": 6350120,
+      "receipt": "reports/emulator/native-font-mixed-20261110-030559-e27d3d09/runtime/original-first-6-font-native/received-artifacts.json",
+      "receipt_sha256": "88eae76df1078a7d3e91b75cd3dd5ec9bd491d6fa6c27ff68ff4e5b6d3a72b81"
+    },
+    {
+      "directory": "original-font-pid-7338-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-7338-run-3",
+      "file_count": 23,
+      "bytes": 6350120,
+      "receipt": "reports/emulator/native-font-mixed-20261110-030559-e27d3d09/runtime/original-first-9-font-native/received-artifacts.json",
+      "receipt_sha256": "e1bd5ba2db5c439ec81c49503835fc48eddebb77e3f91042cfa6d55b6bf9bba1"
+    },
+    {
+      "directory": "original-font-pid-7360-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-7360-run-1",
+      "file_count": 23,
+      "bytes": 6350120,
+      "receipt": "reports/emulator/native-font-mixed-20261110-030559-e27d3d09/runtime/load-first-3-font-native/received-artifacts.json",
+      "receipt_sha256": "115ae07bfaa5c8bfa7946188f5f65a3deee83977e93040db69d5bb331d9430de"
+    },
+    {
+      "directory": "original-font-pid-7360-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-7360-run-2",
+      "file_count": 23,
+      "bytes": 6350120,
+      "receipt": "reports/emulator/native-font-mixed-20261110-030559-e27d3d09/runtime/load-first-6-font-native/received-artifacts.json",
+      "receipt_sha256": "4fb8509227369b92fe100e7d2f6f767c8de907b678262c730d4e50918cd3c134"
+    },
+    {
+      "directory": "original-font-pid-7360-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-7360-run-3",
+      "file_count": 23,
+      "bytes": 6350120,
+      "receipt": "reports/emulator/native-font-mixed-20261110-030559-e27d3d09/runtime/load-first-9-font-native/received-artifacts.json",
+      "receipt_sha256": "0e898b7f89b9157b0fd1e885f504448ace5c551515d18af343e9aca5472feb5f"
+    },
+    {
+      "directory": "original-font-pid-7875-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-7875-run-1",
+      "file_count": 59,
+      "bytes": 14540090,
+      "receipt": "reports/emulator/vector-font-state-mixed-20261110-042347-44ff22e8/runtime/original-first-3-font-native/received-artifacts.json",
+      "receipt_sha256": "4eb35f794c4b272814f68321eed939444ab4cdbfc1297165909c72bc331ea121"
+    },
+    {
+      "directory": "original-font-pid-7875-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-7875-run-2",
+      "file_count": 59,
+      "bytes": 14540091,
+      "receipt": "reports/emulator/vector-font-state-mixed-20261110-042347-44ff22e8/runtime/original-first-6-font-native/received-artifacts.json",
+      "receipt_sha256": "31524d28c7562ca184ebb802fabc3e062692c290c46fb93a95a2bcfbd8fad043"
+    },
+    {
+      "directory": "original-font-pid-7875-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-7875-run-3",
+      "file_count": 59,
+      "bytes": 14540091,
+      "receipt": "reports/emulator/vector-font-state-mixed-20261110-042347-44ff22e8/runtime/original-first-9-font-native/received-artifacts.json",
+      "receipt_sha256": "fd1d92492aa05c3dfe954ffdeb12e60ae8f5ff1416033129fabd822aec8f162c"
+    },
+    {
+      "directory": "original-font-pid-7897-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-7897-run-1",
+      "file_count": 59,
+      "bytes": 14540090,
+      "receipt": "reports/emulator/vector-font-state-mixed-20261110-042347-44ff22e8/runtime/load-first-3-font-native/received-artifacts.json",
+      "receipt_sha256": "3c67ef5d8e6192a72d15da3220343d57b60d9b7e45071ba1faa814c72d44ce74"
+    },
+    {
+      "directory": "original-font-pid-7897-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-7897-run-2",
+      "file_count": 59,
+      "bytes": 14540091,
+      "receipt": "reports/emulator/vector-font-state-mixed-20261110-042347-44ff22e8/runtime/load-first-6-font-native/received-artifacts.json",
+      "receipt_sha256": "7eb1d76a1d0f07af0cbb1ac211f69ece0d129d5e4833cc12a0a3c776b33c731a"
+    },
+    {
+      "directory": "original-font-pid-7897-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-font-pid-7897-run-3",
+      "file_count": 59,
+      "bytes": 14540091,
+      "receipt": "reports/emulator/vector-font-state-mixed-20261110-042347-44ff22e8/runtime/load-first-9-font-native/received-artifacts.json",
+      "receipt_sha256": "70dcc10a9d1ac3268b0d7ea06cd213c9e16dfdb863ed220053ff47cefdb83bd6"
+    },
+    {
+      "directory": "original-renderer-pid-14582-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-14582-run-1",
+      "file_count": 86,
+      "bytes": 16643075,
+      "receipt": "reports/emulator/texture-context-window-20261110-003125-3c60c303/runtime/persistent-fresh-original/received-artifacts.json",
+      "receipt_sha256": "d0b7ddbb4de28d03d74606221f022f3c8a1ab5d6cefb5e3e250d12a0da9f52b2"
+    },
+    {
+      "directory": "original-renderer-pid-14590-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-14590-run-1",
+      "file_count": 86,
+      "bytes": 16643075,
+      "receipt": "reports/emulator/texture-context-window-20261110-003125-3c60c303/runtime/persistent-restart-1-original/received-artifacts.json",
+      "receipt_sha256": "ad077083fac2e2464e1aae94c730770b30016ce488901d65f3e9de4ddc3232de"
+    },
+    {
+      "directory": "original-renderer-pid-15241-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-15241-run-1",
+      "file_count": 86,
+      "bytes": 16643075,
+      "receipt": "reports/emulator/texture-context-window-20261110-003125-3c60c303/runtime/persistent-restart-2-original/received-artifacts.json",
+      "receipt_sha256": "526c963c45c4e0b898329836d8bb29fb60ab52944016c7df883e17d9579325fc"
+    },
+    {
+      "directory": "original-renderer-pid-15863-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-15863-run-1",
+      "file_count": 86,
+      "bytes": 16643075,
+      "receipt": "reports/emulator/texture-context-window-20261110-003125-3c60c303/runtime/persistent-restart-3-original/received-artifacts.json",
+      "receipt_sha256": "199a538b6dba13a080e94603d22acecbf962165c4e993e45a3a561671c906aee"
+    },
+    {
+      "directory": "original-renderer-pid-15863-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-15863-run-2",
+      "file_count": 83,
+      "bytes": 16642004,
+      "receipt": "reports/emulator/texture-context-window-20261110-003125-3c60c303/runtime/persistent-repeat-2-original/received-artifacts.json",
+      "receipt_sha256": "7b025dfeda3e0f2678cacb7bbcef7589793c52203f23e966bd55ac072823c81c"
+    },
+    {
+      "directory": "original-renderer-pid-15863-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-15863-run-3",
+      "file_count": 83,
+      "bytes": 16642004,
+      "receipt": "reports/emulator/texture-context-window-20261110-003125-3c60c303/runtime/persistent-repeat-3-original/received-artifacts.json",
+      "receipt_sha256": "bbca4ce6c4c0bf75d66bf4d312b59683afdb69afab7c7dc97cd72c216058f1ad"
+    },
+    {
+      "directory": "original-renderer-pid-16793-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-16793-run-1",
+      "file_count": 83,
+      "bytes": 15297074,
+      "receipt": "reports/emulator/texture-load-mixed-20261110-013538-184d0455/runtime/load-first-2-original-native/received-artifacts.json",
+      "receipt_sha256": "64b042ac868c51725ee21f14603a6c2091411f4404a5c5af65df901750992d95"
+    },
+    {
+      "directory": "original-renderer-pid-16793-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-16793-run-2",
+      "file_count": 83,
+      "bytes": 15297054,
+      "receipt": "reports/emulator/texture-load-mixed-20261110-013538-184d0455/runtime/load-first-4-original-native/received-artifacts.json",
+      "receipt_sha256": "e1e7748f3fbd95086dd7333a1989adbaee45968dc0e10cb2e62dbb7ee750fdef"
+    },
+    {
+      "directory": "original-renderer-pid-16793-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-16793-run-3",
+      "file_count": 83,
+      "bytes": 15297054,
+      "receipt": "reports/emulator/texture-load-mixed-20261110-013538-184d0455/runtime/load-first-6-original-native/received-artifacts.json",
+      "receipt_sha256": "a084f0d02e592203c51f4b9f56321e66146f0e0587ea618d3740896645bdbf6d"
+    },
+    {
+      "directory": "original-renderer-pid-16825-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-16825-run-1",
+      "file_count": 86,
+      "bytes": 15298123,
+      "receipt": "reports/emulator/texture-load-mixed-20261110-013538-184d0455/runtime/original-first-1-original-native/received-artifacts.json",
+      "receipt_sha256": "2517dc38138b8f117df9b28c5fa46c7c1a5127f095caee19adfb6d859dff57e7"
+    },
+    {
+      "directory": "original-renderer-pid-16825-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-16825-run-2",
+      "file_count": 83,
+      "bytes": 15297054,
+      "receipt": "reports/emulator/texture-load-mixed-20261110-013538-184d0455/runtime/original-first-3-original-native/received-artifacts.json",
+      "receipt_sha256": "d08d12589a8467ebcdd8c3042837ddc9ba6954f641181800fab34199cf517b3d"
+    },
+    {
+      "directory": "original-renderer-pid-16825-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-16825-run-3",
+      "file_count": 83,
+      "bytes": 15297054,
+      "receipt": "reports/emulator/texture-load-mixed-20261110-013538-184d0455/runtime/original-first-5-original-native/received-artifacts.json",
+      "receipt_sha256": "8c67a73086b76602bbe73b15682bb1e8bafa969ed5269aba8246b99571902db1"
+    },
+    {
+      "directory": "original-renderer-pid-24954-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-24954-run-1",
+      "file_count": 66,
+      "bytes": 12212407,
+      "receipt": "reports/emulator/persistent-gx-window-20261109-233552-033ce2de/runtime/persistent-fresh-original/received-artifacts.json",
+      "receipt_sha256": "58d4ff79566c368be121816149b305f31e3be8b015e0fdb9a338931e31135bc1"
+    },
+    {
+      "directory": "original-renderer-pid-24987-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-24987-run-1",
+      "file_count": 66,
+      "bytes": 12212407,
+      "receipt": "reports/emulator/persistent-gx-window-20261109-233552-033ce2de/runtime/persistent-restart-1-original/received-artifacts.json",
+      "receipt_sha256": "8f1bb30dedd72a1fd0c19c2f8fdc57a3124ac94640914d89ddd4b1614a76c03f"
+    },
+    {
+      "directory": "original-renderer-pid-25584-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-25584-run-1",
+      "file_count": 66,
+      "bytes": 12212407,
+      "receipt": "reports/emulator/persistent-gx-window-20261109-233552-033ce2de/runtime/persistent-restart-2-original/received-artifacts.json",
+      "receipt_sha256": "23b5e5f34c5d84204d3b0a9b8d225e130a6be41e9d69f2e4b57d2365623e0a18"
+    },
+    {
+      "directory": "original-renderer-pid-26119-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-26119-run-1",
+      "file_count": 66,
+      "bytes": 12212407,
+      "receipt": "reports/emulator/persistent-gx-window-20261109-233552-033ce2de/runtime/persistent-restart-3-original/received-artifacts.json",
+      "receipt_sha256": "f6995e226b25ce40da9952bdd07e0676ed8d12c4622373e3baee63c9d1fdc39f"
+    },
+    {
+      "directory": "original-renderer-pid-26119-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-26119-run-2",
+      "file_count": 63,
+      "bytes": 12211356,
+      "receipt": "reports/emulator/persistent-gx-window-20261109-233552-033ce2de/runtime/persistent-repeat-2-original/received-artifacts.json",
+      "receipt_sha256": "dc3a85645327a009c083e8075e73c9c2cfe4ee3d23baefe072e8ce4b5101bb23"
+    },
+    {
+      "directory": "original-renderer-pid-26119-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-26119-run-3",
+      "file_count": 63,
+      "bytes": 12211356,
+      "receipt": "reports/emulator/persistent-gx-window-20261109-233552-033ce2de/runtime/persistent-repeat-3-original/received-artifacts.json",
+      "receipt_sha256": "36ba49559cedbb69da3adc5164e53dacdf037b9fe917f5ec6f53bf12935c9ad8"
+    },
+    {
+      "directory": "original-renderer-pid-29145-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-29145-run-1",
+      "file_count": 66,
+      "bytes": 12212407,
+      "receipt": "reports/emulator/persistent-gx-window-20261109-233923-7ce43126/runtime/persistent-fresh-original/received-artifacts.json",
+      "receipt_sha256": "1f5a76a4769e567876aeab934131dddb278c6ba9f83ca8dca6b61dec98b0eada"
+    },
+    {
+      "directory": "original-renderer-pid-29171-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-29171-run-1",
+      "file_count": 66,
+      "bytes": 12212407,
+      "receipt": "reports/emulator/persistent-gx-window-20261109-233923-7ce43126/runtime/persistent-restart-1-original/received-artifacts.json",
+      "receipt_sha256": "3e735d87e0781db8d8160328a638ea166aa450e2bd80222c324deb6a9a427396"
+    },
+    {
+      "directory": "original-renderer-pid-29716-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-29716-run-1",
+      "file_count": 66,
+      "bytes": 12212407,
+      "receipt": "reports/emulator/persistent-gx-window-20261109-233923-7ce43126/runtime/persistent-restart-2-original/received-artifacts.json",
+      "receipt_sha256": "33d198524b5994e5c11eabe18c434a9b830aace902c39f5638ff1646b0f067db"
+    },
+    {
+      "directory": "original-renderer-pid-30239-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-30239-run-1",
+      "file_count": 66,
+      "bytes": 12212407,
+      "receipt": "reports/emulator/persistent-gx-window-20261109-233923-7ce43126/runtime/persistent-restart-3-original/received-artifacts.json",
+      "receipt_sha256": "e29c04f97e66acea33fff2b522d0891307a0bfb3894ef7db06b0fe82b8734357"
+    },
+    {
+      "directory": "original-renderer-pid-30239-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-30239-run-2",
+      "file_count": 63,
+      "bytes": 12211356,
+      "receipt": "reports/emulator/persistent-gx-window-20261109-233923-7ce43126/runtime/persistent-repeat-2-original/received-artifacts.json",
+      "receipt_sha256": "55d2cd718b10e2fd3c1826f8df9013ba15ee46f1705136c080f932b3e4a3171b"
+    },
+    {
+      "directory": "original-renderer-pid-30239-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-30239-run-3",
+      "file_count": 63,
+      "bytes": 12211356,
+      "receipt": "reports/emulator/persistent-gx-window-20261109-233923-7ce43126/runtime/persistent-repeat-3-original/received-artifacts.json",
+      "receipt_sha256": "80e2b3dbf0b0afbaa114a996519fa9ab122299f4c50e0d1234e010ca3b5c2d04"
+    },
+    {
+      "directory": "original-renderer-pid-7338-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-7338-run-1",
+      "file_count": 86,
+      "bytes": 15298113,
+      "receipt": "reports/emulator/native-font-mixed-20261110-030559-e27d3d09/runtime/original-first-1-original-native/received-artifacts.json",
+      "receipt_sha256": "28ecf84bec688dec85acfb057b4542fd5e2c5737bf86e4027cacef6c6b394f14"
+    },
+    {
+      "directory": "original-renderer-pid-7338-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-7338-run-2",
+      "file_count": 83,
+      "bytes": 15297044,
+      "receipt": "reports/emulator/native-font-mixed-20261110-030559-e27d3d09/runtime/original-first-4-original-native/received-artifacts.json",
+      "receipt_sha256": "e3d12125179c05e8e2532a553cecbd01a7b160537779909bf673baea5b41a450"
+    },
+    {
+      "directory": "original-renderer-pid-7338-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-7338-run-3",
+      "file_count": 83,
+      "bytes": 15297044,
+      "receipt": "reports/emulator/native-font-mixed-20261110-030559-e27d3d09/runtime/original-first-7-original-native/received-artifacts.json",
+      "receipt_sha256": "81a4fefbe0d74d87e502ea14f8736c53a95c9abaf9ff8fe358f5bda498b1bd10"
+    },
+    {
+      "directory": "original-renderer-pid-7360-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-7360-run-1",
+      "file_count": 83,
+      "bytes": 15297064,
+      "receipt": "reports/emulator/native-font-mixed-20261110-030559-e27d3d09/runtime/load-first-2-original-native/received-artifacts.json",
+      "receipt_sha256": "e960676c4cb6906ad76cfe96517bf038cd9c2f24e5a1c662ad54fd78c32578d7"
+    },
+    {
+      "directory": "original-renderer-pid-7360-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-7360-run-2",
+      "file_count": 83,
+      "bytes": 15297044,
+      "receipt": "reports/emulator/native-font-mixed-20261110-030559-e27d3d09/runtime/load-first-5-original-native/received-artifacts.json",
+      "receipt_sha256": "354fed10c0799a07017665a4dd92085a7e22c47690508eeb13ed12418878d1c3"
+    },
+    {
+      "directory": "original-renderer-pid-7360-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-7360-run-3",
+      "file_count": 83,
+      "bytes": 15297044,
+      "receipt": "reports/emulator/native-font-mixed-20261110-030559-e27d3d09/runtime/load-first-8-original-native/received-artifacts.json",
+      "receipt_sha256": "e4324e73589c26029f319e85000ef95679a53973bb9e9fee31053981b2a348db"
+    },
+    {
+      "directory": "original-renderer-pid-7875-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-7875-run-1",
+      "file_count": 86,
+      "bytes": 15299269,
+      "receipt": "reports/emulator/vector-font-state-mixed-20261110-042347-44ff22e8/runtime/original-first-1-original-native/received-artifacts.json",
+      "receipt_sha256": "0cdbf98b67f80a81e46b4551f3f7773f6b6941ef1288a5e9036201b1c9792222"
+    },
+    {
+      "directory": "original-renderer-pid-7875-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-7875-run-2",
+      "file_count": 83,
+      "bytes": 15298200,
+      "receipt": "reports/emulator/vector-font-state-mixed-20261110-042347-44ff22e8/runtime/original-first-4-original-native/received-artifacts.json",
+      "receipt_sha256": "f81a91a710ab824b605a17f0b8067c444b0c8066c111abbcc5d6c3b852188d69"
+    },
+    {
+      "directory": "original-renderer-pid-7875-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-7875-run-3",
+      "file_count": 83,
+      "bytes": 15298201,
+      "receipt": "reports/emulator/vector-font-state-mixed-20261110-042347-44ff22e8/runtime/original-first-7-original-native/received-artifacts.json",
+      "receipt_sha256": "2df8a952358268e7e8b8ed219aacb5788e556a634c3550ce949a83217e516658"
+    },
+    {
+      "directory": "original-renderer-pid-7897-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-7897-run-1",
+      "file_count": 83,
+      "bytes": 15298220,
+      "receipt": "reports/emulator/vector-font-state-mixed-20261110-042347-44ff22e8/runtime/load-first-2-original-native/received-artifacts.json",
+      "receipt_sha256": "f13d693c41a518227553cd0aec8b839f223a89c84784b39b0ea3cc64eaff9c4f"
+    },
+    {
+      "directory": "original-renderer-pid-7897-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-7897-run-2",
+      "file_count": 83,
+      "bytes": 15298200,
+      "receipt": "reports/emulator/vector-font-state-mixed-20261110-042347-44ff22e8/runtime/load-first-5-original-native/received-artifacts.json",
+      "receipt_sha256": "e8e052cb92bcd0af9ec9e5ce43b9f9fe7d531e0316a3d676b61c374d6cbff873"
+    },
+    {
+      "directory": "original-renderer-pid-7897-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-renderer-pid-7897-run-3",
+      "file_count": 83,
+      "bytes": 15298201,
+      "receipt": "reports/emulator/vector-font-state-mixed-20261110-042347-44ff22e8/runtime/load-first-8-original-native/received-artifacts.json",
+      "receipt_sha256": "8ff4bc5d253059ddceddd48eafa0f27c69969550dd994e129dc39c693d094a24"
+    },
+    {
+      "directory": "original-texture-load-pid-16793-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-16793-run-1",
+      "file_count": 27,
+      "bytes": 2043474,
+      "receipt": "reports/emulator/texture-load-mixed-20261110-013538-184d0455/runtime/load-first-1-load-native/received-artifacts.json",
+      "receipt_sha256": "3e3eb32125e89c4afef400a6a4339a7c07bc5871976325bcd988cc3d472b8532"
+    },
+    {
+      "directory": "original-texture-load-pid-16793-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-16793-run-2",
+      "file_count": 34,
+      "bytes": 3063389,
+      "receipt": "reports/emulator/texture-load-mixed-20261110-013538-184d0455/runtime/load-first-3-load-native/received-artifacts.json",
+      "receipt_sha256": "e1ebe39e9fcf84881759d933aee06068137c518e6e279a3e51bb97be9b6da982"
+    },
+    {
+      "directory": "original-texture-load-pid-16793-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-16793-run-3",
+      "file_count": 34,
+      "bytes": 3063973,
+      "receipt": "reports/emulator/texture-load-mixed-20261110-013538-184d0455/runtime/load-first-5-load-native/received-artifacts.json",
+      "receipt_sha256": "581c7a3e0aec78a8c29f3c84ea6666875444f7c285d2a54201caffca21bbde2a"
+    },
+    {
+      "directory": "original-texture-load-pid-16825-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-16825-run-1",
+      "file_count": 24,
+      "bytes": 2042423,
+      "receipt": "reports/emulator/texture-load-mixed-20261110-013538-184d0455/runtime/original-first-2-load-native/received-artifacts.json",
+      "receipt_sha256": "30650392a536643e94565cfbd026253e9f11590102d3e746e3eb7c900e27f827"
+    },
+    {
+      "directory": "original-texture-load-pid-16825-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-16825-run-2",
+      "file_count": 34,
+      "bytes": 3063389,
+      "receipt": "reports/emulator/texture-load-mixed-20261110-013538-184d0455/runtime/original-first-4-load-native/received-artifacts.json",
+      "receipt_sha256": "b5cf404b9f223bacc13709982f875fd87aff5b5d8bed313b6296521ed04ba00c"
+    },
+    {
+      "directory": "original-texture-load-pid-16825-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-16825-run-3",
+      "file_count": 34,
+      "bytes": 3063973,
+      "receipt": "reports/emulator/texture-load-mixed-20261110-013538-184d0455/runtime/original-first-6-load-native/received-artifacts.json",
+      "receipt_sha256": "d9118402ed8538f58b985603d9445f5c714a7b81038040abdcab13070ae5aec8"
+    },
+    {
+      "directory": "original-texture-load-pid-23296-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-23296-run-1",
+      "file_count": 27,
+      "bytes": 2043466,
+      "receipt": "reports/emulator/texture-load-window-20261110-010844-b643d7d3/runtime/fresh-texture-load/received-artifacts.json",
+      "receipt_sha256": "d9e7019719b6885e115e9d5aa74dd5cf5f72cba5843bd205ad57b78fc092ad54"
+    },
+    {
+      "directory": "original-texture-load-pid-23341-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-23341-run-1",
+      "file_count": 27,
+      "bytes": 2043466,
+      "receipt": "reports/emulator/texture-load-window-20261110-010844-b643d7d3/runtime/restart-1-texture-load/received-artifacts.json",
+      "receipt_sha256": "f158e0d2fc5e84321067e238fffb1a2c64989510b2b927a17433e69b2ec6811e"
+    },
+    {
+      "directory": "original-texture-load-pid-23733-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-23733-run-1",
+      "file_count": 27,
+      "bytes": 2043466,
+      "receipt": "reports/emulator/texture-load-window-20261110-010844-b643d7d3/runtime/restart-2-texture-load/received-artifacts.json",
+      "receipt_sha256": "4a8700166f3824e73d0ce43669b52b3dbdfa462e7a61bc393fb8afaa7fb00ad7"
+    },
+    {
+      "directory": "original-texture-load-pid-24096-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-24096-run-1",
+      "file_count": 27,
+      "bytes": 2043466,
+      "receipt": "reports/emulator/texture-load-window-20261110-010844-b643d7d3/runtime/restart-3-texture-load/received-artifacts.json",
+      "receipt_sha256": "d8028e3cca71cf6874e1dc74f0251e6aa355b90994b057712310669d21ae5646"
+    },
+    {
+      "directory": "original-texture-load-pid-24096-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-24096-run-2",
+      "file_count": 34,
+      "bytes": 3063381,
+      "receipt": "reports/emulator/texture-load-window-20261110-010844-b643d7d3/runtime/repeat-2-texture-load/received-artifacts.json",
+      "receipt_sha256": "b73665cf553918249c7b85fe8a540c0f97b6803cdddc71b479933fdaa0c97876"
+    },
+    {
+      "directory": "original-texture-load-pid-24096-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-24096-run-3",
+      "file_count": 34,
+      "bytes": 3063965,
+      "receipt": "reports/emulator/texture-load-window-20261110-010844-b643d7d3/runtime/repeat-3-texture-load/received-artifacts.json",
+      "receipt_sha256": "4dfa477b6398ca31c54a6da46db58d6a837c3b73f677052249e624b554e5a03f"
+    },
+    {
+      "directory": "original-texture-load-pid-7338-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-7338-run-1",
+      "file_count": 24,
+      "bytes": 2042413,
+      "receipt": "reports/emulator/native-font-mixed-20261110-030559-e27d3d09/runtime/original-first-2-load-native/received-artifacts.json",
+      "receipt_sha256": "ab5ed94acfbf21ecca9124b1456c1a28373895fd8be48331d72216194e197136"
+    },
+    {
+      "directory": "original-texture-load-pid-7338-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-7338-run-2",
+      "file_count": 34,
+      "bytes": 3063379,
+      "receipt": "reports/emulator/native-font-mixed-20261110-030559-e27d3d09/runtime/original-first-5-load-native/received-artifacts.json",
+      "receipt_sha256": "67d80b6f5eaa136efe85634965599983be8de64dd8c1465c4ed44365e77c99f1"
+    },
+    {
+      "directory": "original-texture-load-pid-7338-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-7338-run-3",
+      "file_count": 34,
+      "bytes": 3063963,
+      "receipt": "reports/emulator/native-font-mixed-20261110-030559-e27d3d09/runtime/original-first-8-load-native/received-artifacts.json",
+      "receipt_sha256": "62e5238ba7d45e4e9bb35c11391cf00b5cc547d1868fb7b6dbd678d7626c92a9"
+    },
+    {
+      "directory": "original-texture-load-pid-7360-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-7360-run-1",
+      "file_count": 27,
+      "bytes": 2043464,
+      "receipt": "reports/emulator/native-font-mixed-20261110-030559-e27d3d09/runtime/load-first-1-load-native/received-artifacts.json",
+      "receipt_sha256": "2909d42070e8306e8fdcf08088ac76ce31aa6c0b467aa9e7367516a3001278ca"
+    },
+    {
+      "directory": "original-texture-load-pid-7360-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-7360-run-2",
+      "file_count": 34,
+      "bytes": 3063379,
+      "receipt": "reports/emulator/native-font-mixed-20261110-030559-e27d3d09/runtime/load-first-4-load-native/received-artifacts.json",
+      "receipt_sha256": "9d5abf0f4beec3ef110f346fb4ff551dd9f5245a8383a62e8aa9404252734dfd"
+    },
+    {
+      "directory": "original-texture-load-pid-7360-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-7360-run-3",
+      "file_count": 34,
+      "bytes": 3063963,
+      "receipt": "reports/emulator/native-font-mixed-20261110-030559-e27d3d09/runtime/load-first-7-load-native/received-artifacts.json",
+      "receipt_sha256": "d4bed28a8d465e841928002017547b25c0a2d4cfe330f5c057654e036a9dd23b"
+    },
+    {
+      "directory": "original-texture-load-pid-7875-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-7875-run-1",
+      "file_count": 24,
+      "bytes": 2042685,
+      "receipt": "reports/emulator/vector-font-state-mixed-20261110-042347-44ff22e8/runtime/original-first-2-load-native/received-artifacts.json",
+      "receipt_sha256": "7515df79e2a64b59723349b25c4b0ea3241e2fe8c36c526e1c46ddb013d3ee40"
+    },
+    {
+      "directory": "original-texture-load-pid-7875-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-7875-run-2",
+      "file_count": 34,
+      "bytes": 3063719,
+      "receipt": "reports/emulator/vector-font-state-mixed-20261110-042347-44ff22e8/runtime/original-first-5-load-native/received-artifacts.json",
+      "receipt_sha256": "dc6b903f7a4609edc27198e4a79f9d9aca7b6f685c8def749933797c2404ab23"
+    },
+    {
+      "directory": "original-texture-load-pid-7875-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-7875-run-3",
+      "file_count": 34,
+      "bytes": 3064303,
+      "receipt": "reports/emulator/vector-font-state-mixed-20261110-042347-44ff22e8/runtime/original-first-8-load-native/received-artifacts.json",
+      "receipt_sha256": "7486e504a4b7adb957712118b9005513dd8f0200632917511eb11dc9aea935be"
+    },
+    {
+      "directory": "original-texture-load-pid-7897-run-1",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-7897-run-1",
+      "file_count": 27,
+      "bytes": 2043736,
+      "receipt": "reports/emulator/vector-font-state-mixed-20261110-042347-44ff22e8/runtime/load-first-1-load-native/received-artifacts.json",
+      "receipt_sha256": "aaf636822ec2e5dcd16c28d588a1ea4d97fb8581071841bdf2080ce6b7e44f59"
+    },
+    {
+      "directory": "original-texture-load-pid-7897-run-2",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-7897-run-2",
+      "file_count": 34,
+      "bytes": 3063719,
+      "receipt": "reports/emulator/vector-font-state-mixed-20261110-042347-44ff22e8/runtime/load-first-4-load-native/received-artifacts.json",
+      "receipt_sha256": "3487b1ae909aecc120296e322e27d018d73193751453c50b49dd94a83a998364"
+    },
+    {
+      "directory": "original-texture-load-pid-7897-run-3",
+      "remote": "/data/app/el2/100/base/com.example.olex2harmonypc/haps/entry/files/original-texture-load-pid-7897-run-3",
+      "file_count": 34,
+      "bytes": 3064303,
+      "receipt": "reports/emulator/vector-font-state-mixed-20261110-042347-44ff22e8/runtime/load-first-7-load-native/received-artifacts.json",
+      "receipt_sha256": "5dc237b55f39b8baa9e21be97476364d0294d6becc9283a561cd56b42db6ce30"
+    }
+  ],
+  "removed_directories": 81,
+  "authorization_record": "out/gx-application-evaluation/diagnostic-cleanup-authorized-attempt1/authorization.json",
+  "execution_result": "out/gx-application-evaluation/diagnostic-cleanup-authorized-attempt1/execution-attempt4/result.json",
+  "original_authorized_plan_sha256": "274134348017125b4411585603efddd771b20a8d6c92b7918d021e11130cfc20",
+  "execution_result_sha256": "e446074b17a5ecb1e52bd94a4ce00d1d21bde088a9db7222ae75a2145983f183",
+  "local_backups_retained_and_reverified": true,
+  "protected_readable_files_unchanged": true,
+  "protected_readable_file_count": 8473,
+  "protected_runtime_contents_hashed": false,
+  "protected_runtime_boundary": "Never traversed or modified; public directory metadata unchanged",
+  "disk_before": [
+    "Filesystem     1K-blocks    Used Available Use% Mounted on",
+    "/dev/block/vdd   5979328 5114872    533736  91% /mnt/debugtmp/100/debug_hap/com.example.olex2harmonypc/data/storage/el2/database"
+  ],
+  "disk_after": [
+    "Filesystem     1K-blocks    Used Available Use% Mounted on",
+    "/dev/block/vdd   5979328 4292544   1356064  76% /mnt/debugtmp/100/debug_hap/com.example.olex2harmonypc/data/storage/el2/database"
+  ],
+  "updated_at": "2026-11-10T07:40:45.694665+08:00"
+}

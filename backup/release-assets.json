@@ -1,0 +1,34 @@
+{
+  "repository": "huihui200739/Olex2-HarmonyPC",
+  "release_tag": "backup-20261110-source28",
+  "private": true,
+  "prerelease": true,
+  "assets": [
+    {
+      "name": "reports-20261110.tar.gz",
+      "bytes": 869771497,
+      "sha256": "1bb202fe341c935f13815ba993a4add23608f00f77f998c04e740287f14d2849",
+      "source_files": 34898,
+      "source_bytes": 5967337168
+    },
+    {
+      "name": "current-state-20261110.tar.gz",
+      "bytes": 261821165,
+      "sha256": "2cc63cb173a62d49d0620f5320c40e022775db7647a10ed1d7b345753ccee6dc",
+      "source_files": 38291,
+      "source_bytes": 926898052
+    },
+    {
+      "name": "Olex2-HarmonyPC-0.22.28-unsigned.hap",
+      "bytes": 17514627,
+      "sha256": "3c66b1aeda753d2963cfe0e1810d8b3067ec04a7634e0e8bea7e54d8b6c25cb0"
+    },
+    {
+      "name": "SHA256SUMS",
+      "bytes": 289,
+      "sha256": "02f15ee2e2b4f23de30a078f02e729e26328f8f437965500739da65e154b9554"
+    }
+  ],
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

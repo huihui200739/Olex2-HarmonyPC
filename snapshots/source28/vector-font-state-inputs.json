@@ -1,0 +1,18 @@
+{
+  "version": "0.22.21",
+  "base": "0.22.20",
+  "base_vector_manifest_sha256": "e95cdf94d5a7a6c8ae3b77f7afe218099b6ab264f8fea9e5dd107726dbfc6a0e",
+  "scope": "Read-only driver mask-query diagnosis; retains raw legacy bool and adds raw-symbol bool + GLint, no graphics writes added",
+  "files": {
+    "app/entry/src/main/cpp/shared_original_probe.cpp": {
+      "sha256": "b861ece5bdddc4ad02becd3a8d9265ac1076771657511c3b64d9366bcf8d31df",
+      "bytes": 13822
+    },
+    "app/AppScope/app.json5": {
+      "sha256": "6119608e0d93242efc06c2199f986407bcbe892bbb3bdabb714a31e226b4c440",
+      "bytes": 225
+    }
+  },
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

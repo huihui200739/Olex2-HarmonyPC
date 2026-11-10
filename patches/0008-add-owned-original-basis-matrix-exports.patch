@@ -1,0 +1,47 @@
+diff --git a/sdl/ebasis.h b/sdl/ebasis.h
+--- a/sdl/ebasis.h
++++ b/sdl/ebasis.h
+@@ -39,23 +39,31 @@
+   void NullCenter()  {  FCenter.Null();  }
+ 
+   // orientation matrix in 4x4 opengl format
++  // Caller-owned export; legacy getters below retain their static buffers.
++  inline void CopyMData(float* data) const {
++    data[0] = (float)FMatrix[0][0];  data[1] = (float)FMatrix[0][1];  data[2] = (float)FMatrix[0][2];
++    data[4] = (float)FMatrix[1][0];  data[5] = (float)FMatrix[1][1];  data[6] = (float)FMatrix[1][2];
++    data[8] = (float)FMatrix[2][0];  data[9] = (float)FMatrix[2][1];  data[10] = (float)FMatrix[2][2];
++    data[3] = data[7] = data[11] = 0;
++    data[12] = (float)FCenter[0];  data[13] = (float)FCenter[1];  data[14] = (float)FCenter[2];
++    data[15] = 1;
++  }
+   inline const float* GetMData() const {
+-    FMData[0] = (float)FMatrix[0][0];  FMData[1] = (float)FMatrix[0][1];  FMData[2] = (float)FMatrix[0][2];
+-    FMData[4] = (float)FMatrix[1][0];  FMData[5] = (float)FMatrix[1][1];  FMData[6] = (float)FMatrix[1][2];
+-    FMData[8] = (float)FMatrix[2][0];  FMData[9] = (float)FMatrix[2][1];  FMData[10] = (float)FMatrix[2][2];
+-    FMData[3] = FMData[7] = FMData[11] = 0;
+-    FMData[12] = (float)FCenter[0];  FMData[13] = (float)FCenter[1];  FMData[14] = (float)FCenter[2];
+-    FMData[15] = 1;
++    CopyMData(FMData);
+     return FMData;
+   }
+   // transposed orientation matrix in 4x4 opengl format
++  // Caller-owned export; legacy getters below retain their static buffers.
++  inline void CopyMDataT(float* data) const {
++    data[0] = (float)FMatrix[0][0];  data[1] = (float)FMatrix[1][0];  data[2] = (float)FMatrix[2][0];
++    data[4] = (float)FMatrix[0][1];  data[5] = (float)FMatrix[1][1];  data[6] = (float)FMatrix[2][1];
++    data[8] = (float)FMatrix[0][2];  data[9] = (float)FMatrix[1][2];  data[10] = (float)FMatrix[2][2];
++    data[3] = data[7] = data[11] = 0;
++    data[12] = (float)FCenter[0];  data[13] = (float)FCenter[1];  data[14] = (float)FCenter[2];
++    data[15] = 1;
++  }
+   inline const float* GetMDataT() const {
+-    FMDataT[0] = (float)FMatrix[0][0];  FMDataT[1] = (float)FMatrix[1][0];  FMDataT[2] = (float)FMatrix[2][0];
+-    FMDataT[4] = (float)FMatrix[0][1];  FMDataT[5] = (float)FMatrix[1][1];  FMDataT[6] = (float)FMatrix[2][1];
+-    FMDataT[8] = (float)FMatrix[0][2];  FMDataT[9] = (float)FMatrix[1][2];  FMDataT[10] = (float)FMatrix[2][2];
+-    FMDataT[3] = FMDataT[7] = FMDataT[11] = 0;
+-    FMDataT[12] = (float)FCenter[0];  FMDataT[13] = (float)FCenter[1];  FMDataT[14] = (float)FCenter[2];
+-    FMDataT[15] = 1;
++    CopyMDataT(FMDataT);
+     return FMDataT;
+   }
+   inline const mat3d& GetMatrix() const {  return FMatrix;  }

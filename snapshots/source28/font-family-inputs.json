@@ -1,0 +1,66 @@
+{
+  "version": "0.22.26",
+  "base": "0.22.25",
+  "base_manifest_sha256": "3ac78a595a79409deab208de70cba63fa2d13fd04934979bc99229c7fb3a08fa",
+  "scope": "Exact installed system family/name/raw SDK style selection; five real original256 RGB glyph stages; no default/closest-style or synthetic-style fallback; dialog/actual DPI/full fonts remain incomplete",
+  "original_font_requests_per_action": 20,
+  "system_family_cases": [
+    "first",
+    "scaled",
+    "restored",
+    "other-family",
+    "other-style"
+  ],
+  "files": {
+    "native/platform_font_factory.cpp": {
+      "bytes": 7698,
+      "sha256": "715baac542f433d0aa0c2f4eda527d6c9a182904157ff9c49b5bee4e83521f3a"
+    },
+    "native/platform_font_factory.h": {
+      "bytes": 1670,
+      "sha256": "4e193b01425b1964cfa3e3d77146f2a118915e70fedfcb83aafdf7025f21f4db"
+    },
+    "native/family_font_description.h": {
+      "bytes": 4372,
+      "sha256": "517c47ce490422a5d85e89eaa99bf013ac9983aaafe55a8a754a08f7b23283a8"
+    },
+    "native/system_font_catalog.cpp": {
+      "bytes": 5563,
+      "sha256": "defc46dfeb01e0b0a67090c7f9ff30d06cf527e12146064e1e5b9a071065cabd"
+    },
+    "native/system_font_catalog.h": {
+      "bytes": 1178,
+      "sha256": "8ff188aec608c5165f2019725cf7d596076b8e8da9416bd4d07756980cf7e64e"
+    },
+    "native/family_font_window_probe.cpp": {
+      "bytes": 7573,
+      "sha256": "b3404a83fa450944e9cd45355732a99c500214a3566edd6ca18bc40be77f83e1"
+    },
+    "native/family_font_window_probe.h": {
+      "bytes": 168,
+      "sha256": "a6fd4c900321350d86d923fb83da6de6049e5a25ac3324afd88c6f7f3cc31af1"
+    },
+    "native/platform_window_scene.h": {
+      "bytes": 2903,
+      "sha256": "275956699a30a2956b7acf3ef71f4413fb8f0adeb5918ceb6d599df263fa7ef9"
+    },
+    "native/original_font_window_probe.cpp": {
+      "bytes": 4748,
+      "sha256": "3c9bdf5fe7b9a36e210f82da5b5f932fe907c83ed69472e2a7abb47f56bffaad"
+    },
+    "app/entry/src/main/cpp/CMakeLists.txt": {
+      "bytes": 5017,
+      "sha256": "628aaadfaeb9b8597d26eb1e9fe62f27beb7deded8d6b887f43679ab051bf4ed"
+    },
+    "app/AppScope/app.json5": {
+      "bytes": 225,
+      "sha256": "299b0831ad1f7eadf2ddd864f7bd5c5141e39eb4163ef0a9afaa0da4e4de1cee"
+    }
+  },
+  "recipe": {
+    "path": "scripts/prepare-font-family-candidate.py",
+    "sha256": "4be4d1ccce782762e28606f80d845f00525de111fdd7ba8300c9310f936b3b08"
+  },
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

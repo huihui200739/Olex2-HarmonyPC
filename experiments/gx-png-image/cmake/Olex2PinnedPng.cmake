@@ -1,0 +1,22 @@
+# Build both fixed dependencies from the unmodified vendored source tree.
+function(add_olex2_pinned_png root)
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+  set(ZLIB_BUILD_TESTING OFF CACHE BOOL "" FORCE)
+  set(ZLIB_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+  set(ZLIB_BUILD_STATIC ON CACHE BOOL "" FORCE)
+  set(ZLIB_INSTALL OFF CACHE BOOL "" FORCE)
+  add_subdirectory("${root}/vendor/zlib" "${CMAKE_CURRENT_BINARY_DIR}/pinned-zlib")
+  list(PREPEND CMAKE_MODULE_PATH "${root}/cmake")
+  set(SKIP_INSTALL_ALL ON)
+  set(PNG_SHARED OFF CACHE BOOL "" FORCE)
+  set(PNG_STATIC ON CACHE BOOL "" FORCE)
+  set(PNG_FRAMEWORK OFF CACHE BOOL "" FORCE)
+  set(PNG_TESTS OFF CACHE BOOL "" FORCE)
+  set(PNG_TOOLS OFF CACHE BOOL "" FORCE)
+  # Upstream's configuration generator invokes clang outside a CMake target.
+  # Preserve the actual toolchain target in that invocation, in this scope only.
+  if(CMAKE_CROSSCOMPILING AND CMAKE_C_COMPILER_TARGET AND CMAKE_C_COMPILER_ID MATCHES "Clang")
+    string(APPEND CMAKE_C_FLAGS " --target=${CMAKE_C_COMPILER_TARGET}")
+  endif()
+  add_subdirectory("${root}/vendor/libpng" "${CMAKE_CURRENT_BINARY_DIR}/pinned-libpng")
+endfunction()

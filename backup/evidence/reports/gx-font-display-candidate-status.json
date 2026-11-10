@@ -1,0 +1,192 @@
+{
+  "kind": "font-display28-own-partial-window-qualification",
+  "status": "installed_three_font_rounds_independently_revalidated",
+  "updated_at": "2026-11-10T07:46:34.085838+08:00",
+  "scope": "Exact28 own original-font/family/window-DPI observations only; not complete UI, complete font support, or full port",
+  "passed": true,
+  "full_port_complete": false,
+  "functional_completion_percent": null,
+  "target": "127.0.0.1:5555",
+  "installed_version": "0.22.28",
+  "installed_version_code": 222800,
+  "installed_bundle_identity_from_saved_bm_dump": true,
+  "installed_protected_code_directly_hashed": false,
+  "source_root": "out/gx-application-evaluation/source28",
+  "source_frozen": true,
+  "candidate_hap": {
+    "path": "out/gx-application-evaluation/app-builds/20261110-071832-be5dfc/entry-default-unsigned.hap",
+    "bytes": 17514627,
+    "sha256": "3c66b1aeda753d2963cfe0e1810d8b3067ec04a7634e0e8bea7e54d8b6c25cb0"
+  },
+  "local_build": {
+    "passed": true,
+    "compiled_native_sources": 615,
+    "staged_files": 2440,
+    "native_dependency_files": 1942,
+    "packaged_native_libraries": 3,
+    "exact_source_replay_files": 2539,
+    "source_package_revalidation": {
+      "path": "out/gx-application-evaluation/font-display28-source-package-revalidation-attempt1.json",
+      "bytes": 1564,
+      "sha256": "be459c168a989ea507d4d0f1d33d07c6b11b8d17cd4a39df793aa92bfb1c9815"
+    },
+    "source27_28_replay": {
+      "path": "out/gx-application-evaluation/font-display27-28-exact-source-replay-attempt1.json",
+      "bytes": 963964,
+      "sha256": "6cf2f437f24fc17a2ceb4074980b54a26eb01a051c0b7649493d2d57dff8d3de"
+    }
+  },
+  "local_tests": {
+    "full_python_tests": 1080,
+    "full_python_result": {
+      "path": "out/gx-application-evaluation/font-display28-cleanup-python-completed-revalidation-attempt1.json",
+      "bytes": 443,
+      "sha256": "f6b89d4896c6dcece51f5b5cbb459127fee6110e6f61dd8042f47fd1ce07ecef"
+    },
+    "node_tests": 100,
+    "node_log": {
+      "path": "out/gx-application-evaluation/font-display28-all-node-attempt1.log",
+      "bytes": 18242,
+      "sha256": "bfe064eccbf12f9e001f138a5b563faa92dafce35c88271b036b05a28136b952"
+    },
+    "host_ctest": 1,
+    "isolated_synthetic_metric_assertions": 14740,
+    "host_log": {
+      "path": "out/gx-application-evaluation/font-display28-host-current-ctest-attempt1.log",
+      "bytes": 490,
+      "sha256": "def19a1dc385c59b4dce02da27f5684105e31fb3352a3994e44093b4da8a23ba"
+    },
+    "isolated_cleanup_tests": 17,
+    "cleanup_log": {
+      "path": "out/gx-application-evaluation/diagnostic-cleanup-tests-attempt5.log",
+      "bytes": 2463,
+      "sha256": "3b8213e617ec6f70c265cb75e7a1afa70469b4007f5e54208e935da502f35664"
+    }
+  },
+  "cleanup": {
+    "status": "completed",
+    "approved_directory_count": 81,
+    "deleted_files": 4502,
+    "backed_up_payload_bytes": 826026629,
+    "observed_disk_recovery_kib": 822328,
+    "local_backups_unchanged": true,
+    "nonselected_readable_files_unchanged": 8473,
+    "protected_runtime_contents_hashed": false,
+    "protected_runtime_boundary": "Not traversed or modified; only public directory metadata compared",
+    "authorization": {
+      "path": "out/gx-application-evaluation/diagnostic-cleanup-authorized-attempt1/authorization.json",
+      "bytes": 599,
+      "sha256": "9a87d3d9c655b28eb04834f4774cb540bd01184a1bf7e0aa7131b5efa51bb2cb"
+    },
+    "execution": {
+      "path": "out/gx-application-evaluation/diagnostic-cleanup-authorized-attempt1/execution-attempt4/result.json",
+      "bytes": 1601,
+      "sha256": "e446074b17a5ecb1e52bd94a4ce00d1d21bde088a9db7222ae75a2145983f183"
+    },
+    "failed_attempts_retained": true
+  },
+  "runtime": {
+    "three_rounds_passed": true,
+    "raw_report": {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/result.json",
+      "bytes": 169619,
+      "sha256": "6a8aadbbff3c6c400fda2206597aa3278178c42e9062f571dce80301226d4d4c"
+    },
+    "independent_offline_revalidation": {
+      "path": "out/gx-application-evaluation/font-display28-window-offline-revalidation-attempt1/result.json",
+      "bytes": 182721,
+      "sha256": "9442af904b210d6212ac1d8c0664aca3cbb554009d553594916cf779295f44c5"
+    },
+    "new_runtime_observation_during_offline_revalidation": false,
+    "pid": 22027,
+    "round_check_counts": [
+      195,
+      202,
+      202
+    ],
+    "total_checks": 599,
+    "actual_context_continuations": 2,
+    "actual_font_requests_per_action": 20,
+    "final_font_requests": 60,
+    "system_families_observed": 10,
+    "system_family_cases_per_round": 5,
+    "display_metrics": {
+      "ready": true,
+      "display_id": 0,
+      "revision": 1,
+      "dpi_x": 264.1600036621094,
+      "dpi_y": 264.1600036621094,
+      "density_pixels": 1.899999976158142,
+      "source": "actual-main-window-display-xDPI-yDPI",
+      "fixed_dpi_fallback": false
+    },
+    "actual_display_DPI_observed": true,
+    "actual_display_DPI_qualified": false,
+    "actual_monitor_switch_tested": false,
+    "full_ui_qualification": false,
+    "own212_ui_tested": false,
+    "own_all7_ui_pid_resources_tested": false,
+    "own12_startup_audit_tested": false,
+    "own_mixed_route_tested": false
+  },
+  "historical25_qualification_not_inherited": true,
+  "historical25_qualification": {
+    "path": "reports/emulator/font-raster-flush-mixed-revalidation-20261110-060136-da56fb5c/result.json",
+    "bytes": 227309,
+    "sha256": "1da82c60520c446f1d1ac6de118a5f4a4aa8c8cbacee05582dae20448a3322c5"
+  },
+  "historical25_summary_files_unchanged": [
+    {
+      "path": "reports/gx-application-platform-status.json",
+      "sha256": "1da82c60520c446f1d1ac6de118a5f4a4aa8c8cbacee05582dae20448a3322c5",
+      "bytes": 227309
+    },
+    {
+      "path": "reports/gx-font-status.json",
+      "sha256": "1da82c60520c446f1d1ac6de118a5f4a4aa8c8cbacee05582dae20448a3322c5",
+      "bytes": 227309
+    },
+    {
+      "path": "reports/gx-persistent-runtime-status.json",
+      "sha256": "1da82c60520c446f1d1ac6de118a5f4a4aa8c8cbacee05582dae20448a3322c5",
+      "bytes": 227309
+    },
+    {
+      "path": "reports/gx-resource-font-status.json",
+      "sha256": "1da82c60520c446f1d1ac6de118a5f4a4aa8c8cbacee05582dae20448a3322c5",
+      "bytes": 227309
+    },
+    {
+      "path": "reports/gx-texture-load-route-status.json",
+      "sha256": "1da82c60520c446f1d1ac6de118a5f4a4aa8c8cbacee05582dae20448a3322c5",
+      "bytes": 227309
+    },
+    {
+      "path": "reports/gx-texture-load-status.json",
+      "sha256": "1da82c60520c446f1d1ac6de118a5f4a4aa8c8cbacee05582dae20448a3322c5",
+      "bytes": 227309
+    },
+    {
+      "path": "reports/gx-vector-font-status.json",
+      "sha256": "1da82c60520c446f1d1ac6de118a5f4a4aa8c8cbacee05582dae20448a3322c5",
+      "bytes": 227309
+    }
+  ],
+  "historical26": "Built but installation failed due to insufficient space. Frozen original results retained; not installed before28.",
+  "historical27": "Built and exact-replayed; stale fixed96 top-level telemetry discovered locally, corrected only in28. Never installed.",
+  "remaining": [
+    "28自身完整212项诊断界面、全部7个UI进程资源、12次启动及混合路线资格",
+    "字体对话框、真实显示器切换、广泛字符及异常恢复",
+    "完整原版界面、菜单、命令、文档、Python与插件",
+    "完整P1～P8验收",
+    "真机、物理键鼠、正式签名及发行验证"
+  ],
+  "physical_pc_verified": false,
+  "full_process_fd_metadata_proof": false,
+  "pending_handoff_sent": false,
+  "final_device_observation": {
+    "path": "out/gx-application-evaluation/font-display28-final-device-observation-attempt1/result.json",
+    "bytes": 767,
+    "sha256": "c7bf744750f975ab7df0aebc6f94076fba0ec49a24dd0728713c6e73de4224cb"
+  }
+}

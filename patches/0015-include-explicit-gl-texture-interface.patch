@@ -1,0 +1,10 @@
+--- a/glib/gltexture.h
++++ b/glib/gltexture.h
+@@ -9,6 +9,7 @@
+ 
+ #ifndef __olx_gl_texture_H
+ #define __olx_gl_texture_H
++#include "glbase.h"
+ #include "gloption.h"
+ #include "emath.h"
+ #include "estlist.h"

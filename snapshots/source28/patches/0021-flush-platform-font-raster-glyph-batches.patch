@@ -1,0 +1,14 @@
+--- a/glib/glfont.cpp
++++ b/glib/glfont.cpp
+@@ -1625,6 +1625,11 @@
+       olx_gl::callList(FontBase + ind);
+     }
+   }
++#ifdef OLEX2_PLATFORM_RASTER_GLYPH_FLUSH
++  // Retire this bitmap batch before the next glyph can overlap its padding.
++  // This preserves transparent zero bits with the fixed GL4ES raster backend.
++  olx_gl::flush();
++#endif
+ }
+ //..............................................................................
+ void TGlFont::DrawVectorChar(size_t& i, const olxstr& str, short& cstate) const {

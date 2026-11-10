@@ -1,0 +1,14 @@
+Graphics compatibility dependency notices
+
+GL4ES: ptitSeb/gl4es, revision bc4314d8369f169d3fa81c5ed1b46b3dba4e74a5.
+Unmodified source files are pinned in vendor.lock.json; execution traces are not vendored.
+The exact upstream LICENSE is included as GL4ES-LICENSE.
+
+GLU: ptitSeb/GLU, revision 2fed2bda2b725d2b9e32c435b48d5141cc95827f.
+Copyright and permission notices vary by source file. The complete original source
+archive, including every copyright and permission notice, is included unchanged
+as GLU-original-source.tar.gz. No source files are removed from that archive.
+
+Olex2: exact pinned source and local patch chain are recorded in source.lock.json.
+OLEX2-LICENCE.txt is retained unchanged. This is an unsigned debug adaptation;
+this notice does not certify a completed application port or formal release.

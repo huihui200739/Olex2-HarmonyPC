@@ -1,0 +1,207 @@
+diff --git a/glib/glmaterial.cpp b/glib/glmaterial.cpp
+index 2c63954..60f7010 100644
+--- a/glib/glmaterial.cpp
++++ b/glib/glmaterial.cpp
+@@ -74,80 +74,9 @@ TGlMaterial& TGlMaterial::operator = (const TGlMaterial& G)  {
+   return *this;
+ }
+ //..............................................................................
+-void TGlMaterial::Init(bool skip) const {
+-  if (skip) {
+-    return;
+-  }
+-  if (Flags & sglmTransparent) {
+-    if (!glIsEnabled(GL_ALPHA_TEST)) {
+-      olx_gl::enable(GL_ALPHA_TEST);
+-      olx_gl::enable(GL_POINT_SMOOTH);
+-      olx_gl::enable(GL_BLEND);
+-      olx_gl::enable(GL_CULL_FACE);
+-    }
+-  }
+-  else {
+-    if (glIsEnabled(GL_ALPHA_TEST)) {
+-      olx_gl::disable(GL_ALPHA_TEST);
+-      olx_gl::disable(GL_POINT_SMOOTH);
+-      olx_gl::disable(GL_BLEND);
+-      olx_gl::disable(GL_CULL_FACE);
+-    }
+-  }
+-  /*
+-  if (Flags & sglmLighting) {
+-    olx_gl::enable(GL_LIGHTING);
+-  }
+-  else {
+-    olx_gl::disable(GL_LIGHTING);
+-  }
+-  */
+-  if ((Flags & sglmColorMat) == 0) {
+-    olx_gl::disable(GL_COLOR_MATERIAL);
+-    olx_gl::material(GL_FRONT, GL_DIFFUSE,
+-      ((Flags & sglmDiffuseF) != 0 ? DiffuseF : BlackColor).Data());
+-    olx_gl::material(GL_BACK, GL_DIFFUSE,
+-      ((Flags & sglmDiffuseB) != 0 ? DiffuseB : BlackColor).Data());
+-    olx_gl::material(GL_FRONT, GL_AMBIENT,
+-      ((Flags & sglmAmbientF) != 0 ? AmbientF : BlackColor).Data());
+-    olx_gl::material(GL_BACK, GL_AMBIENT,
+-      ((Flags & sglmAmbientB) != 0 ? AmbientB : BlackColor).Data());
+-    olx_gl::material(GL_FRONT, GL_SPECULAR,
+-      ((Flags & sglmSpecularF) != 0 ? SpecularF : BlackColor).Data());
+-    olx_gl::material(GL_BACK, GL_SPECULAR,
+-      ((Flags & sglmSpecularB) != 0 ? SpecularB : BlackColor).Data());
+-    olx_gl::material(GL_FRONT, GL_EMISSION,
+-      ((Flags & sglmEmissionF) != 0 ? EmissionF : BlackColor).Data());
+-    olx_gl::material(GL_BACK, GL_EMISSION,
+-      ((Flags & sglmEmissionB) != 0 ? EmissionB : BlackColor).Data());
+-    olx_gl::material(GL_FRONT, GL_SHININESS,
+-      ((Flags & sglmShininessF) != 0 ? ShininessF : 0));
+-    olx_gl::material(GL_BACK, GL_SHININESS,
+-      ((Flags & sglmShininessB) != 0 ? ShininessB : 0));
+-  }
+-  else {
+-    olx_gl::enable(GL_COLOR_MATERIAL);
+-    if (Flags & sglmAmbientF) {
+-      olx_gl::colorMaterial(GL_FRONT, GL_AMBIENT);
+-      olx_gl::color(AmbientF.Data());
+-    }
+-    if (Flags & sglmSpecularF) {
+-      olx_gl::colorMaterial(GL_FRONT, GL_SPECULAR);
+-      olx_gl::color(SpecularF.Data());
+-    }
+-    if (Flags & sglmSpecularB) {
+-      olx_gl::colorMaterial(GL_BACK, GL_SPECULAR);
+-      olx_gl::color(SpecularB.Data());
+-    }
+-    if (Flags & sglmShininessF) {
+-      olx_gl::material(GL_FRONT, GL_SHININESS, ShininessF);
+-    }
+-    if (Flags & sglmShininessB) {
+-      olx_gl::material(GL_BACK, GL_SHININESS, ShininessB);
+-    }
+-    olx_gl::colorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+-  }
+-}
++#ifndef OLEX2_MATERIAL_VALUES_ONLY
++#include "glmaterial_legacy_init.h"
++#endif
+ //..............................................................................
+ const TGlMaterial& TGlMaterial::Intensity(TGlOption& ClearColor, double intensity) const  {
+   static TGlMaterial GlM;
+diff --git a/glib/glmaterial.h b/glib/glmaterial.h
+index 36e8d78..e234f52 100644
+--- a/glib/glmaterial.h
++++ b/glib/glmaterial.h
+@@ -9,7 +9,11 @@
+ 
+ #ifndef __olx_gl_material_H
+ #define __olx_gl_material_H
++#ifndef OLEX2_MATERIAL_VALUES_ONLY
+ #include "glbase.h"
++#else
++#include "glnamespace.h"
++#endif
+ #include "groupobj.h"
+ #include "gloption.h"
+ #include "datafile.h"
+@@ -67,7 +71,9 @@ public:
+   TGlMaterial(const olxstr& str)  {  FromString(str);  }
+   ~TGlMaterial() {}
+ 
++#ifndef OLEX2_MATERIAL_VALUES_ONLY
+   void Init(bool skip) const;
++#endif
+   const TGlMaterial& Intensity(TGlOption& ClearColor, double intensity) const;
+ 
+   DefPropP(uint16_t, Flags)
+diff --git a/glib/glmaterial_legacy_init.h b/glib/glmaterial_legacy_init.h
+new file mode 100644
+index 0000000..d591afc
+--- /dev/null
++++ b/glib/glmaterial_legacy_init.h
+@@ -0,0 +1,87 @@
++/******************************************************************************
++* Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
++*                                                                             *
++* This file is part of the OlexSys Development Framework.                     *
++*                                                                             *
++* This source file is distributed under the terms of the licence located in   *
++* the root folder.                                                            *
++******************************************************************************/
++
++// Original desktop Init body, included by glmaterial.cpp only.
++#ifndef __olx_gl_material_legacy_init_H
++#define __olx_gl_material_legacy_init_H
++void TGlMaterial::Init(bool skip) const {
++  if (skip) {
++    return;
++  }
++  if (Flags & sglmTransparent) {
++    if (!glIsEnabled(GL_ALPHA_TEST)) {
++      olx_gl::enable(GL_ALPHA_TEST);
++      olx_gl::enable(GL_POINT_SMOOTH);
++      olx_gl::enable(GL_BLEND);
++      olx_gl::enable(GL_CULL_FACE);
++    }
++  }
++  else {
++    if (glIsEnabled(GL_ALPHA_TEST)) {
++      olx_gl::disable(GL_ALPHA_TEST);
++      olx_gl::disable(GL_POINT_SMOOTH);
++      olx_gl::disable(GL_BLEND);
++      olx_gl::disable(GL_CULL_FACE);
++    }
++  }
++  /*
++  if (Flags & sglmLighting) {
++    olx_gl::enable(GL_LIGHTING);
++  }
++  else {
++    olx_gl::disable(GL_LIGHTING);
++  }
++  */
++  if ((Flags & sglmColorMat) == 0) {
++    olx_gl::disable(GL_COLOR_MATERIAL);
++    olx_gl::material(GL_FRONT, GL_DIFFUSE,
++      ((Flags & sglmDiffuseF) != 0 ? DiffuseF : BlackColor).Data());
++    olx_gl::material(GL_BACK, GL_DIFFUSE,
++      ((Flags & sglmDiffuseB) != 0 ? DiffuseB : BlackColor).Data());
++    olx_gl::material(GL_FRONT, GL_AMBIENT,
++      ((Flags & sglmAmbientF) != 0 ? AmbientF : BlackColor).Data());
++    olx_gl::material(GL_BACK, GL_AMBIENT,
++      ((Flags & sglmAmbientB) != 0 ? AmbientB : BlackColor).Data());
++    olx_gl::material(GL_FRONT, GL_SPECULAR,
++      ((Flags & sglmSpecularF) != 0 ? SpecularF : BlackColor).Data());
++    olx_gl::material(GL_BACK, GL_SPECULAR,
++      ((Flags & sglmSpecularB) != 0 ? SpecularB : BlackColor).Data());
++    olx_gl::material(GL_FRONT, GL_EMISSION,
++      ((Flags & sglmEmissionF) != 0 ? EmissionF : BlackColor).Data());
++    olx_gl::material(GL_BACK, GL_EMISSION,
++      ((Flags & sglmEmissionB) != 0 ? EmissionB : BlackColor).Data());
++    olx_gl::material(GL_FRONT, GL_SHININESS,
++      ((Flags & sglmShininessF) != 0 ? ShininessF : 0));
++    olx_gl::material(GL_BACK, GL_SHININESS,
++      ((Flags & sglmShininessB) != 0 ? ShininessB : 0));
++  }
++  else {
++    olx_gl::enable(GL_COLOR_MATERIAL);
++    if (Flags & sglmAmbientF) {
++      olx_gl::colorMaterial(GL_FRONT, GL_AMBIENT);
++      olx_gl::color(AmbientF.Data());
++    }
++    if (Flags & sglmSpecularF) {
++      olx_gl::colorMaterial(GL_FRONT, GL_SPECULAR);
++      olx_gl::color(SpecularF.Data());
++    }
++    if (Flags & sglmSpecularB) {
++      olx_gl::colorMaterial(GL_BACK, GL_SPECULAR);
++      olx_gl::color(SpecularB.Data());
++    }
++    if (Flags & sglmShininessF) {
++      olx_gl::material(GL_FRONT, GL_SHININESS, ShininessF);
++    }
++    if (Flags & sglmShininessB) {
++      olx_gl::material(GL_BACK, GL_SHININESS, ShininessB);
++    }
++    olx_gl::colorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
++  }
++}
++#endif

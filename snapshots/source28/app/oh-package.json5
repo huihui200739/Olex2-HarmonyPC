@@ -1,0 +1,8 @@
+{
+  "modelVersion": "6.0.0",
+  "name": "olex2-harmonypc",
+  "version": "0.3.0",
+  "description": "Olex2 Harmony PC native integration validation, not the complete upstream app",
+  "dependencies": {},
+  "devDependencies": {}
+}

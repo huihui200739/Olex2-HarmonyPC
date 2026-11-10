@@ -1,0 +1,50 @@
+diff --git a/sdl/settingsfile.cpp b/sdl/settingsfile.cpp
+index 3366756..2312505 100644
+--- a/sdl/settingsfile.cpp
++++ b/sdl/settingsfile.cpp
+@@ -12,9 +12,23 @@
+ #include "exception.h"
+ 
+ void TSettingsFile::LoadSettings(const olxstr& fileName)  {
++  LoadSettings_(fileName, false);
++}
++void TSettingsFile::LoadUtf8Settings(const olxstr& fileName)  {
++  LoadSettings_(fileName, true);
++}
++void TSettingsFile::LoadSettings_(const olxstr& fileName, bool utf8)  {
+   Clear();
+   TEFile::CheckFileExists(__OlxSourceInfo, fileName);
+-  TEFile::ReadLines(fileName, Lines);
++  if (utf8) {
++    const TStrList decoded = TUtf8File::ReadLines(fileName, false);
++    for (size_t i = 0; i < decoded.Count(); i++) {
++      Lines.Add(decoded[i], false);
++    }
++  }
++  else {
++    TEFile::ReadLines(fileName, Lines);
++  }
+ 
+   for( size_t i=0; i < Lines.Count(); i++ )  {
+     olxstr ln = Lines[i].Trim(' ');
+diff --git a/sdl/settingsfile.h b/sdl/settingsfile.h
+index 8e8a08a..8e02097 100644
+--- a/sdl/settingsfile.h
++++ b/sdl/settingsfile.h
+@@ -23,6 +23,7 @@ class TSettingsFile: public IOlxObject  {
+   olxstr_dict<olxstr, true> Params;
+   TStringToList<olxstr, bool> Lines;
+ protected:
++  void LoadSettings_(const olxstr& fileName, bool utf8);
+   void Clear()  {
+     Params.Clear();
+     Lines.Clear();
+@@ -31,6 +32,8 @@ public:
+   TSettingsFile(){}
+   TSettingsFile(const olxstr& fileName)  {  LoadSettings(fileName);  }
+   void LoadSettings(const olxstr& fileName);
++  // Explicit UTF-8 reader; legacy LoadSettings behavior stays unchanged.
++  void LoadUtf8Settings(const olxstr& fileName);
+   void SaveSettings(const olxstr& fileName);
+   virtual ~TSettingsFile() {}
+   // iteration functions

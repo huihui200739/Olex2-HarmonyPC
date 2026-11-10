@@ -1,0 +1,99 @@
+{
+  "version": "0.22.17",
+  "base": "0.22.16",
+  "base_manifests": {
+    "persistent-gx-inputs.json": "84e118d3b1b7415e2a574db0447e807d04b21d89f333792332fffd6454c85b74",
+    "texture-context-inputs.json": "59ff60a11690299dc41c6a6c5e6fd0f78c40ecea4f31d9be15b78ad49b56d843",
+    "texture-load-inputs.json": "81c4a35edab439fb338a7ceef2d0438b3074bbdcb8feba5384e60f125b24e50f",
+    "texture-load-route-inputs.json": "9b06b7ab3f3e255a51639d345bde90dcef19bccf659acbc073a3ec0373e86e84"
+  },
+  "scope": "native raster cells into genuine original font creation/text/scaling/context release; not yet target-qualified",
+  "files": {
+    "native/glyph_bitmap.h": {
+      "sha256": "a9f832c9e2617a8aa6be7301ed8302699f10f1d0963e661ee2aad621059ddb0e",
+      "bytes": 695
+    },
+    "native/original_font_cells.cpp": {
+      "sha256": "5c7797a0e01e540a32f68a46e200242b8a38140258b34a3ea50f300281b6443f",
+      "bytes": 1909
+    },
+    "native/harmony_glyph_raster.h": {
+      "sha256": "3199f2f2a1b83b7125ae9f408ea05c086c384578fe3e408ef59f216990a9cc52",
+      "bytes": 814
+    },
+    "native/harmony_glyph_raster.cpp": {
+      "sha256": "760c235051a6b25dc30b80f9b1f37c4af84fd7edb5c55be49df5923fce7e65d4",
+      "bytes": 6041
+    },
+    "native/platform_font_factory.h": {
+      "sha256": "9a2b90bca021f04f2f77da11c9c4731bbf19f9990e7dc29887fa459efc1ff0f2",
+      "bytes": 865
+    },
+    "native/platform_font_factory.cpp": {
+      "sha256": "9bb0fdeedfbab9f40c41e0da43028365af1a729794111c81aafaf7f16ccb9bbf",
+      "bytes": 4595
+    },
+    "native/original_font_window_probe.h": {
+      "sha256": "4bd9c2b6c2c0a70c2c31350d2542fd0f47eac8586c77a5d3e0558ba5be702174",
+      "bytes": 224
+    },
+    "native/original_font_window_probe.cpp": {
+      "sha256": "ea39f24b96758e367a2f22bc3d5f715b8585ee564143d0f6278fec9b709a9d88",
+      "bytes": 3928
+    },
+    "native/platform_window_scene.h": {
+      "sha256": "c9f7baff8485f2b6081009ee106e09d26d315c282ed076fb042aacba26fe96f4",
+      "bytes": 2826
+    },
+    "native/persistent_gx_window.cpp": {
+      "sha256": "776c7af91a80eef3238443459121a58b6101d0cd3dc8ab0feb3dd1bd1c1a4000",
+      "bytes": 14344
+    },
+    "native/original_renderer_host.h": {
+      "sha256": "146acd58d01911a66959da5b8bc3e69afc1793811553d02463c01ca32b108847",
+      "bytes": 617
+    },
+    "app/entry/src/main/cpp/original_window_route_runs.h": {
+      "sha256": "a6716ecf94b9aa6c861b6fc4b5c602025af8cb2a3aa413017cb17df518abdb56",
+      "bytes": 776
+    },
+    "app/entry/src/main/cpp/shared_original_probe.h": {
+      "sha256": "b84a24b5846739978033dcba8aaad74659fcc5e3e3deab072c18146ee3f57ea1",
+      "bytes": 307
+    },
+    "app/entry/src/main/cpp/shared_original_probe.cpp": {
+      "sha256": "4095afc571cd686535c4e7dff2fbb58b2dfb1e4f05a935baed941f6de3f9b4fa",
+      "bytes": 13385
+    },
+    "app/entry/src/main/cpp/renderer.h": {
+      "sha256": "8cf307c5010326157827c50fea912fa42dc261ca350f0b77ef7f894b250a0579",
+      "bytes": 5432
+    },
+    "app/entry/src/main/cpp/renderer.cpp": {
+      "sha256": "dbdacfc08f4f2adb64d0659ca49173146ac310727e09f4cdf20dc75f0d6946d6",
+      "bytes": 33816
+    },
+    "app/entry/src/main/cpp/napi_init.cpp": {
+      "sha256": "148c086eca7f3c92a27ce50c3cf933fc21d9eab2657701757fe2779b84a99f6a",
+      "bytes": 32794
+    },
+    "app/entry/src/main/cpp/types/libolex2native/index.d.ts": {
+      "sha256": "79ce7c0b921898ec5e1fae76a8129096d246043461047b47d46327b1efecd30b",
+      "bytes": 6929
+    },
+    "app/entry/src/main/ets/pages/Index.ets": {
+      "sha256": "447ace8a298c37dc8e94a32223203302852482aa045e364e239a490b390a6ea0",
+      "bytes": 45812
+    },
+    "app/entry/src/main/cpp/CMakeLists.txt": {
+      "sha256": "84821452f184866845b4096bd28b27c9953103538c67aea6dd2d1598da9d044f",
+      "bytes": 4338
+    },
+    "app/AppScope/app.json5": {
+      "sha256": "490bc1f4fe0deff21b5326931e93b206be613c58fbeff95c8a9c2d68628edc40",
+      "bytes": 225
+    }
+  },
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

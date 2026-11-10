@@ -1,0 +1,22 @@
+{
+  "version": "0.22.16",
+  "base": "0.22.15",
+  "base_input_manifest_sha256": "81c4a35edab439fb338a7ceef2d0438b3074bbdcb8feba5384e60f125b24e50f",
+  "scope": "route-local original-window and texture-load generations; prepared only, actual target mixed-route execution pending",
+  "files": {
+    "app/entry/src/main/cpp/original_window_route_runs.h": {
+      "sha256": "a40b90f1a5751cfe6ea503d1fbc9e20634ca4841f98b298a058b9ca72bd66cc2",
+      "bytes": 596
+    },
+    "app/entry/src/main/cpp/shared_original_probe.cpp": {
+      "sha256": "3204e8af828186c31f48c4821a52ca0dc71dd1d03a1515ec0e196b56c7e540aa",
+      "bytes": 13298
+    },
+    "app/AppScope/app.json5": {
+      "sha256": "b921767d243b9e3fdba670c33ea9ee21d261972de6a5f9814d550bba239715d0",
+      "bytes": 225
+    }
+  },
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

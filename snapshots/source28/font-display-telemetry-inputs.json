@@ -1,0 +1,32 @@
+{
+  "version": "0.22.28",
+  "base": "0.22.27",
+  "base_manifest_sha256": "530e7d3dc66f027e5da3e1cdd148c78463d786ddc6861bfc5722b06dcabe314d",
+  "scope": "Correct physical point DPI telemetry and include actual main-window native display metrics in existing GraphicsStatus snapshots; no inherited device qualification",
+  "original_font_requests_per_action": 20,
+  "files": {
+    "app/AppScope/app.json5": {
+      "bytes": 225,
+      "sha256": "5c9a81f7bd497661e8ae5f19291e8d41fd044f28a7cb8324c39d663527540b38"
+    },
+    "app/entry/src/main/cpp/napi_init.cpp": {
+      "bytes": 34884,
+      "sha256": "8fded49eb129b28fc66fe36f3ea3fdd126fb8c0c46e9515f2ee40266ce4d86b3"
+    },
+    "app/entry/src/main/cpp/types/libolex2native/index.d.ts": {
+      "bytes": 7426,
+      "sha256": "a7db64ae253c580e43c2bc4f539e0ab14cfb7cb66ad90e4a681ac0c2c8f55946"
+    },
+    "native/family_font_window_probe.cpp": {
+      "bytes": 7958,
+      "sha256": "43126714ac137d79be52f11831443f43915e2b122034c479de3a2585ba025ed0"
+    }
+  },
+  "recipe": {
+    "path": "scripts/prepare-font-display-telemetry-candidate.py",
+    "sha256": "0bec55a276d8204eb8d781613f568080424d5d2f914ed63cae0e892792aff57e"
+  },
+  "device_executed": false,
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

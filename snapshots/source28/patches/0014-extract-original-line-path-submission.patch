@@ -1,0 +1,118 @@
+--- a/glib/glprimitive.cpp
++++ b/glib/glprimitive.cpp
+@@ -10,6 +10,7 @@
+ #include "glprimitive.h"
+ #include "trianglesubmit.h"
+ #include "linesubmit.h"
++#include "linepathsubmit.h"
+ #include "polygonsubmit.h"
+ #include "glmaterial.h"
+ #include "glrender.h"
+@@ -339,43 +340,15 @@
+   }
+   case sgloLineStrip: {
+     PrepareColorRendering(GL_LINE_STRIP);
+-    float LW = 0;
+-    if (Params[0] != 1) {
+-      olx_gl::get(GL_LINE_WIDTH, &LW);
+-      olx_gl::lineWidth(Params[0] * LW);
+-    }
+-    for (size_t i = 0; i < Vertices.Count(); i++) {
+-      if (Colors.Count() == Vertices.Count()) {
+-        SetColor(Colors[i]);
+-      }
+-      DrawVertex(Vertices[i]);
+-    }
+-    if (LW != 0) {
+-      olx_gl::lineWidth(LW);
+-    }
++    LineSubmissionSink sink(*this);
++    SubmitPrimitiveLineStrip(Vertices, Colors, Params, sink);
+     EndColorRendering();
+     break;
+   }
+   case sgloLineLoop: {
+     PrepareColorRendering(GL_LINE_LOOP);
+-    float LW = 0;
+-    if (Params[0] != 1) {
+-      olx_gl::get(GL_LINE_WIDTH, &LW);
+-      olx_gl::lineWidth(Params[0] * LW);
+-    }
+-    if (Colors.IsEmpty() || GetRenderer().IsSelecting()) {
+-      for (size_t i = 0; i < Vertices.Count(); i++) {
+-        DrawVertex(Vertices[i]);
+-      }
+-    }
+-    else if (Colors.Count() == Vertices.Count()) {
+-      for (size_t i = 0; i < Vertices.Count(); i++) {
+-        DrawVertex(Vertices[i], Colors[i]);
+-      }
+-    }
+-    if (LW != 0) {
+-      olx_gl::lineWidth(LW);
+-    }
++    LineSubmissionSink sink(*this);
++    SubmitPrimitiveLineLoop(Vertices, Colors, Params, sink);
+     EndColorRendering();
+     break;
+   }
+--- /dev/null
++++ b/glib/linepathsubmit.h
+@@ -0,0 +1,57 @@
++/******************************************************************************
++* Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
++*                                                                             *
++* This file is part of the OlexSys Development Framework.                     *
++*                                                                             *
++* This source file is distributed under the terms of the licence located in   *
++* the root folder.                                                            *
++******************************************************************************/
++
++// Exact original strip/loop bodies; caller retains GL begin/end and state.
++#ifndef __olx_primitive_line_path_submit_H
++#define __olx_primitive_line_path_submit_H
++#include <cstddef>
++#include "glnamespace.h"
++BeginGlNamespace()
++template<class V,class C,class P,class Sink>
++void SubmitPrimitiveLineStrip(const V& Vertices,const C& Colors,const P& Params,Sink& sink)
++{
++    float LW = 0;
++    if (Params[0] != 1) {
++      sink.GetLineWidth(&LW);
++      sink.SetLineWidth(Params[0] * LW);
++    }
++    for (size_t i = 0; i < Vertices.Count(); i++) {
++      if (Colors.Count() == Vertices.Count()) {
++        sink.SetColor(Colors[i]);
++      }
++      sink.DrawVertex(Vertices[i]);
++    }
++    if (LW != 0) {
++      sink.SetLineWidth(LW);
++    }
++}
++template<class V,class C,class P,class Sink>
++void SubmitPrimitiveLineLoop(const V& Vertices,const C& Colors,const P& Params,Sink& sink)
++{
++    float LW = 0;
++    if (Params[0] != 1) {
++      sink.GetLineWidth(&LW);
++      sink.SetLineWidth(Params[0] * LW);
++    }
++    if (Colors.IsEmpty() || sink.IsSelecting()) {
++      for (size_t i = 0; i < Vertices.Count(); i++) {
++        sink.DrawVertex(Vertices[i]);
++      }
++    }
++    else if (Colors.Count() == Vertices.Count()) {
++      for (size_t i = 0; i < Vertices.Count(); i++) {
++        sink.DrawVertex(Vertices[i], Colors[i]);
++      }
++    }
++    if (LW != 0) {
++      sink.SetLineWidth(LW);
++    }
++}
++EndGlNamespace()
++#endif

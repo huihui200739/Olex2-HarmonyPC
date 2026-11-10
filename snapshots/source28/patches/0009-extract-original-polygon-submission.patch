@@ -1,0 +1,72 @@
+diff --git a/glib/glprimitive.cpp b/glib/glprimitive.cpp
+--- a/glib/glprimitive.cpp
++++ b/glib/glprimitive.cpp
+@@ -9,6 +9,7 @@
+ 
+ #include "glprimitive.h"
+ #include "trianglesubmit.h"
++#include "polygonsubmit.h"
+ #include "glmaterial.h"
+ #include "glrender.h"
+ #include "gpcollection.h"
+@@ -488,19 +489,8 @@
+   case sgloPolygon: {
+     PrepareColorRendering(GL_POLYGON);
+     olx_gl::FlagDisabler fc(GL_CULL_FACE);
+-    if (Normals.Count() == 1) {
+-      SetNormal(Normals[0]);
+-    }
+-    if (Colors.IsEmpty() || GetRenderer().IsSelecting()) {
+-      for (size_t i = 0; i < Vertices.Count(); i++) {
+-        DrawVertex(Vertices[i]);
+-      }
+-    }
+-    else if (Colors.Count() == Vertices.Count()) {
+-      for (size_t i = 0; i < Vertices.Count(); i++) {
+-        DrawVertex(Vertices[i], Colors[i]);
+-      }
+-    }
++    TriangleSubmissionSink sink(*this);
++    SubmitPrimitivePolygon(Vertices, Normals, Colors, sink);
+     EndColorRendering();
+     break;
+   }
+diff --git a/glib/polygonsubmit.h b/glib/polygonsubmit.h
+new file mode 100644
+--- /dev/null
++++ b/glib/polygonsubmit.h
+@@ -0,0 +1,34 @@
++/******************************************************************************
++* Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
++*                                                                             *
++* This file is part of the OlexSys Development Framework.                     *
++*                                                                             *
++* This source file is distributed under the terms of the licence located in   *
++* the root folder.                                                            *
++******************************************************************************/
++
++// Original sgloPolygon submission only. Cull-face/begin/end remain with the
++// desktop caller; the target supplies its own explicit rasterization policy.
++#ifndef __olx_polygon_submit_H
++#define __olx_polygon_submit_H
++#include "glnamespace.h"
++BeginGlNamespace()
++template <class VerticesType,class NormalsType,class ColorsType,class Sink>
++void SubmitPrimitivePolygon(const VerticesType& Vertices,const NormalsType& Normals,
++    const ColorsType& Colors,Sink& sink) {
++    if (Normals.Count() == 1) {
++      sink.SetNormal(Normals[0]);
++    }
++    if (Colors.IsEmpty() || sink.IsSelecting()) {
++      for (size_t i = 0; i < Vertices.Count(); i++) {
++        sink.DrawVertex(Vertices[i]);
++      }
++    }
++    else if (Colors.Count() == Vertices.Count()) {
++      for (size_t i = 0; i < Vertices.Count(); i++) {
++        sink.DrawVertex(Vertices[i], Colors[i]);
++      }
++    }
++}
++EndGlNamespace()
++#endif

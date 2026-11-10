@@ -1,0 +1,58 @@
+{
+  "version": "0.22.22",
+  "base": "0.22.21",
+  "base_manifest_sha256": "8aa714e90c8236f9875119ef4409b6460a23bb0fd3c2326ceb37fe39e10d73e1",
+  "scope": "Original #file:style-size ofnt ZIP/bit-array via genuine CreateGlyphs; explicit exact8..28 entry profile, legacy wx resampling still unavailable; retained native/vector stages",
+  "files": {
+    "native/olex_font_resource.cpp": {
+      "bytes": 9864,
+      "sha256": "eb07ea76f7cf16edeec98f75cd99760ee5baa56eb6aa539053072b29d11aa5cc"
+    },
+    "native/olex_font_resource.h": {
+      "bytes": 1054,
+      "sha256": "6d8bb0fd279f91b91ae8b608418f500039a4d86a239ed063f5767c41802aa5e4"
+    },
+    "native/platform_font_factory.cpp": {
+      "bytes": 6014,
+      "sha256": "734596cfb89e497df07c1ed0562a63c61c47ebfcaaf03b8b4b77070b552b4d6b"
+    },
+    "native/platform_font_factory.h": {
+      "bytes": 1262,
+      "sha256": "276d478c960f64b59cd55a789c7e365b1b48ede96295db35a0afd5d5bee5e11b"
+    },
+    "native/original_resource_font_window_probe.cpp": {
+      "bytes": 6187,
+      "sha256": "8ab0b12032b70db2fca172b179d0da5c996fbce3bd0a04d3abbac9a7d213a90d"
+    },
+    "native/original_resource_font_window_probe.h": {
+      "bytes": 245,
+      "sha256": "f893a128dfbdd9702efdef72377daa5642c3936c94baae7816eea47e61b6dfcf"
+    },
+    "native/olex_font_resource_fixture.h": {
+      "bytes": 48519,
+      "sha256": "6a928cd3cabdc5f74eb8379af765c3d93fc02d7134049e136ce5c82c2f2eedbc"
+    },
+    "native/original_font_window_probe.cpp": {
+      "bytes": 4514,
+      "sha256": "9dd17180e83f17df1036871afc9be6e111ea1a7b98325094ad346d42c9384d8a"
+    },
+    "app/entry/src/main/cpp/CMakeLists.txt": {
+      "bytes": 4508,
+      "sha256": "4d4a6c5b2650cef0306972fbad14cee67db26a9f219c143244528276fd3bd506"
+    },
+    "app/AppScope/app.json5": {
+      "bytes": 225,
+      "sha256": "64242ef4a970e2e79d95c9e8f98fef6e497465d62582d172a8ebe38aa1804fda"
+    }
+  },
+  "fixture_manifest_sha256": "c02727fb3c6ba29513bd65db1ac5575a8fad6ab2d85adf58713d714bc72e63db",
+  "resource_semantics_sources": {
+    "upstream/gxlib/wxglscene.cpp": "493f3d90fa2cbca1f355fc0476cd0e0943531040bd19fe161bc8ba8371c74995",
+    "upstream/glib/glscene.cpp": "3619bda657a0dd15cbaf789ea26edf9ab167e58eb7bc05bf94ef18d311c8cad1",
+    "upstream/glib/glfont.cpp": "ed5a5373ac1920d338a330ec3d0d7d79e131bc02d5f332a5896cd98d1c69f196",
+    "upstream/sdl/bitarray.h": "57fa3131f590eb1042dad724ca1c3313c6c5360c2584d5da8533e5b4c459004e"
+  },
+  "original_font_requests_per_action": 9,
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

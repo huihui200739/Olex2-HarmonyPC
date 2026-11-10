@@ -1,0 +1,41 @@
+{
+  "version": "0.22.14",
+  "base": "0.22.13",
+  "base_lock_sha256": "fe8974096e7a63652897f08a6a93d405c7277f92ef1bc196a69f3330ca3cb3a0",
+  "files": {
+    "native/persistent_gx_window.cpp": {
+      "sha256": "5e7010433a4f0a467a13c83369e3647ee43ab22c6292a5d960b7b373e8c694f7",
+      "bytes": 11544
+    },
+    "native/persistent_texture_window_probe.cpp": {
+      "sha256": "ccd3192ef41ba3eaad8c77a9c38fb4943ad57b4e02f2fa2c2e82f7e578d54e10",
+      "bytes": 6978
+    },
+    "native/persistent_texture_window_probe.h": {
+      "sha256": "39f9991f3dadb408051b03d7d6b120a6db9f1b612002e4ce582876edc4676f98",
+      "bytes": 392
+    },
+    "upstream/glib/gltexture.cpp": {
+      "sha256": "4423aad8715f748002b2ad539fa6cd62825a304165f2f72418169aa7812485ff",
+      "bytes": 16662
+    },
+    "source.lock.json": {
+      "sha256": "818e820d63292ef69d2bdda4497de9a783997173804afa50f8eeb791a24abc59",
+      "bytes": 8007
+    },
+    "app/AppScope/app.json5": {
+      "sha256": "7209ae53173215a9fbd0f201f94d07ebcd7bac8b0f9db3590a8c1658e8978c88",
+      "bytes": 225
+    },
+    "app/entry/src/main/cpp/CMakeLists.txt": {
+      "sha256": "41442fa57d1a23d1f8151f0f0760dabe8f6b899d299ca4cdf3a3ea36adb2b6b1",
+      "bytes": 3789
+    },
+    "patches/0020-texture-manager-detached-context-destruction.patch": {
+      "sha256": "0a3b80f4723ccbec7806617aed9fa8a9ec0ca6565a7f7d7e14e621be47243de3",
+      "bytes": 539
+    }
+  },
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

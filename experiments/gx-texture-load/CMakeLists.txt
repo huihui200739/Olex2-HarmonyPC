@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.16)
+project(original_window_route_runs LANGUAGES CXX)
+enable_testing()
+add_executable(original_window_route_runs tests/route_runs.cpp)
+target_compile_features(original_window_route_runs PRIVATE cxx_std_17)
+target_include_directories(original_window_route_runs PRIVATE native)
+target_compile_options(original_window_route_runs PRIVATE -Wall -Wextra -Werror -pedantic)
+add_test(NAME isolated_original_window_route_runs COMMAND original_window_route_runs)

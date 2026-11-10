@@ -1,0 +1,74 @@
+{
+  "version": "0.22.15",
+  "base": "0.22.14",
+  "base_lock_sha256": "818e820d63292ef69d2bdda4497de9a783997173804afa50f8eeb791a24abc59",
+  "scope": "original UI texture loading, replacement, real log deltas and 2D context preservation; qualification pending",
+  "files": {
+    "native/original_texture_load_probe.h": {
+      "sha256": "944cfd1de6a590b75d198d270ae7319f294696ac31a89a8a3ee676b19a16ff4b",
+      "bytes": 438
+    },
+    "native/original_texture_load_probe.cpp": {
+      "sha256": "f6177c2a7eb02cd88fc4eed8173f8fc537673443be5ba4c600c274dda1f099f6",
+      "bytes": 10302
+    },
+    "native/original_texture_load_fixtures.h": {
+      "sha256": "c311157c822ea728057e46d9e98e9d8fb8f097204179ad877836d29ea4a8a5bd",
+      "bytes": 2814
+    },
+    "native/original_renderer_host.h": {
+      "sha256": "1a85d6e183e405d70995c81da1f7d046e6cc3203a775831427452c2d7a84ab26",
+      "bytes": 583
+    },
+    "native/persistent_gx_window.h": {
+      "sha256": "6b633f9cca32961abed4afff0723e024704989c1c1d05977db25f26a1d64c9c5",
+      "bytes": 478
+    },
+    "native/application_runtime.cpp": {
+      "sha256": "9c012ccebf52b172be7d7e0cc7b51e30633303d6de48f3c01e4fad2d16f2cf18",
+      "bytes": 16160
+    },
+    "native/persistent_gx_window.cpp": {
+      "sha256": "3ab127abaf128c5abfae93d46e427c8818060721d3612e301921f5b484534dee",
+      "bytes": 13100
+    },
+    "app/entry/src/main/cpp/shared_original_probe.h": {
+      "sha256": "36a772914ff8ef853b109fe14ffa8b4cdbb5c9759f2bbdc100cc540f0a63fd23",
+      "bytes": 286
+    },
+    "app/entry/src/main/cpp/shared_original_probe.cpp": {
+      "sha256": "c85b062798ad3f549fa4fcdc4e996e209014d9e9c18c63522560b29d7f88210f",
+      "bytes": 13181
+    },
+    "app/entry/src/main/cpp/renderer.h": {
+      "sha256": "727fe6296cf51f0a276f4ebb5fc457630027c4e452c71b7366a0815b1b67016c",
+      "bytes": 5411
+    },
+    "app/entry/src/main/cpp/renderer.cpp": {
+      "sha256": "3a6d2a3f31184761a80de19cd49a9e71518170369b8e03c0e0d5b238e477ff21",
+      "bytes": 33752
+    },
+    "app/entry/src/main/cpp/napi_init.cpp": {
+      "sha256": "12917138b7b7d2b4ef3477cafcd92dfaf0f0d2465758b41f4bc276bb932215de",
+      "bytes": 32450
+    },
+    "app/entry/src/main/cpp/types/libolex2native/index.d.ts": {
+      "sha256": "c7514205bb90dac5272f3b1cb4759df681945b6e6b7f92580f5e611a6a7235bb",
+      "bytes": 6880
+    },
+    "app/entry/src/main/ets/pages/Index.ets": {
+      "sha256": "5ee1c0a9a8e26c4fdf01e1e014c7e3d43e9b78ad090ad19da87f3ecf1c7a26d2",
+      "bytes": 45251
+    },
+    "app/entry/src/main/cpp/CMakeLists.txt": {
+      "sha256": "34764c3659ea69996e8722e24f9d1d3d4f08e53554e2963b54871f9e811c670d",
+      "bytes": 3962
+    },
+    "app/AppScope/app.json5": {
+      "sha256": "1cad4aded4ac3720462d5394da4c3b68653ca97be1ac3ebf7909b5c22af0dc36",
+      "bytes": 225
+    }
+  },
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

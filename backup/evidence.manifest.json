@@ -1,0 +1,50 @@
+[
+  {
+    "original_path": "reports/gx-font-display-candidate-status.json",
+    "backup_path": "backup/evidence/reports/gx-font-display-candidate-status.json",
+    "bytes": 7756,
+    "sha256": "e7cca771a6304fdfe0ef9959c5ca623d6afb537530e5583ab8a3d1da6ddda50b"
+  },
+  {
+    "original_path": "reports/pending-diagnostic-cleanup.json",
+    "backup_path": "backup/evidence/reports/pending-diagnostic-cleanup.json",
+    "bytes": 40687,
+    "sha256": "8d742a215b185289f77ee94e880b383f45822ca13020805231f03d6ddd3b08ac"
+  },
+  {
+    "original_path": "reports/emulator/font-display-window-20261110-074045-37e45d82/result.json",
+    "backup_path": "backup/evidence/reports/emulator/font-display-window-20261110-074045-37e45d82/result.json",
+    "bytes": 169619,
+    "sha256": "6a8aadbbff3c6c400fda2206597aa3278178c42e9062f571dce80301226d4d4c"
+  },
+  {
+    "original_path": "out/gx-application-evaluation/font-display28-window-offline-revalidation-attempt1/result.json",
+    "backup_path": "backup/evidence/out/gx-application-evaluation/font-display28-window-offline-revalidation-attempt1/result.json",
+    "bytes": 182721,
+    "sha256": "9442af904b210d6212ac1d8c0664aca3cbb554009d553594916cf779295f44c5"
+  },
+  {
+    "original_path": "out/gx-application-evaluation/font-display28-source-package-revalidation-attempt1.json",
+    "backup_path": "backup/evidence/out/gx-application-evaluation/font-display28-source-package-revalidation-attempt1.json",
+    "bytes": 1564,
+    "sha256": "be459c168a989ea507d4d0f1d33d07c6b11b8d17cd4a39df793aa92bfb1c9815"
+  },
+  {
+    "original_path": "out/gx-application-evaluation/font-display28-cleanup-python-completed-revalidation-attempt1.json",
+    "backup_path": "backup/evidence/out/gx-application-evaluation/font-display28-cleanup-python-completed-revalidation-attempt1.json",
+    "bytes": 443,
+    "sha256": "f6b89d4896c6dcece51f5b5cbb459127fee6110e6f61dd8042f47fd1ce07ecef"
+  },
+  {
+    "original_path": "out/gx-application-evaluation/font-display28-cleanup-final-consistency-attempt1.json",
+    "backup_path": "backup/evidence/out/gx-application-evaluation/font-display28-cleanup-final-consistency-attempt1.json",
+    "bytes": 37445,
+    "sha256": "65bb7b479075b6688914e3c603de533ee35943afd454f2afbb8f3a70b55d1f87"
+  },
+  {
+    "original_path": "out/gx-application-evaluation/font-display28-tool-profile-tests-attempt1.log",
+    "backup_path": "backup/evidence/out/gx-application-evaluation/font-display28-tool-profile-tests-attempt1.log",
+    "bytes": 2736,
+    "sha256": "3e428894d3a00fb11f5114d088830e7f7e587fa70a2afe29820b4322d3730dfe"
+  }
+]

@@ -1,0 +1,130 @@
+diff --git a/glib/glutil.h b/glib/glutil.h
+index 7c90134..59bd50e 100644
+--- a/glib/glutil.h
++++ b/glib/glutil.h
+@@ -12,8 +12,17 @@
+ #include "glalg.h"
+ #include "bapp.h"
+ #include "sortedlist.h"
++#include "spheresubmit.h"
+ BeginGlNamespace()
+ 
++// Retains the existing immediate-mode desktop backend and public API.
++struct SphereDesktopSink {
++  void BeginTriangles() { olx_gl::begin(GL_TRIANGLES); }
++  template <class V> void Normal(const V& v) { olx_gl::normal(v); }
++  template <class V> void Vertex(const V& v) { olx_gl::vertex(v); }
++  void End() { olx_gl::end(); }
++};
++
+ template <typename float_type, class FaceProvider> class GlSphereEx :
+   public OlxSphere<float_type,FaceProvider>
+ {
+@@ -30,17 +39,10 @@ public:
+     const TTypeList<IndexTriangle>& triags,
+     const TArrayList<vec_t>& norms)
+   {
+-    const size_t tc = triags.Count();
+-    olx_gl::begin(GL_TRIANGLES);
+-    for( size_t i = 0; i < tc; i++ )  {
+-      const IndexTriangle& t = triags[i];
+-      for( size_t j=0; j < 3; j++ )  {
+-        olx_gl::normal(norms[t.vertices[j]]);
+-        olx_gl::vertex(vecs[t.vertices[j]]);
+-      }
+-    }
+-    olx_gl::end();
++    SphereDesktopSink sink;
++    SphereTriangleSubmission<float_type>::Render(vecs, triags, norms, sink);
+   }
++
+   static void RenderEx(float_type rad, size_t ext,
+     const vec_t& f_mask, const vec_t& t_mask)
+   {
+@@ -55,20 +57,9 @@ public:
+     const TArrayList<vec_t>& norms,
+     const vec_t& f_mask, const vec_t& t_mask)
+   {
+-    const size_t tc = triags.Count();
+-    olx_gl::begin(GL_TRIANGLES);
+-    for( size_t i = 0; i < tc; i++ )  {
+-      const IndexTriangle& t = triags[i];
+-      if( vec_t::IsInRangeInc(vecs[t.vertices[0]], f_mask, t_mask) &&
+-          vec_t::IsInRangeInc(vecs[t.vertices[1]], f_mask, t_mask) &&
+-          vec_t::IsInRangeInc(vecs[t.vertices[2]], f_mask, t_mask) )
+-         continue;
+-      for( int j=0; j < 3; j++ )  {
+-        olx_gl::normal(norms[t.vertices[j]]);
+-        olx_gl::vertex(vecs[t.vertices[j]]);
+-      }
+-    }
+-    olx_gl::end();
++    SphereDesktopSink sink;
++    SphereTriangleSubmission<float_type>::RenderEx(
++      vecs, triags, norms, f_mask, t_mask, sink);
+   }
+   void RenderDisks(float_type rad, size_t t, float_type disk_s)  {
+     vec_t sf(rad, 0, 0);
+diff --git a/glib/spheresubmit.h b/glib/spheresubmit.h
+new file mode 100644
+index 0000000..add593e
+--- /dev/null
++++ b/glib/spheresubmit.h
+@@ -0,0 +1,57 @@
++/******************************************************************************
++* Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
++*                                                                             *
++* This file is part of the OlexSys Development Framework.                     *
++*                                                                             *
++* This source file is distributed under the terms of the licence located in   *
++* the root folder.                                                            *
++******************************************************************************/
++
++// Backend-independent triangle submission extracted from GlSphereEx.
++// The sink owns the batch lifetime; no desktop GL headers or GLU are required.
++#ifndef __olx_sphere_submit_H
++#define __olx_sphere_submit_H
++#include "esphere.h"
++namespace glObj {
++template <typename float_type> struct SphereTriangleSubmission {
++  typedef TVector3<float_type> vec_t;
++  template <class Sink>
++  static void Render(const TTypeList<vec_t>& vecs,
++    const TTypeList<IndexTriangle>& triags,
++    const TArrayList<vec_t>& norms, Sink& sink)
++  {
++    const size_t tc = triags.Count();
++    sink.BeginTriangles();
++    for (size_t i = 0; i < tc; i++) {
++      const IndexTriangle& t = triags[i];
++      for (size_t j = 0; j < 3; j++) {
++        sink.Normal(norms[t.vertices[j]]);
++        sink.Vertex(vecs[t.vertices[j]]);
++      }
++    }
++    sink.End();
++  }
++  template <class Sink>
++  static void RenderEx(const TTypeList<vec_t>& vecs,
++    const TTypeList<IndexTriangle>& triags,
++    const TArrayList<vec_t>& norms,
++    const vec_t& f_mask, const vec_t& t_mask, Sink& sink)
++  {
++    const size_t tc = triags.Count();
++    sink.BeginTriangles();
++    for (size_t i = 0; i < tc; i++) {
++      const IndexTriangle& t = triags[i];
++      if (vec_t::IsInRangeInc(vecs[t.vertices[0]], f_mask, t_mask) &&
++          vec_t::IsInRangeInc(vecs[t.vertices[1]], f_mask, t_mask) &&
++          vec_t::IsInRangeInc(vecs[t.vertices[2]], f_mask, t_mask))
++        continue;
++      for (size_t j = 0; j < 3; j++) {
++        sink.Normal(norms[t.vertices[j]]);
++        sink.Vertex(vecs[t.vertices[j]]);
++      }
++    }
++    sink.End();
++  }
++};
++}
++#endif

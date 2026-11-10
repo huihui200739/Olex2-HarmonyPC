@@ -1,0 +1,10 @@
+--- a/glib/gllight.cpp
++++ b/glib/gllight.cpp
+@@ -12,6 +12,7 @@
+ UseGlNamespace();
+ 
+ TGlLight::TGlLight() : OnLibChange(actions.New("ONCHANGE")) {
++  SpotExponent = 0;
+   SpotCutoff = 180;
+   Position[2] = 1;
+   Attenuation[0] = 1;

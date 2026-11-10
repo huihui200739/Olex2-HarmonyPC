@@ -1,0 +1,21 @@
+diff --git a/sdl/ehashed.h b/sdl/ehashed.h
+index 9c06ad9..e459c28 100644
+--- a/sdl/ehashed.h
++++ b/sdl/ehashed.h
+@@ -154,7 +154,7 @@ private:
+   }
+ #else
+   void init() {
+-    basket_n = 0;
++    count = basket_n = 0;
+   }
+ #endif
+ protected:
+@@ -216,6 +216,7 @@ public:
+ 
+   void Clear() {
+     data.clear();
++    init();
+   }
+ 
+   virtual ~TEHashed() {

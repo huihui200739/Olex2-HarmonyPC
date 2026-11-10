@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "scope": "Full local Python regression and frozen input verification; not emulator qualification",
+  "python_tests": 1080,
+  "recipe_files": 260,
+  "changed_files": [],
+  "input_manifest_sha256": "a05242d3da5891dfc6eccafb4b464ddd51784916bcb7c17158bba2d61c50368f",
+  "log_sha256": "765fd9f68e7622b10a405b3ca3f49708a08c56d1da8c2c589749ed31ea7e8354",
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

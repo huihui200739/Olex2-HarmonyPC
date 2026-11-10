@@ -1,0 +1,22 @@
+test_changed_recipe_anchor_rejected (test_font_display_tool_profiles.FontDisplayToolProfileTests.test_changed_recipe_anchor_rejected) ... ok
+test_collection_retains_all_resource_controls (test_font_display_tool_profiles.FontDisplayToolProfileTests.test_collection_retains_all_resource_controls) ... ok
+test_exact_target_in_both_profiles (test_font_display_tool_profiles.FontDisplayToolProfileTests.test_exact_target_in_both_profiles) ... ok
+test_executed_sources_and_all_dependencies_retained (test_font_display_tool_profiles.FontDisplayToolProfileTests.test_executed_sources_and_all_dependencies_retained) ... ok
+test_isolated_ready_display_keeps_all_eleven_gates (test_font_display_tool_profiles.FontDisplayToolProfileTests.test_isolated_ready_display_keeps_all_eleven_gates) ... ok
+test_missing_or_invalid_actual_display_fails (test_font_display_tool_profiles.FontDisplayToolProfileTests.test_missing_or_invalid_actual_display_fails) ... ok
+test_nonidentity_startup_gates_preserved_exactly (test_font_display_tool_profiles.FontDisplayToolProfileTests.test_nonidentity_startup_gates_preserved_exactly) ... ok
+test_old_nonempty_original_logs_still_fail (test_font_display_tool_profiles.FontDisplayToolProfileTests.test_old_nonempty_original_logs_still_fail) ... ok
+test_preparation_keeps_original_ui_generator_except_three_bound_inputs (test_font_display_tool_profiles.FontDisplayToolProfileTests.test_preparation_keeps_original_ui_generator_except_three_bound_inputs) ... ok
+test_profiles_compile (test_font_display_tool_profiles.FontDisplayToolProfileTests.test_profiles_compile) ... ok
+test_snapshot_identity_must_match (test_font_display_tool_profiles.FontDisplayToolProfileTests.test_snapshot_identity_must_match) ... ok
+test_startup_preserves_exact_twelve_and_live_pid_corroboration (test_font_display_tool_profiles.FontDisplayToolProfileTests.test_startup_preserves_exact_twelve_and_live_pid_corroboration) ... ok
+test_startup_strict_install_guard (test_font_display_tool_profiles.FontDisplayToolProfileTests.test_startup_strict_install_guard) ... ok
+test_ui_install_profile_only_adds_a_strict_guard (test_font_display_tool_profiles.FontDisplayToolProfileTests.test_ui_install_profile_only_adds_a_strict_guard) ... ok
+test_uninitialized_owner_still_fails (test_font_display_tool_profiles.FontDisplayToolProfileTests.test_uninitialized_owner_still_fails) ... ok
+test_unsaved_workspace_still_fails (test_font_display_tool_profiles.FontDisplayToolProfileTests.test_unsaved_workspace_still_fails) ... ok
+test_wrong_candidate_rejected (test_font_display_tool_profiles.FontDisplayToolProfileTests.test_wrong_candidate_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.008s
+
+OK

@@ -1,0 +1,5797 @@
+{
+  "passed": true,
+  "scope": "Independent offline reread of the same exact28 three font-window observations; not a new emulator run or complete UI qualification",
+  "new_runtime_observation_performed": false,
+  "full_port_complete": false,
+  "functional_completion_percent": null,
+  "full_ui_qualification": false,
+  "identity": {
+    "bundleName": "com.example.olex2harmonypc",
+    "versionName": "0.22.28",
+    "versionCode": 222800
+  },
+  "pid": 22027,
+  "checks": 599,
+  "actual_context_continuations": 2,
+  "rounds": [
+    {
+      "passed": true,
+      "checks": [
+        {
+          "name": "actual route and current process identities",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual main next frame selection and external EGL restored",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same-window independent context actually detached and destroyed",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual unique long-lived owner and balanced leases",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "original glyph lists retired before compatibility shutdown",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "genuine original-font creation contract",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal genuine original metrics from all256 RGB source cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal genuine point-size and creation generation",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal full actual window equals independent binary glyph layout",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "expected_ink_pixels": 2592,
+            "expected_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7"
+          }
+        },
+        {
+          "name": "normal actual default-window driver and linked program",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal actual driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled genuine original metrics from all256 RGB source cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled genuine point-size and creation generation",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled full actual window equals independent binary glyph layout",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "expected_ink_pixels": 5770,
+            "expected_sha256": "1df5245d0df2b745a4945fafc3be9f1fca6954255ff80283948d21cd364f0ad8",
+            "actual_sha256": "1df5245d0df2b745a4945fafc3be9f1fca6954255ff80283948d21cd364f0ad8"
+          }
+        },
+        {
+          "name": "scaled actual default-window driver and linked program",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled actual driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored genuine original metrics from all256 RGB source cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored genuine point-size and creation generation",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored full actual window equals independent binary glyph layout",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "expected_ink_pixels": 2592,
+            "expected_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7"
+          }
+        },
+        {
+          "name": "restored actual default-window driver and linked program",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored actual driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same original font object through scale and restoration",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restoring scale restores exact CPU and actual GPU bytes",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual scaled glyphs differ and have more ink",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "original vector descriptor genuine lists and honest shared-backend reference",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual source table equals independently parsed unchanged upstream data",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal genuine vector creation and unchanged intrinsic point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal independent original95 glyph metrics and text width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal original vector creation and retirement generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal fixed origin text actual matrices and original draw scalar",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal entire actual window equals direct upstream-table replay without TGlFont",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "ink": 255,
+            "actual_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+            "reference_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+            "independent_GPU_backend": false
+          }
+        },
+        {
+          "name": "normal actual genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal actual real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal reference genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal reference real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled genuine vector creation and unchanged intrinsic point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled independent original95 glyph metrics and text width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled original vector creation and retirement generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled fixed origin text actual matrices and original draw scalar",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled entire actual window equals direct upstream-table replay without TGlFont",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "ink": 255,
+            "actual_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+            "reference_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+            "independent_GPU_backend": false
+          }
+        },
+        {
+          "name": "scene-scaled actual genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled actual real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled reference genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled reference real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled genuine vector creation and unchanged intrinsic point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled independent original95 glyph metrics and text width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled original vector creation and retirement generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled fixed origin text actual matrices and original draw scalar",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled entire actual window equals direct upstream-table replay without TGlFont",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "ink": 385,
+            "actual_sha256": "a7b980d9295ca8da38d14643b8f1a32185bac496ff4530becc1ea0721921a55e",
+            "reference_sha256": "a7b980d9295ca8da38d14643b8f1a32185bac496ff4530becc1ea0721921a55e",
+            "independent_GPU_backend": false
+          }
+        },
+        {
+          "name": "draw-scaled actual genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled actual real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled reference genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled reference real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored genuine vector creation and unchanged intrinsic point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored independent original95 glyph metrics and text width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored original vector creation and retirement generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored fixed origin text actual matrices and original draw scalar",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored entire actual window equals direct upstream-table replay without TGlFont",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "ink": 255,
+            "actual_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+            "reference_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+            "independent_GPU_backend": false
+          }
+        },
+        {
+          "name": "restored actual genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored actual real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored reference genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored reference real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same distinct original vector font object through all four cases",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "surface font scaling preserves original intrinsic vector semantics",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "original vector draw scalar genuinely enlarges visible strokes",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "genuine original resource CreateGlyphs without default-font replacement",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual font archive bytes equal explicit independent synthetic resource",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal original ZIP entry dimensions and exact LSB bit-array",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal genuine original resource bitmap and point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal independently decoded original256 glyph metrics and width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal exact build release and resource-read cache generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal full actual window equals independent original bit-array bitmap reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "783372d97a9e8924534eb351f4acd10b3ba6952fc82ba889b050bfdc23bc8075",
+            "expected_sha256": "783372d97a9e8924534eb351f4acd10b3ba6952fc82ba889b050bfdc23bc8075",
+            "ink": 87
+          }
+        },
+        {
+          "name": "normal actual default-window driver shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal original resource actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled original ZIP entry dimensions and exact LSB bit-array",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled genuine original resource bitmap and point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled independently decoded original256 glyph metrics and width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled exact build release and resource-read cache generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled full actual window equals independent original bit-array bitmap reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "8367451e1b2342fae8b3d3127fe859187d694b96095bee68f614a632f3e99537",
+            "expected_sha256": "8367451e1b2342fae8b3d3127fe859187d694b96095bee68f614a632f3e99537",
+            "ink": 143
+          }
+        },
+        {
+          "name": "scaled actual default-window driver shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled original resource actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored original ZIP entry dimensions and exact LSB bit-array",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored genuine original resource bitmap and point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored independently decoded original256 glyph metrics and width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored exact build release and resource-read cache generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored full actual window equals independent original bit-array bitmap reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "783372d97a9e8924534eb351f4acd10b3ba6952fc82ba889b050bfdc23bc8075",
+            "expected_sha256": "783372d97a9e8924534eb351f4acd10b3ba6952fc82ba889b050bfdc23bc8075",
+            "ink": 87
+          }
+        },
+        {
+          "name": "restored actual default-window driver shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored original resource actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same distinct original resource font object through selected entry scaling",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "resource entry scale genuinely changes and exact restoration returns",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "original resource RGB resampling explicit synthetic route without fallback",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual original resample archive bytes match independent fixture",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small actual source entry and exact256 LSB bits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small exact opaque RGB cells equal unchanged fixed wx source reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "5b6f25a1e07e2c923c3246edfc8d59738d1b9a5952d20959acab0ada53a487f8",
+            "expected_sha256": "5b6f25a1e07e2c923c3246edfc8d59738d1b9a5952d20959acab0ada53a487f8"
+          }
+        },
+        {
+          "name": "small all256 original RGB glyph metrics and fixed/variable width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small genuine original RGB bitmap creation and requested point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small exact build release source-read and resampling cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small full real window equals independently laid out original RGB bitmaps",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "f60d4f501ee12f16c5435f2ebcd36bb181ca1920a3c05379a0932778e0a7a962",
+            "expected_sha256": "f60d4f501ee12f16c5435f2ebcd36bb181ca1920a3c05379a0932778e0a7a962",
+            "ink": 52
+          }
+        },
+        {
+          "name": "small actual default-window GPU shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large actual source entry and exact256 LSB bits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large exact opaque RGB cells equal unchanged fixed wx source reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "6cc465ded32b00504b5475d0ce0abb2e149f8f7cba51c6ad93f6b74f88b3c759",
+            "expected_sha256": "6cc465ded32b00504b5475d0ce0abb2e149f8f7cba51c6ad93f6b74f88b3c759"
+          }
+        },
+        {
+          "name": "large all256 original RGB glyph metrics and fixed/variable width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large genuine original RGB bitmap creation and requested point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large exact build release source-read and resampling cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large full real window equals independently laid out original RGB bitmaps",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "d530537d16cd9390dc1fc256be942244fd4a3a9980034b0e62f46a5a2094a46d",
+            "expected_sha256": "d530537d16cd9390dc1fc256be942244fd4a3a9980034b0e62f46a5a2094a46d",
+            "ink": 375
+          }
+        },
+        {
+          "name": "large actual default-window GPU shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-scaled actual source entry and exact256 LSB bits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-scaled exact opaque RGB cells equal unchanged fixed wx source reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "659d1c5b4bbca422baf383e85c1cf060ff524bccddb3cefc9a1c544bd894b5a7",
+            "expected_sha256": "659d1c5b4bbca422baf383e85c1cf060ff524bccddb3cefc9a1c544bd894b5a7"
+          }
+        },
+        {
+          "name": "large-scaled all256 original RGB glyph metrics and fixed/variable width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-scaled genuine original RGB bitmap creation and requested point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-scaled exact build release source-read and resampling cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-scaled full real window equals independently laid out original RGB bitmaps",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "1c807c430475e647a2d3f5df202c10aba1dc2d3aa9f3f1693cbedbda2eb3d065",
+            "expected_sha256": "1c807c430475e647a2d3f5df202c10aba1dc2d3aa9f3f1693cbedbda2eb3d065",
+            "ink": 520
+          }
+        },
+        {
+          "name": "large-scaled actual default-window GPU shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-scaled actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-restored actual source entry and exact256 LSB bits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-restored exact opaque RGB cells equal unchanged fixed wx source reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "6cc465ded32b00504b5475d0ce0abb2e149f8f7cba51c6ad93f6b74f88b3c759",
+            "expected_sha256": "6cc465ded32b00504b5475d0ce0abb2e149f8f7cba51c6ad93f6b74f88b3c759"
+          }
+        },
+        {
+          "name": "large-restored all256 original RGB glyph metrics and fixed/variable width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-restored genuine original RGB bitmap creation and requested point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-restored exact build release source-read and resampling cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-restored full real window equals independently laid out original RGB bitmaps",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "d530537d16cd9390dc1fc256be942244fd4a3a9980034b0e62f46a5a2094a46d",
+            "expected_sha256": "d530537d16cd9390dc1fc256be942244fd4a3a9980034b0e62f46a5a2094a46d",
+            "ink": 375
+          }
+        },
+        {
+          "name": "large-restored actual default-window GPU shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-restored actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "fixed-italic actual source entry and exact256 LSB bits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "fixed-italic exact opaque RGB cells equal unchanged fixed wx source reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "e4ca995309cb042a2095178f3ae4eb4f6d605198a6811173667eff12b50f5b19",
+            "expected_sha256": "e4ca995309cb042a2095178f3ae4eb4f6d605198a6811173667eff12b50f5b19"
+          }
+        },
+        {
+          "name": "fixed-italic all256 original RGB glyph metrics and fixed/variable width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "fixed-italic genuine original RGB bitmap creation and requested point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "fixed-italic exact build release source-read and resampling cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "fixed-italic full real window equals independently laid out original RGB bitmaps",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "5b2dac678cd437762567304fcfeb8a6a675a30733aeae9ec0462d7f09e551dcc",
+            "expected_sha256": "5b2dac678cd437762567304fcfeb8a6a675a30733aeae9ec0462d7f09e551dcc",
+            "ink": 3404
+          }
+        },
+        {
+          "name": "fixed-italic actual default-window GPU shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "fixed-italic actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "identity actual source entry and exact256 LSB bits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "identity exact opaque RGB cells equal unchanged fixed wx source reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "89bedc21565613bd6d69e05658beafb36da3e90a320724ba52a985f6400cffea",
+            "expected_sha256": "89bedc21565613bd6d69e05658beafb36da3e90a320724ba52a985f6400cffea"
+          }
+        },
+        {
+          "name": "identity all256 original RGB glyph metrics and fixed/variable width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "identity genuine original RGB bitmap creation and requested point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "identity exact build release source-read and resampling cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "identity full real window equals independently laid out original RGB bitmaps",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "3aac5799972c504b89cc56989c6e74827685019b66950b2d9a75e87da170adf9",
+            "expected_sha256": "3aac5799972c504b89cc56989c6e74827685019b66950b2d9a75e87da170adf9",
+            "ink": 423
+          }
+        },
+        {
+          "name": "identity actual default-window GPU shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "identity actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same original large resource object through real scale and restoration",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small bold fixed-italic and italic resource objects remain distinct",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "exact installed family/style selection with no default closest or synthetic substitution",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "missing installed family and exact style explicitly rejected",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "current physical x/y DPI observation replaces stale fixed96 telemetry without claiming full display qualification",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "first exact installed family and actual style index/raw tuple",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "first genuine selected-face original256 raster path",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "first exact creation public release and CPU raster cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "first all256 original glyph metrics from selected face RGB cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "first full actual GPU frame equals independent original glyph layout",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "expected_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "ink": 2592
+          }
+        },
+        {
+          "name": "first actual default-window linked GPU and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "first exact actual shader stage sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled exact installed family and actual style index/raw tuple",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled genuine selected-face original256 raster path",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled exact creation public release and CPU raster cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled all256 original glyph metrics from selected face RGB cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled full actual GPU frame equals independent original glyph layout",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "1df5245d0df2b745a4945fafc3be9f1fca6954255ff80283948d21cd364f0ad8",
+            "expected_sha256": "1df5245d0df2b745a4945fafc3be9f1fca6954255ff80283948d21cd364f0ad8",
+            "ink": 5770
+          }
+        },
+        {
+          "name": "scaled actual default-window linked GPU and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled exact actual shader stage sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored exact installed family and actual style index/raw tuple",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored genuine selected-face original256 raster path",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored exact creation public release and CPU raster cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored all256 original glyph metrics from selected face RGB cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored full actual GPU frame equals independent original glyph layout",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "expected_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "ink": 2592
+          }
+        },
+        {
+          "name": "restored actual default-window linked GPU and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored exact actual shader stage sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-family exact installed family and actual style index/raw tuple",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-family genuine selected-face original256 raster path",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-family exact creation public release and CPU raster cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-family all256 original glyph metrics from selected face RGB cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-family full actual GPU frame equals independent original glyph layout",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "expected_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "ink": 2592
+          }
+        },
+        {
+          "name": "other-family actual default-window linked GPU and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-family exact actual shader stage sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-style exact installed family and actual style index/raw tuple",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-style genuine selected-face original256 raster path",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-style exact creation public release and CPU raster cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-style all256 original glyph metrics from selected face RGB cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-style full actual GPU frame equals independent original glyph layout",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "041dc2599328dba2044a1c1c026391a7eb6132bdb5b3f7e1f1e6b4c96d3190a4",
+            "expected_sha256": "041dc2599328dba2044a1c1c026391a7eb6132bdb5b3f7e1f1e6b4c96d3190a4",
+            "ink": 2524
+          }
+        },
+        {
+          "name": "other-style actual default-window linked GPU and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-style exact actual shader stage sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "one genuine family font object preserved through scale restoration",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "different real family and style own separate original font objects",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restoring selected family returns exact original CPU and GPU bytes",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 66.04000091552734,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "scaled binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 99.05999755859375,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "restored binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 66.04000091552734,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "first binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 66.04000091552734,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "scaled binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 99.05999755859375,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "restored binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 66.04000091552734,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "other-family binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 66.04000091552734,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "other-style binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 66.04000091552734,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "actual UI before and after display metrics bind every native/family raster",
+          "passed": true
+        },
+        {
+          "name": "all original and new controls remain fully visible",
+          "passed": true
+        },
+        {
+          "name": "saved workspace and original initialized runtime preserved",
+          "passed": true
+        },
+        {
+          "name": "all font rounds use same actual PID",
+          "passed": true
+        }
+      ],
+      "pid": 22027,
+      "run": 1,
+      "cases": [
+        {
+          "label": "normal",
+          "cell_width": 82,
+          "cell_height": 83,
+          "point_size": 18,
+          "ink_pixels": 2592,
+          "actual_rgba_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+          "cells_sha256": "42292d57827787042bb645359383e9cb9458b8338f2fe4186384f77943be5235"
+        },
+        {
+          "label": "scaled",
+          "cell_width": 120,
+          "cell_height": 121,
+          "point_size": 27,
+          "ink_pixels": 5770,
+          "actual_rgba_sha256": "1df5245d0df2b745a4945fafc3be9f1fca6954255ff80283948d21cd364f0ad8",
+          "cells_sha256": "6388037fc7473703953917b11613bbab8375f2b6a9866bce897471ecd0f263a9"
+        },
+        {
+          "label": "restored",
+          "cell_width": 82,
+          "cell_height": 83,
+          "point_size": 18,
+          "ink_pixels": 2592,
+          "actual_rgba_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+          "cells_sha256": "42292d57827787042bb645359383e9cb9458b8338f2fe4186384f77943be5235"
+        }
+      ],
+      "actual_context_continuation_verified": false,
+      "full_port_complete": false,
+      "functional_completion_percent": null,
+      "scope": "Exact24 all prior native/vector/resource23 gates plus six synthetic small/large/scaled/restored/fixed-italic/identity RGB resource stages; not full font, wx runtime or full application qualification",
+      "vector_cases": [
+        {
+          "label": "normal",
+          "ink": 255,
+          "actual_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+          "font_address": 547262358016
+        },
+        {
+          "label": "scene-scaled",
+          "ink": 255,
+          "actual_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+          "font_address": 547262358016
+        },
+        {
+          "label": "draw-scaled",
+          "ink": 385,
+          "actual_sha256": "a7b980d9295ca8da38d14643b8f1a32185bac496ff4530becc1ea0721921a55e",
+          "font_address": 547262358016
+        },
+        {
+          "label": "restored",
+          "ink": 255,
+          "actual_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+          "font_address": 547262358016
+        }
+      ],
+      "vector_reference_is_independent_GPU_backend": false,
+      "resource_cases": [
+        {
+          "label": "normal",
+          "entry": "nr__18",
+          "ink": 87,
+          "actual_sha256": "783372d97a9e8924534eb351f4acd10b3ba6952fc82ba889b050bfdc23bc8075",
+          "font_address": 547262359040
+        },
+        {
+          "label": "scaled",
+          "entry": "nr__27",
+          "ink": 143,
+          "actual_sha256": "8367451e1b2342fae8b3d3127fe859187d694b96095bee68f614a632f3e99537",
+          "font_address": 547262359040
+        },
+        {
+          "label": "restored",
+          "entry": "nr__18",
+          "ink": 87,
+          "actual_sha256": "783372d97a9e8924534eb351f4acd10b3ba6952fc82ba889b050bfdc23bc8075",
+          "font_address": 547262359040
+        }
+      ],
+      "resource_mask_observations": [
+        {
+          "label": "normal",
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "label": "scaled",
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "label": "restored",
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ]
+        }
+      ],
+      "resample_cases": [
+        {
+          "label": "small",
+          "entry": "nr__8",
+          "point_size": 7,
+          "font_address": 547262359552,
+          "ink": 52,
+          "actual_sha256": "f60d4f501ee12f16c5435f2ebcd36bb181ca1920a3c05379a0932778e0a7a962",
+          "rgb_sha256": "5b6f25a1e07e2c923c3246edfc8d59738d1b9a5952d20959acab0ada53a487f8"
+        },
+        {
+          "label": "large",
+          "entry": "nrb_72",
+          "point_size": 31,
+          "font_address": 547262361088,
+          "ink": 375,
+          "actual_sha256": "d530537d16cd9390dc1fc256be942244fd4a3a9980034b0e62f46a5a2094a46d",
+          "rgb_sha256": "6cc465ded32b00504b5475d0ce0abb2e149f8f7cba51c6ad93f6b74f88b3c759"
+        },
+        {
+          "label": "large-scaled",
+          "entry": "nrb_72",
+          "point_size": 46,
+          "font_address": 547262361088,
+          "ink": 520,
+          "actual_sha256": "1c807c430475e647a2d3f5df202c10aba1dc2d3aa9f3f1693cbedbda2eb3d065",
+          "rgb_sha256": "659d1c5b4bbca422baf383e85c1cf060ff524bccddb3cefc9a1c544bd894b5a7"
+        },
+        {
+          "label": "large-restored",
+          "entry": "nrb_72",
+          "point_size": 31,
+          "font_address": 547262361088,
+          "ink": 375,
+          "actual_sha256": "d530537d16cd9390dc1fc256be942244fd4a3a9980034b0e62f46a5a2094a46d",
+          "rgb_sha256": "6cc465ded32b00504b5475d0ce0abb2e149f8f7cba51c6ad93f6b74f88b3c759"
+        },
+        {
+          "label": "fixed-italic",
+          "entry": "fib_72",
+          "point_size": 96,
+          "font_address": 547265217024,
+          "ink": 3404,
+          "actual_sha256": "5b2dac678cd437762567304fcfeb8a6a675a30733aeae9ec0462d7f09e551dcc",
+          "rgb_sha256": "e4ca995309cb042a2095178f3ae4eb4f6d605198a6811173667eff12b50f5b19"
+        },
+        {
+          "label": "identity",
+          "entry": "ni__72",
+          "point_size": 72,
+          "font_address": 547265220096,
+          "ink": 423,
+          "actual_sha256": "3aac5799972c504b89cc56989c6e74827685019b66950b2d9a75e87da170adf9",
+          "rgb_sha256": "89bedc21565613bd6d69e05658beafb36da3e90a320724ba52a985f6400cffea"
+        }
+      ],
+      "resample_mask_observations": [
+        {
+          "label": "small",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "large",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "large-scaled",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "large-restored",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "fixed-italic",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "identity",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "resample_reference_scope": "Synthetic font opaque RGB cells from unchanged fixed wx3.2.6 methods, minimal storage shim; not full wx runtime, independent GPU or device evidence",
+      "family_cases": [
+        {
+          "label": "first",
+          "family": "HarmonyOS-Sans",
+          "style": "normal",
+          "family_index": 0,
+          "style_index": 0,
+          "point_size": 18,
+          "font_address": 547265219072,
+          "actual_face_bold": false,
+          "actual_face_italic": false,
+          "cells_sha256": "42292d57827787042bb645359383e9cb9458b8338f2fe4186384f77943be5235",
+          "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7"
+        },
+        {
+          "label": "scaled",
+          "family": "HarmonyOS-Sans",
+          "style": "normal",
+          "family_index": 0,
+          "style_index": 0,
+          "point_size": 27,
+          "font_address": 547265219072,
+          "actual_face_bold": false,
+          "actual_face_italic": false,
+          "cells_sha256": "6388037fc7473703953917b11613bbab8375f2b6a9866bce897471ecd0f263a9",
+          "actual_sha256": "1df5245d0df2b745a4945fafc3be9f1fca6954255ff80283948d21cd364f0ad8"
+        },
+        {
+          "label": "restored",
+          "family": "HarmonyOS-Sans",
+          "style": "normal",
+          "family_index": 0,
+          "style_index": 0,
+          "point_size": 18,
+          "font_address": 547265219072,
+          "actual_face_bold": false,
+          "actual_face_italic": false,
+          "cells_sha256": "42292d57827787042bb645359383e9cb9458b8338f2fe4186384f77943be5235",
+          "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7"
+        },
+        {
+          "label": "other-family",
+          "family": "HarmonyOS-Sans-Light",
+          "style": "normal",
+          "family_index": 1,
+          "style_index": 0,
+          "point_size": 18,
+          "font_address": 547265183744,
+          "actual_face_bold": false,
+          "actual_face_italic": false,
+          "cells_sha256": "42292d57827787042bb645359383e9cb9458b8338f2fe4186384f77943be5235",
+          "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7"
+        },
+        {
+          "label": "other-style",
+          "family": "HarmonyOS-Sans",
+          "style": "normal",
+          "family_index": 0,
+          "style_index": 1,
+          "point_size": 18,
+          "font_address": 547265218048,
+          "actual_face_bold": false,
+          "actual_face_italic": true,
+          "cells_sha256": "bb280757fe9b188d0e426aa2b674390c1d42a14ea860474adc491095a520bb70",
+          "actual_sha256": "041dc2599328dba2044a1c1c026391a7eb6132bdb5b3f7e1f1e6b4c96d3190a4"
+        }
+      ],
+      "family_mask_observations": [
+        {
+          "label": "first",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "scaled",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "restored",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "other-family",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "other-style",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "system_family_count": 10,
+      "font_raster_reference_scope": "Actual selected NativeDrawing RGB cells and exact original GPU layout; not an independent font rasterizer, complete family coverage, chooser dialog or actual-display DPI proof",
+      "display_metrics": {
+        "ready": true,
+        "display_id": 0,
+        "revision": 1,
+        "dpi_x": 264.1600036621094,
+        "dpi_y": 264.1600036621094,
+        "density_pixels": 1.899999976158142,
+        "source": "actual-main-window-display-xDPI-yDPI",
+        "fixed_dpi_fallback": false
+      },
+      "layout_before": {
+        "olex2-view-reset": {
+          "passed": true,
+          "bounds": [
+            1174,
+            1485,
+            1318,
+            1546
+          ],
+          "original_bounds": [
+            1174,
+            1485,
+            1318,
+            1546
+          ],
+          "text": "重置视角"
+        },
+        "olex2-view-zoom": {
+          "passed": true,
+          "bounds": [
+            1677,
+            1477,
+            1877,
+            1553
+          ],
+          "original_bounds": [
+            1677,
+            1477,
+            1877,
+            1553
+          ],
+          "text": "4.400000"
+        },
+        "olex2-original-renderer-probe": {
+          "passed": true,
+          "bounds": [
+            1696,
+            808,
+            1871,
+            865
+          ],
+          "original_bounds": [
+            1696,
+            808,
+            1871,
+            865
+          ],
+          "text": "测试原版绘图"
+        },
+        "olex2-original-texture-load-probe": {
+          "passed": true,
+          "bounds": [
+            1521,
+            808,
+            1696,
+            865
+          ],
+          "original_bounds": [
+            1521,
+            808,
+            1696,
+            865
+          ]
+        },
+        "olex2-original-font-probe": {
+          "passed": true,
+          "bounds": [
+            1346,
+            808,
+            1521,
+            865
+          ],
+          "original_bounds": [
+            1346,
+            808,
+            1521,
+            865
+          ]
+        }
+      },
+      "layout_after": {
+        "olex2-view-reset": {
+          "passed": true,
+          "bounds": [
+            1174,
+            1485,
+            1318,
+            1546
+          ],
+          "original_bounds": [
+            1174,
+            1485,
+            1318,
+            1546
+          ],
+          "text": "重置视角"
+        },
+        "olex2-view-zoom": {
+          "passed": true,
+          "bounds": [
+            1677,
+            1477,
+            1877,
+            1553
+          ],
+          "original_bounds": [
+            1677,
+            1477,
+            1877,
+            1553
+          ],
+          "text": "4.400000"
+        },
+        "olex2-original-renderer-probe": {
+          "passed": true,
+          "bounds": [
+            1696,
+            808,
+            1871,
+            865
+          ],
+          "original_bounds": [
+            1696,
+            808,
+            1871,
+            865
+          ],
+          "text": "测试原版绘图"
+        },
+        "olex2-original-texture-load-probe": {
+          "passed": true,
+          "bounds": [
+            1521,
+            808,
+            1696,
+            865
+          ],
+          "original_bounds": [
+            1521,
+            808,
+            1696,
+            865
+          ]
+        },
+        "olex2-original-font-probe": {
+          "passed": true,
+          "bounds": [
+            1346,
+            808,
+            1521,
+            865
+          ],
+          "original_bounds": [
+            1346,
+            808,
+            1521,
+            865
+          ]
+        }
+      },
+      "folder": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-1"
+    },
+    {
+      "passed": true,
+      "checks": [
+        {
+          "name": "actual route and current process identities",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual main next frame selection and external EGL restored",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same-window independent context actually detached and destroyed",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual unique long-lived owner and balanced leases",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "original glyph lists retired before compatibility shutdown",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "genuine original-font creation contract",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal genuine original metrics from all256 RGB source cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal genuine point-size and creation generation",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal full actual window equals independent binary glyph layout",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "expected_ink_pixels": 2592,
+            "expected_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7"
+          }
+        },
+        {
+          "name": "normal actual default-window driver and linked program",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal actual driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled genuine original metrics from all256 RGB source cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled genuine point-size and creation generation",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled full actual window equals independent binary glyph layout",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "expected_ink_pixels": 5770,
+            "expected_sha256": "1df5245d0df2b745a4945fafc3be9f1fca6954255ff80283948d21cd364f0ad8",
+            "actual_sha256": "1df5245d0df2b745a4945fafc3be9f1fca6954255ff80283948d21cd364f0ad8"
+          }
+        },
+        {
+          "name": "scaled actual default-window driver and linked program",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled actual driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored genuine original metrics from all256 RGB source cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored genuine point-size and creation generation",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored full actual window equals independent binary glyph layout",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "expected_ink_pixels": 2592,
+            "expected_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7"
+          }
+        },
+        {
+          "name": "restored actual default-window driver and linked program",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored actual driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same original font object through scale and restoration",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restoring scale restores exact CPU and actual GPU bytes",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual scaled glyphs differ and have more ink",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same actual font/owner/scene across destroyed contexts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal glyphs survive actual new-context reconstruction byte-exactly",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "original vector descriptor genuine lists and honest shared-backend reference",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual source table equals independently parsed unchanged upstream data",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal genuine vector creation and unchanged intrinsic point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal independent original95 glyph metrics and text width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal original vector creation and retirement generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal fixed origin text actual matrices and original draw scalar",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal entire actual window equals direct upstream-table replay without TGlFont",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "ink": 255,
+            "actual_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+            "reference_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+            "independent_GPU_backend": false
+          }
+        },
+        {
+          "name": "normal actual genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal actual real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal reference genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal reference real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled genuine vector creation and unchanged intrinsic point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled independent original95 glyph metrics and text width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled original vector creation and retirement generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled fixed origin text actual matrices and original draw scalar",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled entire actual window equals direct upstream-table replay without TGlFont",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "ink": 255,
+            "actual_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+            "reference_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+            "independent_GPU_backend": false
+          }
+        },
+        {
+          "name": "scene-scaled actual genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled actual real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled reference genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled reference real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled genuine vector creation and unchanged intrinsic point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled independent original95 glyph metrics and text width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled original vector creation and retirement generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled fixed origin text actual matrices and original draw scalar",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled entire actual window equals direct upstream-table replay without TGlFont",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "ink": 385,
+            "actual_sha256": "a7b980d9295ca8da38d14643b8f1a32185bac496ff4530becc1ea0721921a55e",
+            "reference_sha256": "a7b980d9295ca8da38d14643b8f1a32185bac496ff4530becc1ea0721921a55e",
+            "independent_GPU_backend": false
+          }
+        },
+        {
+          "name": "draw-scaled actual genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled actual real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled reference genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled reference real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored genuine vector creation and unchanged intrinsic point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored independent original95 glyph metrics and text width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored original vector creation and retirement generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored fixed origin text actual matrices and original draw scalar",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored entire actual window equals direct upstream-table replay without TGlFont",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "ink": 255,
+            "actual_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+            "reference_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+            "independent_GPU_backend": false
+          }
+        },
+        {
+          "name": "restored actual genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored actual real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored reference genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored reference real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same distinct original vector font object through all four cases",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "surface font scaling preserves original intrinsic vector semantics",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "original vector draw scalar genuinely enlarges visible strokes",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same original vector object and exact actual pixels through new real context",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "genuine original resource CreateGlyphs without default-font replacement",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual font archive bytes equal explicit independent synthetic resource",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal original ZIP entry dimensions and exact LSB bit-array",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal genuine original resource bitmap and point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal independently decoded original256 glyph metrics and width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal exact build release and resource-read cache generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal full actual window equals independent original bit-array bitmap reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "783372d97a9e8924534eb351f4acd10b3ba6952fc82ba889b050bfdc23bc8075",
+            "expected_sha256": "783372d97a9e8924534eb351f4acd10b3ba6952fc82ba889b050bfdc23bc8075",
+            "ink": 87
+          }
+        },
+        {
+          "name": "normal actual default-window driver shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal original resource actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled original ZIP entry dimensions and exact LSB bit-array",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled genuine original resource bitmap and point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled independently decoded original256 glyph metrics and width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled exact build release and resource-read cache generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled full actual window equals independent original bit-array bitmap reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "8367451e1b2342fae8b3d3127fe859187d694b96095bee68f614a632f3e99537",
+            "expected_sha256": "8367451e1b2342fae8b3d3127fe859187d694b96095bee68f614a632f3e99537",
+            "ink": 143
+          }
+        },
+        {
+          "name": "scaled actual default-window driver shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled original resource actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored original ZIP entry dimensions and exact LSB bit-array",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored genuine original resource bitmap and point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored independently decoded original256 glyph metrics and width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored exact build release and resource-read cache generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored full actual window equals independent original bit-array bitmap reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "783372d97a9e8924534eb351f4acd10b3ba6952fc82ba889b050bfdc23bc8075",
+            "expected_sha256": "783372d97a9e8924534eb351f4acd10b3ba6952fc82ba889b050bfdc23bc8075",
+            "ink": 87
+          }
+        },
+        {
+          "name": "restored actual default-window driver shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored original resource actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same distinct original resource font object through selected entry scaling",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "resource entry scale genuinely changes and exact restoration returns",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same original resource object and exact pixels across real contexts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "original resource RGB resampling explicit synthetic route without fallback",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual original resample archive bytes match independent fixture",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small actual source entry and exact256 LSB bits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small exact opaque RGB cells equal unchanged fixed wx source reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "5b6f25a1e07e2c923c3246edfc8d59738d1b9a5952d20959acab0ada53a487f8",
+            "expected_sha256": "5b6f25a1e07e2c923c3246edfc8d59738d1b9a5952d20959acab0ada53a487f8"
+          }
+        },
+        {
+          "name": "small all256 original RGB glyph metrics and fixed/variable width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small genuine original RGB bitmap creation and requested point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small exact build release source-read and resampling cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small full real window equals independently laid out original RGB bitmaps",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "f60d4f501ee12f16c5435f2ebcd36bb181ca1920a3c05379a0932778e0a7a962",
+            "expected_sha256": "f60d4f501ee12f16c5435f2ebcd36bb181ca1920a3c05379a0932778e0a7a962",
+            "ink": 52
+          }
+        },
+        {
+          "name": "small actual default-window GPU shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large actual source entry and exact256 LSB bits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large exact opaque RGB cells equal unchanged fixed wx source reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "6cc465ded32b00504b5475d0ce0abb2e149f8f7cba51c6ad93f6b74f88b3c759",
+            "expected_sha256": "6cc465ded32b00504b5475d0ce0abb2e149f8f7cba51c6ad93f6b74f88b3c759"
+          }
+        },
+        {
+          "name": "large all256 original RGB glyph metrics and fixed/variable width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large genuine original RGB bitmap creation and requested point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large exact build release source-read and resampling cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large full real window equals independently laid out original RGB bitmaps",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "d530537d16cd9390dc1fc256be942244fd4a3a9980034b0e62f46a5a2094a46d",
+            "expected_sha256": "d530537d16cd9390dc1fc256be942244fd4a3a9980034b0e62f46a5a2094a46d",
+            "ink": 375
+          }
+        },
+        {
+          "name": "large actual default-window GPU shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-scaled actual source entry and exact256 LSB bits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-scaled exact opaque RGB cells equal unchanged fixed wx source reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "659d1c5b4bbca422baf383e85c1cf060ff524bccddb3cefc9a1c544bd894b5a7",
+            "expected_sha256": "659d1c5b4bbca422baf383e85c1cf060ff524bccddb3cefc9a1c544bd894b5a7"
+          }
+        },
+        {
+          "name": "large-scaled all256 original RGB glyph metrics and fixed/variable width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-scaled genuine original RGB bitmap creation and requested point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-scaled exact build release source-read and resampling cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-scaled full real window equals independently laid out original RGB bitmaps",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "1c807c430475e647a2d3f5df202c10aba1dc2d3aa9f3f1693cbedbda2eb3d065",
+            "expected_sha256": "1c807c430475e647a2d3f5df202c10aba1dc2d3aa9f3f1693cbedbda2eb3d065",
+            "ink": 520
+          }
+        },
+        {
+          "name": "large-scaled actual default-window GPU shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-scaled actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-restored actual source entry and exact256 LSB bits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-restored exact opaque RGB cells equal unchanged fixed wx source reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "6cc465ded32b00504b5475d0ce0abb2e149f8f7cba51c6ad93f6b74f88b3c759",
+            "expected_sha256": "6cc465ded32b00504b5475d0ce0abb2e149f8f7cba51c6ad93f6b74f88b3c759"
+          }
+        },
+        {
+          "name": "large-restored all256 original RGB glyph metrics and fixed/variable width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-restored genuine original RGB bitmap creation and requested point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-restored exact build release source-read and resampling cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-restored full real window equals independently laid out original RGB bitmaps",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "d530537d16cd9390dc1fc256be942244fd4a3a9980034b0e62f46a5a2094a46d",
+            "expected_sha256": "d530537d16cd9390dc1fc256be942244fd4a3a9980034b0e62f46a5a2094a46d",
+            "ink": 375
+          }
+        },
+        {
+          "name": "large-restored actual default-window GPU shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-restored actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "fixed-italic actual source entry and exact256 LSB bits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "fixed-italic exact opaque RGB cells equal unchanged fixed wx source reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "e4ca995309cb042a2095178f3ae4eb4f6d605198a6811173667eff12b50f5b19",
+            "expected_sha256": "e4ca995309cb042a2095178f3ae4eb4f6d605198a6811173667eff12b50f5b19"
+          }
+        },
+        {
+          "name": "fixed-italic all256 original RGB glyph metrics and fixed/variable width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "fixed-italic genuine original RGB bitmap creation and requested point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "fixed-italic exact build release source-read and resampling cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "fixed-italic full real window equals independently laid out original RGB bitmaps",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "5b2dac678cd437762567304fcfeb8a6a675a30733aeae9ec0462d7f09e551dcc",
+            "expected_sha256": "5b2dac678cd437762567304fcfeb8a6a675a30733aeae9ec0462d7f09e551dcc",
+            "ink": 3404
+          }
+        },
+        {
+          "name": "fixed-italic actual default-window GPU shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "fixed-italic actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "identity actual source entry and exact256 LSB bits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "identity exact opaque RGB cells equal unchanged fixed wx source reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "89bedc21565613bd6d69e05658beafb36da3e90a320724ba52a985f6400cffea",
+            "expected_sha256": "89bedc21565613bd6d69e05658beafb36da3e90a320724ba52a985f6400cffea"
+          }
+        },
+        {
+          "name": "identity all256 original RGB glyph metrics and fixed/variable width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "identity genuine original RGB bitmap creation and requested point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "identity exact build release source-read and resampling cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "identity full real window equals independently laid out original RGB bitmaps",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "3aac5799972c504b89cc56989c6e74827685019b66950b2d9a75e87da170adf9",
+            "expected_sha256": "3aac5799972c504b89cc56989c6e74827685019b66950b2d9a75e87da170adf9",
+            "ink": 423
+          }
+        },
+        {
+          "name": "identity actual default-window GPU shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "identity actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same original large resource object through real scale and restoration",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small bold fixed-italic and italic resource objects remain distinct",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "all resampled objects and exact pixels survive actual context replacement",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "exact installed family/style selection with no default closest or synthetic substitution",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "missing installed family and exact style explicitly rejected",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "current physical x/y DPI observation replaces stale fixed96 telemetry without claiming full display qualification",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "first exact installed family and actual style index/raw tuple",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "first genuine selected-face original256 raster path",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "first exact creation public release and CPU raster cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "first all256 original glyph metrics from selected face RGB cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "first full actual GPU frame equals independent original glyph layout",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "expected_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "ink": 2592
+          }
+        },
+        {
+          "name": "first actual default-window linked GPU and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "first exact actual shader stage sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled exact installed family and actual style index/raw tuple",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled genuine selected-face original256 raster path",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled exact creation public release and CPU raster cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled all256 original glyph metrics from selected face RGB cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled full actual GPU frame equals independent original glyph layout",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "1df5245d0df2b745a4945fafc3be9f1fca6954255ff80283948d21cd364f0ad8",
+            "expected_sha256": "1df5245d0df2b745a4945fafc3be9f1fca6954255ff80283948d21cd364f0ad8",
+            "ink": 5770
+          }
+        },
+        {
+          "name": "scaled actual default-window linked GPU and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled exact actual shader stage sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored exact installed family and actual style index/raw tuple",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored genuine selected-face original256 raster path",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored exact creation public release and CPU raster cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored all256 original glyph metrics from selected face RGB cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored full actual GPU frame equals independent original glyph layout",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "expected_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "ink": 2592
+          }
+        },
+        {
+          "name": "restored actual default-window linked GPU and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored exact actual shader stage sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-family exact installed family and actual style index/raw tuple",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-family genuine selected-face original256 raster path",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-family exact creation public release and CPU raster cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-family all256 original glyph metrics from selected face RGB cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-family full actual GPU frame equals independent original glyph layout",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "expected_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "ink": 2592
+          }
+        },
+        {
+          "name": "other-family actual default-window linked GPU and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-family exact actual shader stage sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-style exact installed family and actual style index/raw tuple",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-style genuine selected-face original256 raster path",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-style exact creation public release and CPU raster cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-style all256 original glyph metrics from selected face RGB cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-style full actual GPU frame equals independent original glyph layout",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "041dc2599328dba2044a1c1c026391a7eb6132bdb5b3f7e1f1e6b4c96d3190a4",
+            "expected_sha256": "041dc2599328dba2044a1c1c026391a7eb6132bdb5b3f7e1f1e6b4c96d3190a4",
+            "ink": 2524
+          }
+        },
+        {
+          "name": "other-style actual default-window linked GPU and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-style exact actual shader stage sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "one genuine family font object preserved through scale restoration",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "different real family and style own separate original font objects",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restoring selected family returns exact original CPU and GPU bytes",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual installed family/style catalog stays unchanged across destroyed contexts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "all selected-family font objects and exact GPU cells survive actual context replacement",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 66.04000091552734,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "scaled binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 99.05999755859375,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "restored binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 66.04000091552734,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "first binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 66.04000091552734,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "scaled binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 99.05999755859375,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "restored binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 66.04000091552734,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "other-family binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 66.04000091552734,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "other-style binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 66.04000091552734,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "actual UI before and after display metrics bind every native/family raster",
+          "passed": true
+        },
+        {
+          "name": "all original and new controls remain fully visible",
+          "passed": true
+        },
+        {
+          "name": "saved workspace and original initialized runtime preserved",
+          "passed": true
+        },
+        {
+          "name": "all font rounds use same actual PID",
+          "passed": true
+        }
+      ],
+      "pid": 22027,
+      "run": 2,
+      "cases": [
+        {
+          "label": "normal",
+          "cell_width": 82,
+          "cell_height": 83,
+          "point_size": 18,
+          "ink_pixels": 2592,
+          "actual_rgba_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+          "cells_sha256": "42292d57827787042bb645359383e9cb9458b8338f2fe4186384f77943be5235"
+        },
+        {
+          "label": "scaled",
+          "cell_width": 120,
+          "cell_height": 121,
+          "point_size": 27,
+          "ink_pixels": 5770,
+          "actual_rgba_sha256": "1df5245d0df2b745a4945fafc3be9f1fca6954255ff80283948d21cd364f0ad8",
+          "cells_sha256": "6388037fc7473703953917b11613bbab8375f2b6a9866bce897471ecd0f263a9"
+        },
+        {
+          "label": "restored",
+          "cell_width": 82,
+          "cell_height": 83,
+          "point_size": 18,
+          "ink_pixels": 2592,
+          "actual_rgba_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+          "cells_sha256": "42292d57827787042bb645359383e9cb9458b8338f2fe4186384f77943be5235"
+        }
+      ],
+      "actual_context_continuation_verified": true,
+      "full_port_complete": false,
+      "functional_completion_percent": null,
+      "scope": "Exact24 all prior native/vector/resource23 gates plus six synthetic small/large/scaled/restored/fixed-italic/identity RGB resource stages; not full font, wx runtime or full application qualification",
+      "vector_cases": [
+        {
+          "label": "normal",
+          "ink": 255,
+          "actual_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+          "font_address": 547262358016
+        },
+        {
+          "label": "scene-scaled",
+          "ink": 255,
+          "actual_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+          "font_address": 547262358016
+        },
+        {
+          "label": "draw-scaled",
+          "ink": 385,
+          "actual_sha256": "a7b980d9295ca8da38d14643b8f1a32185bac496ff4530becc1ea0721921a55e",
+          "font_address": 547262358016
+        },
+        {
+          "label": "restored",
+          "ink": 255,
+          "actual_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+          "font_address": 547262358016
+        }
+      ],
+      "vector_reference_is_independent_GPU_backend": false,
+      "resource_cases": [
+        {
+          "label": "normal",
+          "entry": "nr__18",
+          "ink": 87,
+          "actual_sha256": "783372d97a9e8924534eb351f4acd10b3ba6952fc82ba889b050bfdc23bc8075",
+          "font_address": 547262359040
+        },
+        {
+          "label": "scaled",
+          "entry": "nr__27",
+          "ink": 143,
+          "actual_sha256": "8367451e1b2342fae8b3d3127fe859187d694b96095bee68f614a632f3e99537",
+          "font_address": 547262359040
+        },
+        {
+          "label": "restored",
+          "entry": "nr__18",
+          "ink": 87,
+          "actual_sha256": "783372d97a9e8924534eb351f4acd10b3ba6952fc82ba889b050bfdc23bc8075",
+          "font_address": 547262359040
+        }
+      ],
+      "resource_mask_observations": [
+        {
+          "label": "normal",
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "label": "scaled",
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "label": "restored",
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ]
+        }
+      ],
+      "resample_cases": [
+        {
+          "label": "small",
+          "entry": "nr__8",
+          "point_size": 7,
+          "font_address": 547262359552,
+          "ink": 52,
+          "actual_sha256": "f60d4f501ee12f16c5435f2ebcd36bb181ca1920a3c05379a0932778e0a7a962",
+          "rgb_sha256": "5b6f25a1e07e2c923c3246edfc8d59738d1b9a5952d20959acab0ada53a487f8"
+        },
+        {
+          "label": "large",
+          "entry": "nrb_72",
+          "point_size": 31,
+          "font_address": 547262361088,
+          "ink": 375,
+          "actual_sha256": "d530537d16cd9390dc1fc256be942244fd4a3a9980034b0e62f46a5a2094a46d",
+          "rgb_sha256": "6cc465ded32b00504b5475d0ce0abb2e149f8f7cba51c6ad93f6b74f88b3c759"
+        },
+        {
+          "label": "large-scaled",
+          "entry": "nrb_72",
+          "point_size": 46,
+          "font_address": 547262361088,
+          "ink": 520,
+          "actual_sha256": "1c807c430475e647a2d3f5df202c10aba1dc2d3aa9f3f1693cbedbda2eb3d065",
+          "rgb_sha256": "659d1c5b4bbca422baf383e85c1cf060ff524bccddb3cefc9a1c544bd894b5a7"
+        },
+        {
+          "label": "large-restored",
+          "entry": "nrb_72",
+          "point_size": 31,
+          "font_address": 547262361088,
+          "ink": 375,
+          "actual_sha256": "d530537d16cd9390dc1fc256be942244fd4a3a9980034b0e62f46a5a2094a46d",
+          "rgb_sha256": "6cc465ded32b00504b5475d0ce0abb2e149f8f7cba51c6ad93f6b74f88b3c759"
+        },
+        {
+          "label": "fixed-italic",
+          "entry": "fib_72",
+          "point_size": 96,
+          "font_address": 547265217024,
+          "ink": 3404,
+          "actual_sha256": "5b2dac678cd437762567304fcfeb8a6a675a30733aeae9ec0462d7f09e551dcc",
+          "rgb_sha256": "e4ca995309cb042a2095178f3ae4eb4f6d605198a6811173667eff12b50f5b19"
+        },
+        {
+          "label": "identity",
+          "entry": "ni__72",
+          "point_size": 72,
+          "font_address": 547265220096,
+          "ink": 423,
+          "actual_sha256": "3aac5799972c504b89cc56989c6e74827685019b66950b2d9a75e87da170adf9",
+          "rgb_sha256": "89bedc21565613bd6d69e05658beafb36da3e90a320724ba52a985f6400cffea"
+        }
+      ],
+      "resample_mask_observations": [
+        {
+          "label": "small",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "large",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "large-scaled",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "large-restored",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "fixed-italic",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "identity",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "resample_reference_scope": "Synthetic font opaque RGB cells from unchanged fixed wx3.2.6 methods, minimal storage shim; not full wx runtime, independent GPU or device evidence",
+      "family_cases": [
+        {
+          "label": "first",
+          "family": "HarmonyOS-Sans",
+          "style": "normal",
+          "family_index": 0,
+          "style_index": 0,
+          "point_size": 18,
+          "font_address": 547265219072,
+          "actual_face_bold": false,
+          "actual_face_italic": false,
+          "cells_sha256": "42292d57827787042bb645359383e9cb9458b8338f2fe4186384f77943be5235",
+          "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7"
+        },
+        {
+          "label": "scaled",
+          "family": "HarmonyOS-Sans",
+          "style": "normal",
+          "family_index": 0,
+          "style_index": 0,
+          "point_size": 27,
+          "font_address": 547265219072,
+          "actual_face_bold": false,
+          "actual_face_italic": false,
+          "cells_sha256": "6388037fc7473703953917b11613bbab8375f2b6a9866bce897471ecd0f263a9",
+          "actual_sha256": "1df5245d0df2b745a4945fafc3be9f1fca6954255ff80283948d21cd364f0ad8"
+        },
+        {
+          "label": "restored",
+          "family": "HarmonyOS-Sans",
+          "style": "normal",
+          "family_index": 0,
+          "style_index": 0,
+          "point_size": 18,
+          "font_address": 547265219072,
+          "actual_face_bold": false,
+          "actual_face_italic": false,
+          "cells_sha256": "42292d57827787042bb645359383e9cb9458b8338f2fe4186384f77943be5235",
+          "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7"
+        },
+        {
+          "label": "other-family",
+          "family": "HarmonyOS-Sans-Light",
+          "style": "normal",
+          "family_index": 1,
+          "style_index": 0,
+          "point_size": 18,
+          "font_address": 547265183744,
+          "actual_face_bold": false,
+          "actual_face_italic": false,
+          "cells_sha256": "42292d57827787042bb645359383e9cb9458b8338f2fe4186384f77943be5235",
+          "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7"
+        },
+        {
+          "label": "other-style",
+          "family": "HarmonyOS-Sans",
+          "style": "normal",
+          "family_index": 0,
+          "style_index": 1,
+          "point_size": 18,
+          "font_address": 547265218048,
+          "actual_face_bold": false,
+          "actual_face_italic": true,
+          "cells_sha256": "bb280757fe9b188d0e426aa2b674390c1d42a14ea860474adc491095a520bb70",
+          "actual_sha256": "041dc2599328dba2044a1c1c026391a7eb6132bdb5b3f7e1f1e6b4c96d3190a4"
+        }
+      ],
+      "family_mask_observations": [
+        {
+          "label": "first",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "scaled",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "restored",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "other-family",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "other-style",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "system_family_count": 10,
+      "font_raster_reference_scope": "Actual selected NativeDrawing RGB cells and exact original GPU layout; not an independent font rasterizer, complete family coverage, chooser dialog or actual-display DPI proof",
+      "display_metrics": {
+        "ready": true,
+        "display_id": 0,
+        "revision": 1,
+        "dpi_x": 264.1600036621094,
+        "dpi_y": 264.1600036621094,
+        "density_pixels": 1.899999976158142,
+        "source": "actual-main-window-display-xDPI-yDPI",
+        "fixed_dpi_fallback": false
+      },
+      "layout_before": {
+        "olex2-view-reset": {
+          "passed": true,
+          "bounds": [
+            1174,
+            1485,
+            1318,
+            1546
+          ],
+          "original_bounds": [
+            1174,
+            1485,
+            1318,
+            1546
+          ],
+          "text": "重置视角"
+        },
+        "olex2-view-zoom": {
+          "passed": true,
+          "bounds": [
+            1677,
+            1477,
+            1877,
+            1553
+          ],
+          "original_bounds": [
+            1677,
+            1477,
+            1877,
+            1553
+          ],
+          "text": "4.400000"
+        },
+        "olex2-original-renderer-probe": {
+          "passed": true,
+          "bounds": [
+            1696,
+            808,
+            1871,
+            865
+          ],
+          "original_bounds": [
+            1696,
+            808,
+            1871,
+            865
+          ],
+          "text": "测试原版绘图"
+        },
+        "olex2-original-texture-load-probe": {
+          "passed": true,
+          "bounds": [
+            1521,
+            808,
+            1696,
+            865
+          ],
+          "original_bounds": [
+            1521,
+            808,
+            1696,
+            865
+          ]
+        },
+        "olex2-original-font-probe": {
+          "passed": true,
+          "bounds": [
+            1346,
+            808,
+            1521,
+            865
+          ],
+          "original_bounds": [
+            1346,
+            808,
+            1521,
+            865
+          ]
+        }
+      },
+      "layout_after": {
+        "olex2-view-reset": {
+          "passed": true,
+          "bounds": [
+            1174,
+            1485,
+            1318,
+            1546
+          ],
+          "original_bounds": [
+            1174,
+            1485,
+            1318,
+            1546
+          ],
+          "text": "重置视角"
+        },
+        "olex2-view-zoom": {
+          "passed": true,
+          "bounds": [
+            1677,
+            1477,
+            1877,
+            1553
+          ],
+          "original_bounds": [
+            1677,
+            1477,
+            1877,
+            1553
+          ],
+          "text": "4.400000"
+        },
+        "olex2-original-renderer-probe": {
+          "passed": true,
+          "bounds": [
+            1696,
+            808,
+            1871,
+            865
+          ],
+          "original_bounds": [
+            1696,
+            808,
+            1871,
+            865
+          ],
+          "text": "测试原版绘图"
+        },
+        "olex2-original-texture-load-probe": {
+          "passed": true,
+          "bounds": [
+            1521,
+            808,
+            1696,
+            865
+          ],
+          "original_bounds": [
+            1521,
+            808,
+            1696,
+            865
+          ]
+        },
+        "olex2-original-font-probe": {
+          "passed": true,
+          "bounds": [
+            1346,
+            808,
+            1521,
+            865
+          ],
+          "original_bounds": [
+            1346,
+            808,
+            1521,
+            865
+          ]
+        }
+      },
+      "folder": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-2"
+    },
+    {
+      "passed": true,
+      "checks": [
+        {
+          "name": "actual route and current process identities",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual main next frame selection and external EGL restored",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same-window independent context actually detached and destroyed",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual unique long-lived owner and balanced leases",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "original glyph lists retired before compatibility shutdown",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "genuine original-font creation contract",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal genuine original metrics from all256 RGB source cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal genuine point-size and creation generation",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal full actual window equals independent binary glyph layout",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "expected_ink_pixels": 2592,
+            "expected_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7"
+          }
+        },
+        {
+          "name": "normal actual default-window driver and linked program",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal actual driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled genuine original metrics from all256 RGB source cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled genuine point-size and creation generation",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled full actual window equals independent binary glyph layout",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "expected_ink_pixels": 5770,
+            "expected_sha256": "1df5245d0df2b745a4945fafc3be9f1fca6954255ff80283948d21cd364f0ad8",
+            "actual_sha256": "1df5245d0df2b745a4945fafc3be9f1fca6954255ff80283948d21cd364f0ad8"
+          }
+        },
+        {
+          "name": "scaled actual default-window driver and linked program",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled actual driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored genuine original metrics from all256 RGB source cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored genuine point-size and creation generation",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored full actual window equals independent binary glyph layout",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "expected_ink_pixels": 2592,
+            "expected_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7"
+          }
+        },
+        {
+          "name": "restored actual default-window driver and linked program",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored actual driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same original font object through scale and restoration",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restoring scale restores exact CPU and actual GPU bytes",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual scaled glyphs differ and have more ink",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same actual font/owner/scene across destroyed contexts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal glyphs survive actual new-context reconstruction byte-exactly",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "original vector descriptor genuine lists and honest shared-backend reference",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual source table equals independently parsed unchanged upstream data",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal genuine vector creation and unchanged intrinsic point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal independent original95 glyph metrics and text width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal original vector creation and retirement generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal fixed origin text actual matrices and original draw scalar",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal entire actual window equals direct upstream-table replay without TGlFont",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "ink": 255,
+            "actual_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+            "reference_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+            "independent_GPU_backend": false
+          }
+        },
+        {
+          "name": "normal actual genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal actual real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal reference genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal reference real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled genuine vector creation and unchanged intrinsic point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled independent original95 glyph metrics and text width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled original vector creation and retirement generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled fixed origin text actual matrices and original draw scalar",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled entire actual window equals direct upstream-table replay without TGlFont",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "ink": 255,
+            "actual_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+            "reference_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+            "independent_GPU_backend": false
+          }
+        },
+        {
+          "name": "scene-scaled actual genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled actual real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled reference genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scene-scaled reference real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled genuine vector creation and unchanged intrinsic point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled independent original95 glyph metrics and text width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled original vector creation and retirement generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled fixed origin text actual matrices and original draw scalar",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled entire actual window equals direct upstream-table replay without TGlFont",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "ink": 385,
+            "actual_sha256": "a7b980d9295ca8da38d14643b8f1a32185bac496ff4530becc1ea0721921a55e",
+            "reference_sha256": "a7b980d9295ca8da38d14643b8f1a32185bac496ff4530becc1ea0721921a55e",
+            "independent_GPU_backend": false
+          }
+        },
+        {
+          "name": "draw-scaled actual genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled actual real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled reference genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "draw-scaled reference real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored genuine vector creation and unchanged intrinsic point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored independent original95 glyph metrics and text width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored original vector creation and retirement generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored fixed origin text actual matrices and original draw scalar",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored entire actual window equals direct upstream-table replay without TGlFont",
+          "passed": true,
+          "detail": {
+            "pixels": 254048,
+            "ink": 255,
+            "actual_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+            "reference_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+            "independent_GPU_backend": false
+          }
+        },
+        {
+          "name": "restored actual genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored actual real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored reference genuine default-window driver and shader",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored reference real driver shader source retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same distinct original vector font object through all four cases",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "surface font scaling preserves original intrinsic vector semantics",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "original vector draw scalar genuinely enlarges visible strokes",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same original vector object and exact actual pixels through new real context",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "genuine original resource CreateGlyphs without default-font replacement",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual font archive bytes equal explicit independent synthetic resource",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal original ZIP entry dimensions and exact LSB bit-array",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal genuine original resource bitmap and point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal independently decoded original256 glyph metrics and width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal exact build release and resource-read cache generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal full actual window equals independent original bit-array bitmap reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "783372d97a9e8924534eb351f4acd10b3ba6952fc82ba889b050bfdc23bc8075",
+            "expected_sha256": "783372d97a9e8924534eb351f4acd10b3ba6952fc82ba889b050bfdc23bc8075",
+            "ink": 87
+          }
+        },
+        {
+          "name": "normal actual default-window driver shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal original resource actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled original ZIP entry dimensions and exact LSB bit-array",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled genuine original resource bitmap and point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled independently decoded original256 glyph metrics and width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled exact build release and resource-read cache generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled full actual window equals independent original bit-array bitmap reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "8367451e1b2342fae8b3d3127fe859187d694b96095bee68f614a632f3e99537",
+            "expected_sha256": "8367451e1b2342fae8b3d3127fe859187d694b96095bee68f614a632f3e99537",
+            "ink": 143
+          }
+        },
+        {
+          "name": "scaled actual default-window driver shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled original resource actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored original ZIP entry dimensions and exact LSB bit-array",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored genuine original resource bitmap and point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored independently decoded original256 glyph metrics and width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored exact build release and resource-read cache generations",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored full actual window equals independent original bit-array bitmap reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "783372d97a9e8924534eb351f4acd10b3ba6952fc82ba889b050bfdc23bc8075",
+            "expected_sha256": "783372d97a9e8924534eb351f4acd10b3ba6952fc82ba889b050bfdc23bc8075",
+            "ink": 87
+          }
+        },
+        {
+          "name": "restored actual default-window driver shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored original resource actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same distinct original resource font object through selected entry scaling",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "resource entry scale genuinely changes and exact restoration returns",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same original resource object and exact pixels across real contexts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "original resource RGB resampling explicit synthetic route without fallback",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual original resample archive bytes match independent fixture",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small actual source entry and exact256 LSB bits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small exact opaque RGB cells equal unchanged fixed wx source reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "5b6f25a1e07e2c923c3246edfc8d59738d1b9a5952d20959acab0ada53a487f8",
+            "expected_sha256": "5b6f25a1e07e2c923c3246edfc8d59738d1b9a5952d20959acab0ada53a487f8"
+          }
+        },
+        {
+          "name": "small all256 original RGB glyph metrics and fixed/variable width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small genuine original RGB bitmap creation and requested point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small exact build release source-read and resampling cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small full real window equals independently laid out original RGB bitmaps",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "f60d4f501ee12f16c5435f2ebcd36bb181ca1920a3c05379a0932778e0a7a962",
+            "expected_sha256": "f60d4f501ee12f16c5435f2ebcd36bb181ca1920a3c05379a0932778e0a7a962",
+            "ink": 52
+          }
+        },
+        {
+          "name": "small actual default-window GPU shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large actual source entry and exact256 LSB bits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large exact opaque RGB cells equal unchanged fixed wx source reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "6cc465ded32b00504b5475d0ce0abb2e149f8f7cba51c6ad93f6b74f88b3c759",
+            "expected_sha256": "6cc465ded32b00504b5475d0ce0abb2e149f8f7cba51c6ad93f6b74f88b3c759"
+          }
+        },
+        {
+          "name": "large all256 original RGB glyph metrics and fixed/variable width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large genuine original RGB bitmap creation and requested point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large exact build release source-read and resampling cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large full real window equals independently laid out original RGB bitmaps",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "d530537d16cd9390dc1fc256be942244fd4a3a9980034b0e62f46a5a2094a46d",
+            "expected_sha256": "d530537d16cd9390dc1fc256be942244fd4a3a9980034b0e62f46a5a2094a46d",
+            "ink": 375
+          }
+        },
+        {
+          "name": "large actual default-window GPU shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-scaled actual source entry and exact256 LSB bits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-scaled exact opaque RGB cells equal unchanged fixed wx source reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "659d1c5b4bbca422baf383e85c1cf060ff524bccddb3cefc9a1c544bd894b5a7",
+            "expected_sha256": "659d1c5b4bbca422baf383e85c1cf060ff524bccddb3cefc9a1c544bd894b5a7"
+          }
+        },
+        {
+          "name": "large-scaled all256 original RGB glyph metrics and fixed/variable width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-scaled genuine original RGB bitmap creation and requested point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-scaled exact build release source-read and resampling cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-scaled full real window equals independently laid out original RGB bitmaps",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "1c807c430475e647a2d3f5df202c10aba1dc2d3aa9f3f1693cbedbda2eb3d065",
+            "expected_sha256": "1c807c430475e647a2d3f5df202c10aba1dc2d3aa9f3f1693cbedbda2eb3d065",
+            "ink": 520
+          }
+        },
+        {
+          "name": "large-scaled actual default-window GPU shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-scaled actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-restored actual source entry and exact256 LSB bits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-restored exact opaque RGB cells equal unchanged fixed wx source reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "6cc465ded32b00504b5475d0ce0abb2e149f8f7cba51c6ad93f6b74f88b3c759",
+            "expected_sha256": "6cc465ded32b00504b5475d0ce0abb2e149f8f7cba51c6ad93f6b74f88b3c759"
+          }
+        },
+        {
+          "name": "large-restored all256 original RGB glyph metrics and fixed/variable width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-restored genuine original RGB bitmap creation and requested point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-restored exact build release source-read and resampling cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-restored full real window equals independently laid out original RGB bitmaps",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "d530537d16cd9390dc1fc256be942244fd4a3a9980034b0e62f46a5a2094a46d",
+            "expected_sha256": "d530537d16cd9390dc1fc256be942244fd4a3a9980034b0e62f46a5a2094a46d",
+            "ink": 375
+          }
+        },
+        {
+          "name": "large-restored actual default-window GPU shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "large-restored actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "fixed-italic actual source entry and exact256 LSB bits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "fixed-italic exact opaque RGB cells equal unchanged fixed wx source reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "e4ca995309cb042a2095178f3ae4eb4f6d605198a6811173667eff12b50f5b19",
+            "expected_sha256": "e4ca995309cb042a2095178f3ae4eb4f6d605198a6811173667eff12b50f5b19"
+          }
+        },
+        {
+          "name": "fixed-italic all256 original RGB glyph metrics and fixed/variable width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "fixed-italic genuine original RGB bitmap creation and requested point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "fixed-italic exact build release source-read and resampling cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "fixed-italic full real window equals independently laid out original RGB bitmaps",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "5b2dac678cd437762567304fcfeb8a6a675a30733aeae9ec0462d7f09e551dcc",
+            "expected_sha256": "5b2dac678cd437762567304fcfeb8a6a675a30733aeae9ec0462d7f09e551dcc",
+            "ink": 3404
+          }
+        },
+        {
+          "name": "fixed-italic actual default-window GPU shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "fixed-italic actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "identity actual source entry and exact256 LSB bits",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "identity exact opaque RGB cells equal unchanged fixed wx source reference",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "89bedc21565613bd6d69e05658beafb36da3e90a320724ba52a985f6400cffea",
+            "expected_sha256": "89bedc21565613bd6d69e05658beafb36da3e90a320724ba52a985f6400cffea"
+          }
+        },
+        {
+          "name": "identity all256 original RGB glyph metrics and fixed/variable width",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "identity genuine original RGB bitmap creation and requested point size",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "identity exact build release source-read and resampling cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "identity full real window equals independently laid out original RGB bitmaps",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "3aac5799972c504b89cc56989c6e74827685019b66950b2d9a75e87da170adf9",
+            "expected_sha256": "3aac5799972c504b89cc56989c6e74827685019b66950b2d9a75e87da170adf9",
+            "ink": 423
+          }
+        },
+        {
+          "name": "identity actual default-window GPU shader and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "identity actual shader sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "same original large resource object through real scale and restoration",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "small bold fixed-italic and italic resource objects remain distinct",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "all resampled objects and exact pixels survive actual context replacement",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "exact installed family/style selection with no default closest or synthetic substitution",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "missing installed family and exact style explicitly rejected",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "current physical x/y DPI observation replaces stale fixed96 telemetry without claiming full display qualification",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "first exact installed family and actual style index/raw tuple",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "first genuine selected-face original256 raster path",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "first exact creation public release and CPU raster cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "first all256 original glyph metrics from selected face RGB cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "first full actual GPU frame equals independent original glyph layout",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "expected_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "ink": 2592
+          }
+        },
+        {
+          "name": "first actual default-window linked GPU and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "first exact actual shader stage sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled exact installed family and actual style index/raw tuple",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled genuine selected-face original256 raster path",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled exact creation public release and CPU raster cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled all256 original glyph metrics from selected face RGB cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled full actual GPU frame equals independent original glyph layout",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "1df5245d0df2b745a4945fafc3be9f1fca6954255ff80283948d21cd364f0ad8",
+            "expected_sha256": "1df5245d0df2b745a4945fafc3be9f1fca6954255ff80283948d21cd364f0ad8",
+            "ink": 5770
+          }
+        },
+        {
+          "name": "scaled actual default-window linked GPU and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "scaled exact actual shader stage sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored exact installed family and actual style index/raw tuple",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored genuine selected-face original256 raster path",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored exact creation public release and CPU raster cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored all256 original glyph metrics from selected face RGB cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored full actual GPU frame equals independent original glyph layout",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "expected_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "ink": 2592
+          }
+        },
+        {
+          "name": "restored actual default-window linked GPU and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restored exact actual shader stage sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-family exact installed family and actual style index/raw tuple",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-family genuine selected-face original256 raster path",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-family exact creation public release and CPU raster cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-family all256 original glyph metrics from selected face RGB cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-family full actual GPU frame equals independent original glyph layout",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "expected_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+            "ink": 2592
+          }
+        },
+        {
+          "name": "other-family actual default-window linked GPU and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-family exact actual shader stage sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-style exact installed family and actual style index/raw tuple",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-style genuine selected-face original256 raster path",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-style exact creation public release and CPU raster cache counts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-style all256 original glyph metrics from selected face RGB cells",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-style full actual GPU frame equals independent original glyph layout",
+          "passed": true,
+          "detail": {
+            "actual_sha256": "041dc2599328dba2044a1c1c026391a7eb6132bdb5b3f7e1f1e6b4c96d3190a4",
+            "expected_sha256": "041dc2599328dba2044a1c1c026391a7eb6132bdb5b3f7e1f1e6b4c96d3190a4",
+            "ink": 2524
+          }
+        },
+        {
+          "name": "other-style actual default-window linked GPU and integer write state",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "other-style exact actual shader stage sources retained",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "one genuine family font object preserved through scale restoration",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "different real family and style own separate original font objects",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "restoring selected family returns exact original CPU and GPU bytes",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "actual installed family/style catalog stays unchanged across destroyed contexts",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "all selected-family font objects and exact GPU cells survive actual context replacement",
+          "passed": true,
+          "detail": null
+        },
+        {
+          "name": "normal binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 66.04000091552734,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "scaled binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 99.05999755859375,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "restored binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 66.04000091552734,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "first binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 66.04000091552734,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "scaled binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 99.05999755859375,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "restored binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 66.04000091552734,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "other-family binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 66.04000091552734,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "other-style binds exact observed display identity and float32 physical DPI size/axis scale",
+          "passed": true,
+          "detail": {
+            "pixel_size": 66.04000091552734,
+            "scale_x": 1.0
+          }
+        },
+        {
+          "name": "actual UI before and after display metrics bind every native/family raster",
+          "passed": true
+        },
+        {
+          "name": "all original and new controls remain fully visible",
+          "passed": true
+        },
+        {
+          "name": "saved workspace and original initialized runtime preserved",
+          "passed": true
+        },
+        {
+          "name": "all font rounds use same actual PID",
+          "passed": true
+        }
+      ],
+      "pid": 22027,
+      "run": 3,
+      "cases": [
+        {
+          "label": "normal",
+          "cell_width": 82,
+          "cell_height": 83,
+          "point_size": 18,
+          "ink_pixels": 2592,
+          "actual_rgba_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+          "cells_sha256": "42292d57827787042bb645359383e9cb9458b8338f2fe4186384f77943be5235"
+        },
+        {
+          "label": "scaled",
+          "cell_width": 120,
+          "cell_height": 121,
+          "point_size": 27,
+          "ink_pixels": 5770,
+          "actual_rgba_sha256": "1df5245d0df2b745a4945fafc3be9f1fca6954255ff80283948d21cd364f0ad8",
+          "cells_sha256": "6388037fc7473703953917b11613bbab8375f2b6a9866bce897471ecd0f263a9"
+        },
+        {
+          "label": "restored",
+          "cell_width": 82,
+          "cell_height": 83,
+          "point_size": 18,
+          "ink_pixels": 2592,
+          "actual_rgba_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7",
+          "cells_sha256": "42292d57827787042bb645359383e9cb9458b8338f2fe4186384f77943be5235"
+        }
+      ],
+      "actual_context_continuation_verified": true,
+      "full_port_complete": false,
+      "functional_completion_percent": null,
+      "scope": "Exact24 all prior native/vector/resource23 gates plus six synthetic small/large/scaled/restored/fixed-italic/identity RGB resource stages; not full font, wx runtime or full application qualification",
+      "vector_cases": [
+        {
+          "label": "normal",
+          "ink": 255,
+          "actual_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+          "font_address": 547262358016
+        },
+        {
+          "label": "scene-scaled",
+          "ink": 255,
+          "actual_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+          "font_address": 547262358016
+        },
+        {
+          "label": "draw-scaled",
+          "ink": 385,
+          "actual_sha256": "a7b980d9295ca8da38d14643b8f1a32185bac496ff4530becc1ea0721921a55e",
+          "font_address": 547262358016
+        },
+        {
+          "label": "restored",
+          "ink": 255,
+          "actual_sha256": "e27d6e05e9012c661a08c07dfc7374da6a9c48f10e95775c7e0873927ed1c218",
+          "font_address": 547262358016
+        }
+      ],
+      "vector_reference_is_independent_GPU_backend": false,
+      "resource_cases": [
+        {
+          "label": "normal",
+          "entry": "nr__18",
+          "ink": 87,
+          "actual_sha256": "783372d97a9e8924534eb351f4acd10b3ba6952fc82ba889b050bfdc23bc8075",
+          "font_address": 547262359040
+        },
+        {
+          "label": "scaled",
+          "entry": "nr__27",
+          "ink": 143,
+          "actual_sha256": "8367451e1b2342fae8b3d3127fe859187d694b96095bee68f614a632f3e99537",
+          "font_address": 547262359040
+        },
+        {
+          "label": "restored",
+          "entry": "nr__18",
+          "ink": 87,
+          "actual_sha256": "783372d97a9e8924534eb351f4acd10b3ba6952fc82ba889b050bfdc23bc8075",
+          "font_address": 547262359040
+        }
+      ],
+      "resource_mask_observations": [
+        {
+          "label": "normal",
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "label": "scaled",
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "label": "restored",
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ]
+        }
+      ],
+      "resample_cases": [
+        {
+          "label": "small",
+          "entry": "nr__8",
+          "point_size": 7,
+          "font_address": 547262359552,
+          "ink": 52,
+          "actual_sha256": "f60d4f501ee12f16c5435f2ebcd36bb181ca1920a3c05379a0932778e0a7a962",
+          "rgb_sha256": "5b6f25a1e07e2c923c3246edfc8d59738d1b9a5952d20959acab0ada53a487f8"
+        },
+        {
+          "label": "large",
+          "entry": "nrb_72",
+          "point_size": 31,
+          "font_address": 547262361088,
+          "ink": 375,
+          "actual_sha256": "d530537d16cd9390dc1fc256be942244fd4a3a9980034b0e62f46a5a2094a46d",
+          "rgb_sha256": "6cc465ded32b00504b5475d0ce0abb2e149f8f7cba51c6ad93f6b74f88b3c759"
+        },
+        {
+          "label": "large-scaled",
+          "entry": "nrb_72",
+          "point_size": 46,
+          "font_address": 547262361088,
+          "ink": 520,
+          "actual_sha256": "1c807c430475e647a2d3f5df202c10aba1dc2d3aa9f3f1693cbedbda2eb3d065",
+          "rgb_sha256": "659d1c5b4bbca422baf383e85c1cf060ff524bccddb3cefc9a1c544bd894b5a7"
+        },
+        {
+          "label": "large-restored",
+          "entry": "nrb_72",
+          "point_size": 31,
+          "font_address": 547262361088,
+          "ink": 375,
+          "actual_sha256": "d530537d16cd9390dc1fc256be942244fd4a3a9980034b0e62f46a5a2094a46d",
+          "rgb_sha256": "6cc465ded32b00504b5475d0ce0abb2e149f8f7cba51c6ad93f6b74f88b3c759"
+        },
+        {
+          "label": "fixed-italic",
+          "entry": "fib_72",
+          "point_size": 96,
+          "font_address": 547265217024,
+          "ink": 3404,
+          "actual_sha256": "5b2dac678cd437762567304fcfeb8a6a675a30733aeae9ec0462d7f09e551dcc",
+          "rgb_sha256": "e4ca995309cb042a2095178f3ae4eb4f6d605198a6811173667eff12b50f5b19"
+        },
+        {
+          "label": "identity",
+          "entry": "ni__72",
+          "point_size": 72,
+          "font_address": 547265220096,
+          "ink": 423,
+          "actual_sha256": "3aac5799972c504b89cc56989c6e74827685019b66950b2d9a75e87da170adf9",
+          "rgb_sha256": "89bedc21565613bd6d69e05658beafb36da3e90a320724ba52a985f6400cffea"
+        }
+      ],
+      "resample_mask_observations": [
+        {
+          "label": "small",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "large",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "large-scaled",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "large-restored",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "fixed-italic",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "identity",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "resample_reference_scope": "Synthetic font opaque RGB cells from unchanged fixed wx3.2.6 methods, minimal storage shim; not full wx runtime, independent GPU or device evidence",
+      "family_cases": [
+        {
+          "label": "first",
+          "family": "HarmonyOS-Sans",
+          "style": "normal",
+          "family_index": 0,
+          "style_index": 0,
+          "point_size": 18,
+          "font_address": 547265219072,
+          "actual_face_bold": false,
+          "actual_face_italic": false,
+          "cells_sha256": "42292d57827787042bb645359383e9cb9458b8338f2fe4186384f77943be5235",
+          "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7"
+        },
+        {
+          "label": "scaled",
+          "family": "HarmonyOS-Sans",
+          "style": "normal",
+          "family_index": 0,
+          "style_index": 0,
+          "point_size": 27,
+          "font_address": 547265219072,
+          "actual_face_bold": false,
+          "actual_face_italic": false,
+          "cells_sha256": "6388037fc7473703953917b11613bbab8375f2b6a9866bce897471ecd0f263a9",
+          "actual_sha256": "1df5245d0df2b745a4945fafc3be9f1fca6954255ff80283948d21cd364f0ad8"
+        },
+        {
+          "label": "restored",
+          "family": "HarmonyOS-Sans",
+          "style": "normal",
+          "family_index": 0,
+          "style_index": 0,
+          "point_size": 18,
+          "font_address": 547265219072,
+          "actual_face_bold": false,
+          "actual_face_italic": false,
+          "cells_sha256": "42292d57827787042bb645359383e9cb9458b8338f2fe4186384f77943be5235",
+          "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7"
+        },
+        {
+          "label": "other-family",
+          "family": "HarmonyOS-Sans-Light",
+          "style": "normal",
+          "family_index": 1,
+          "style_index": 0,
+          "point_size": 18,
+          "font_address": 547265183744,
+          "actual_face_bold": false,
+          "actual_face_italic": false,
+          "cells_sha256": "42292d57827787042bb645359383e9cb9458b8338f2fe4186384f77943be5235",
+          "actual_sha256": "8a4d3bcf50791e61689061b0f030cba4ec01f2d0fe5f40d14d6ee0462b406cb7"
+        },
+        {
+          "label": "other-style",
+          "family": "HarmonyOS-Sans",
+          "style": "normal",
+          "family_index": 0,
+          "style_index": 1,
+          "point_size": 18,
+          "font_address": 547265218048,
+          "actual_face_bold": false,
+          "actual_face_italic": true,
+          "cells_sha256": "bb280757fe9b188d0e426aa2b674390c1d42a14ea860474adc491095a520bb70",
+          "actual_sha256": "041dc2599328dba2044a1c1c026391a7eb6132bdb5b3f7e1f1e6b4c96d3190a4"
+        }
+      ],
+      "family_mask_observations": [
+        {
+          "label": "first",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "scaled",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "restored",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "other-family",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "label": "other-style",
+          "actual_integer": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "legacy_boolean": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "raw_symbol_boolean": [
+            0,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "system_family_count": 10,
+      "font_raster_reference_scope": "Actual selected NativeDrawing RGB cells and exact original GPU layout; not an independent font rasterizer, complete family coverage, chooser dialog or actual-display DPI proof",
+      "display_metrics": {
+        "ready": true,
+        "display_id": 0,
+        "revision": 1,
+        "dpi_x": 264.1600036621094,
+        "dpi_y": 264.1600036621094,
+        "density_pixels": 1.899999976158142,
+        "source": "actual-main-window-display-xDPI-yDPI",
+        "fixed_dpi_fallback": false
+      },
+      "layout_before": {
+        "olex2-view-reset": {
+          "passed": true,
+          "bounds": [
+            1174,
+            1485,
+            1318,
+            1546
+          ],
+          "original_bounds": [
+            1174,
+            1485,
+            1318,
+            1546
+          ],
+          "text": "重置视角"
+        },
+        "olex2-view-zoom": {
+          "passed": true,
+          "bounds": [
+            1677,
+            1477,
+            1877,
+            1553
+          ],
+          "original_bounds": [
+            1677,
+            1477,
+            1877,
+            1553
+          ],
+          "text": "4.400000"
+        },
+        "olex2-original-renderer-probe": {
+          "passed": true,
+          "bounds": [
+            1696,
+            808,
+            1871,
+            865
+          ],
+          "original_bounds": [
+            1696,
+            808,
+            1871,
+            865
+          ],
+          "text": "测试原版绘图"
+        },
+        "olex2-original-texture-load-probe": {
+          "passed": true,
+          "bounds": [
+            1521,
+            808,
+            1696,
+            865
+          ],
+          "original_bounds": [
+            1521,
+            808,
+            1696,
+            865
+          ]
+        },
+        "olex2-original-font-probe": {
+          "passed": true,
+          "bounds": [
+            1346,
+            808,
+            1521,
+            865
+          ],
+          "original_bounds": [
+            1346,
+            808,
+            1521,
+            865
+          ]
+        }
+      },
+      "layout_after": {
+        "olex2-view-reset": {
+          "passed": true,
+          "bounds": [
+            1174,
+            1485,
+            1318,
+            1546
+          ],
+          "original_bounds": [
+            1174,
+            1485,
+            1318,
+            1546
+          ],
+          "text": "重置视角"
+        },
+        "olex2-view-zoom": {
+          "passed": true,
+          "bounds": [
+            1677,
+            1477,
+            1877,
+            1553
+          ],
+          "original_bounds": [
+            1677,
+            1477,
+            1877,
+            1553
+          ],
+          "text": "4.400000"
+        },
+        "olex2-original-renderer-probe": {
+          "passed": true,
+          "bounds": [
+            1696,
+            808,
+            1871,
+            865
+          ],
+          "original_bounds": [
+            1696,
+            808,
+            1871,
+            865
+          ],
+          "text": "测试原版绘图"
+        },
+        "olex2-original-texture-load-probe": {
+          "passed": true,
+          "bounds": [
+            1521,
+            808,
+            1696,
+            865
+          ],
+          "original_bounds": [
+            1521,
+            808,
+            1696,
+            865
+          ]
+        },
+        "olex2-original-font-probe": {
+          "passed": true,
+          "bounds": [
+            1346,
+            808,
+            1521,
+            865
+          ],
+          "original_bounds": [
+            1346,
+            808,
+            1521,
+            865
+          ]
+        }
+      },
+      "folder": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-3"
+    }
+  ],
+  "build_verification": {
+    "passed": true,
+    "schema_version": 2,
+    "hap_sha256": "3c66b1aeda753d2963cfe0e1810d8b3067ec04a7634e0e8bea7e54d8b6c25cb0",
+    "input_manifest_sha256": "b9abe09f94d4d1b4b50f92df3f43a6bfae2b89e7fbc58339645162565096f5ed",
+    "snapshot_sha256": "b37d8fb8df082d37881a49e20b6cbda12086c909f44665af05fd6c6c2e72eb14",
+    "staged_files": 2440,
+    "compiled_native_sources": 615,
+    "native_dependency_files": 1942,
+    "generated_header_inputs": 2,
+    "tools": 12,
+    "sdk": {
+      "apiVersion": "24",
+      "displayName": "Native",
+      "meta": {
+        "metaVersion": "3.0.0"
+      },
+      "path": "native",
+      "releaseType": "Release",
+      "version": "6.1.1.125"
+    },
+    "native_libraries": 3,
+    "full_port_complete": false,
+    "workspace_matches": true,
+    "limits": [
+      "Diagnostic subset only; original full GUI, renderer, Python and plugins are not certified.",
+      "Unsigned debug traceability, not authenticated release provenance or a digital signature.",
+      "Records the actual local build; does not assert independently reproducible HAP bytes.",
+      "Native dependency evidence is compiler/Ninja input tracing, not ArkTS transitive dependency tracing.",
+      "Tool hashes and SDK package metadata identify selected local tools, not an audit of the entire SDK.",
+      "Emulator, physical-PC and runtime test evidence are separate and must bind the final HAP hash.",
+      "Includes fixed third-party C/C++ and all packaged native libraries; not complete original renderer certification.",
+      "Does not directly hash installed target code when the OS denies shell access."
+    ]
+  },
+  "source_report": {
+    "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/result.json",
+    "bytes": 169619,
+    "sha256": "6a8aadbbff3c6c400fda2206597aa3278178c42e9062f571dce80301226d4d4c"
+  },
+  "retained_actual_installed_identity_verified": true,
+  "evidence": [
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/result.json",
+      "bytes": 169619,
+      "sha256": "6a8aadbbff3c6c400fda2206597aa3278178c42e9062f571dce80301226d4d4c"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-1-before/layout.json",
+      "bytes": 107219,
+      "sha256": "8f7513d41649da14ccdbfff9f985bb2188d067d657962331e758e6330b62fae6"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-1-before/native-verification.json",
+      "bytes": 26613,
+      "sha256": "5c8f8ff049a44eed415ae20231959995973c4696317b0fe5c4db468bc6dbbb12"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-1-before/pid.txt",
+      "bytes": 6,
+      "sha256": "d6bbd0980a2ca873700c1b29cd6ce05b7366dc217f7453f4e698d21907b08e1d"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-1-before/process-scoped-report.log",
+      "bytes": 35180,
+      "sha256": "e31eb84b1b745cdf0e99768e783e4179a590f6c9c4c79fe5e9b4a624a7b47813"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-1-after/layout.json",
+      "bytes": 107219,
+      "sha256": "40e7252b22d75878ea8f8db1149c6118fcc25d42e8d761a9c3e58131557d0257"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-1-after/native-verification.json",
+      "bytes": 26613,
+      "sha256": "1bd0a26b2a63f562acb42398977b19935ff303217fe31df8d13d0cfe9706a617"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-1-after/pid.txt",
+      "bytes": 6,
+      "sha256": "d6bbd0980a2ca873700c1b29cd6ce05b7366dc217f7453f4e698d21907b08e1d"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-1-after/process-scoped-report.log",
+      "bytes": 48129,
+      "sha256": "18650ac4b6f22b7692ec008b335f26cd4c27df8470951eb843f27a2e4af39037"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-1/received-artifacts.json",
+      "bytes": 35561,
+      "sha256": "cdfcd713c78c1067c816ea9d2ecd4bdd24d376a39bf4b826f94c2e0793e6eac2"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-2-before/layout.json",
+      "bytes": 107219,
+      "sha256": "40e7252b22d75878ea8f8db1149c6118fcc25d42e8d761a9c3e58131557d0257"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-2-before/native-verification.json",
+      "bytes": 26613,
+      "sha256": "1bd0a26b2a63f562acb42398977b19935ff303217fe31df8d13d0cfe9706a617"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-2-before/pid.txt",
+      "bytes": 6,
+      "sha256": "d6bbd0980a2ca873700c1b29cd6ce05b7366dc217f7453f4e698d21907b08e1d"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-2-before/process-scoped-report.log",
+      "bytes": 48129,
+      "sha256": "18650ac4b6f22b7692ec008b335f26cd4c27df8470951eb843f27a2e4af39037"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-2-after/layout.json",
+      "bytes": 107219,
+      "sha256": "f0845d74d6d468f248f3e3cda5f31f6dbeeb15a8d9678550b0e2345e3525cc13"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-2-after/native-verification.json",
+      "bytes": 26613,
+      "sha256": "d1661585b5a5fde86427031dcdc28621509ff706e1e7c26a150b4218c2d4a086"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-2-after/pid.txt",
+      "bytes": 6,
+      "sha256": "d6bbd0980a2ca873700c1b29cd6ce05b7366dc217f7453f4e698d21907b08e1d"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-2-after/process-scoped-report.log",
+      "bytes": 61078,
+      "sha256": "ef488c4e4d80c3cc19240b0644653676cc8f6de928d62e59a3360f4e1e67c8f0"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-2/received-artifacts.json",
+      "bytes": 34844,
+      "sha256": "a9470c4a56186982f788ab21e4f6176d745211b702e84e9dca6b1ff8c11aff6b"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-3-before/layout.json",
+      "bytes": 107219,
+      "sha256": "f0845d74d6d468f248f3e3cda5f31f6dbeeb15a8d9678550b0e2345e3525cc13"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-3-before/native-verification.json",
+      "bytes": 26613,
+      "sha256": "d1661585b5a5fde86427031dcdc28621509ff706e1e7c26a150b4218c2d4a086"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-3-before/pid.txt",
+      "bytes": 6,
+      "sha256": "d6bbd0980a2ca873700c1b29cd6ce05b7366dc217f7453f4e698d21907b08e1d"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-3-before/process-scoped-report.log",
+      "bytes": 61078,
+      "sha256": "ef488c4e4d80c3cc19240b0644653676cc8f6de928d62e59a3360f4e1e67c8f0"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-3-after/layout.json",
+      "bytes": 107219,
+      "sha256": "27714234a61525885cf98d0c2957d06ac6d062be8de7189d9ed8208507729a97"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-3-after/native-verification.json",
+      "bytes": 26613,
+      "sha256": "593796c518fcd0a15f48676a13d55e065145983275818a28728c1ed5d9aa47eb"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-3-after/pid.txt",
+      "bytes": 6,
+      "sha256": "d6bbd0980a2ca873700c1b29cd6ce05b7366dc217f7453f4e698d21907b08e1d"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-3-after/process-scoped-report.log",
+      "bytes": 74027,
+      "sha256": "1ffb70370862f47479dcb8e94c4c9b83012b26317fd3f27f17c548a83c4ad4b0"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/runtime/font-3/received-artifacts.json",
+      "bytes": 34844,
+      "sha256": "14fefe268fca74a3fbca3e3569818ad489c9f40340f74460a0a52db3b61e81e4"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/native_font_raster_window_validation.py",
+      "bytes": 3626,
+      "sha256": "b1c0b9f4b916cca51f0372d1d953abe7195bce9cff6079d3a7c045af503f8b97"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/native_font_window_validation.py",
+      "bytes": 8193,
+      "sha256": "3c38b67667c040b05787942869b588dfee5b717d10d1b9c7ff56e50a88b0c370"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/capture-profile.py",
+      "bytes": 4251,
+      "sha256": "6b2676cdf258b101717c4056a45cc5995df3ebb6d34b62823f4c6dbaa32cd582"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/font_display_reference.py",
+      "bytes": 2792,
+      "sha256": "b414b2dd186cab763e3d50147cb54744e17127a3bcc241503d27c0f0a5be2a2c"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/font_display_source_validation.py",
+      "bytes": 3466,
+      "sha256": "172950c15c692b7afa8b8e26041952ecb62fe8577aee58c98b8f893b2c808000"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/font_display_window_validation.py",
+      "bytes": 3201,
+      "sha256": "a8797d456b23139f9339e96e98a8f90d1c205809c16c0556c3e6475983c5f92d"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/font_family_reference.py",
+      "bytes": 3614,
+      "sha256": "aa508c9b007d218702341b1df7b41db301cc38c3feadd944f08ed687858a7143"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/font_family_window_validation.py",
+      "bytes": 9382,
+      "sha256": "aaee2fc88c1476132e82e06f6aff91e3a3d53234e3c9612cd8497ae3235c75ee"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/font_raster_flush_window_validation.py",
+      "bytes": 1467,
+      "sha256": "1713556353fa39ead77688a29638d47ad3c340cee35977b0c9a972db22c22ce3"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/hdc_install_validation.py",
+      "bytes": 502,
+      "sha256": "bacc286c4c9ada03cb52456add3cfdd48c5390361999ce64bb4e0c8ff6d3c585"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/native_font_raster_window_validation.py",
+      "bytes": 3626,
+      "sha256": "b1c0b9f4b916cca51f0372d1d953abe7195bce9cff6079d3a7c045af503f8b97"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/native_font_window_validation.py",
+      "bytes": 8193,
+      "sha256": "3c38b67667c040b05787942869b588dfee5b717d10d1b9c7ff56e50a88b0c370"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/olex_font_resample_window_validation.py",
+      "bytes": 7848,
+      "sha256": "7835ce5b473f3b7937bec466b104ef98e52ec35966e7059a553a88416f2a08b9"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/olex_font_resource_fixtures.py",
+      "bytes": 4083,
+      "sha256": "73e717551733f4e36fa9ce439d5d1fb85d8d09bdc0ff384514ab469540676881"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/olex_font_resource_window_validation.py",
+      "bytes": 9931,
+      "sha256": "eec951799747ebb0cdf4dce9f740c95016a8498c8cb43d5893a006fcba3c70b3"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/original_vector_font_window_validation.py",
+      "bytes": 8573,
+      "sha256": "95cfb0cd6ccedc4e81593797e639d7435a3ef4243e4284131eaa73adf3acf8aa"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/prepare_texture_load_support.py",
+      "bytes": 1488,
+      "sha256": "023ad7d669dbcdc32fc9c03db3a81e93c86aae0126964b04ae6d2af00e92c5a0"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/resource_font_resample_reference.py",
+      "bytes": 2579,
+      "sha256": "46ea9da4b8c39df646ebb04d1e7021968338dcd1f5c4027e60a8f1442506c9b9"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/run-font-display-window-smoke.py",
+      "bytes": 9661,
+      "sha256": "7bf55c1cff1cf47251dfb1c656d7edcdaa2523fbc7fc31bb6d5f93edecd087f6"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/run-font-family-window-smoke-v2.py",
+      "bytes": 9267,
+      "sha256": "76eb759b1576057faa97575ea4c9a4fa0f8e6e66c52dba16192ddb66d9df26e4"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/run-olex-font-resource-window-smoke.py",
+      "bytes": 8891,
+      "sha256": "20f42e410e3348fe6c07b6b6756f0d888756203fd8ee072c878d7a1c8e36e79c"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/run-vector-font-state-window-smoke.py",
+      "bytes": 8754,
+      "sha256": "396dacf87f121010ac3b8a7d37114fbc89318dcfe689ecf41fdf832bbf96f274"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/vector_font_state_window_validation.py",
+      "bytes": 2454,
+      "sha256": "ada9b61c4927af63506c04fc9b23bcf53dff6d96e3f3b05df96b8ca0464fd83f"
+    },
+    {
+      "path": "reports/emulator/font-display-window-20261110-074045-37e45d82/installed-bundle.log",
+      "bytes": 15419,
+      "sha256": "62a7d407eafd6dbd518b60acec31277a0739451bf9c4694afe7dc5431c44776c"
+    },
+    {
+      "path": "out/gx-application-evaluation/app-builds/20261110-071832-be5dfc/entry-default-unsigned.hap",
+      "bytes": 17514627,
+      "sha256": "3c66b1aeda753d2963cfe0e1810d8b3067ec04a7634e0e8bea7e54d8b6c25cb0"
+    },
+    {
+      "path": "out/gx-application-evaluation/font-display28-window-offline-revalidation-attempt1/executed-offline-profile.py",
+      "bytes": 7599,
+      "sha256": "9c604eec4e936b8c8d1b84805bc0040a8ade192b0ab6322c8a1831c65f5652cc"
+    }
+  ],
+  "display_metrics": {
+    "ready": true,
+    "display_id": 0,
+    "revision": 1,
+    "dpi_x": 264.1600036621094,
+    "dpi_y": 264.1600036621094,
+    "density_pixels": 1.899999976158142,
+    "source": "actual-main-window-display-xDPI-yDPI",
+    "fixed_dpi_fallback": false
+  },
+  "system_family_count": 10
+}

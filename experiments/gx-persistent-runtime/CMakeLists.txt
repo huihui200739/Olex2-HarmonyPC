@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.24)
+project(olex2_platform_scene_state LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+add_executable(platform_scene_state tests/platform_scene_state.cpp)
+target_include_directories(platform_scene_state PRIVATE tests/model native ../../native)
+enable_testing()
+add_test(NAME modeled_platform_scene_state COMMAND platform_scene_state)

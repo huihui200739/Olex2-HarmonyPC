@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.24)
+project(olex2_texture_1d LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(OLEX2_TEXTURE_SOURCE "" CACHE PATH "Exact 19-patch candidate upstream")
+if(NOT EXISTS "${OLEX2_TEXTURE_SOURCE}/glib/glpixelstorescope.h")
+  message(FATAL_ERROR "Select the remediated isolated candidate")
+endif()
+include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/Olex2Utility.cmake")
+add_olex2_utility_library(texture_1d_sdl "${OLEX2_TEXTURE_SOURCE}")
+add_executable(original_texture_1d_mocked tests/original_texture_1d_mocked.cpp
+  "${OLEX2_TEXTURE_SOURCE}/glib/gltexture.cpp" "${OLEX2_TEXTURE_SOURCE}/glib/gloption.cpp")
+target_include_directories(original_texture_1d_mocked PRIVATE "${OLEX2_TEXTURE_SOURCE}/glib")
+find_library(OPENGL_FRAMEWORK OpenGL REQUIRED)
+target_link_libraries(original_texture_1d_mocked PRIVATE texture_1d_sdl "${OPENGL_FRAMEWORK}")
+enable_testing()
+add_test(NAME original_texture_1d_mocked COMMAND original_texture_1d_mocked)
+
+# Exercise the same narrowly enabled pinned-GL4ES alias in call capture.
+target_compile_definitions(original_texture_1d_mocked PRIVATE OLEX2_HARMONY_GL4ES_TEXTURE_1D_READBACK=1)

@@ -1,0 +1,8 @@
+{
+  "name": "entry",
+  "version": "0.3.0",
+  "description": "Native integration validation",
+  "dependencies": {
+    "libolex2native.so": "file:./src/main/cpp/types/libolex2native"
+  }
+}

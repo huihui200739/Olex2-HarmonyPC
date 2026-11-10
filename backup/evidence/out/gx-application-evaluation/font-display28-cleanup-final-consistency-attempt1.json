@@ -1,0 +1,1172 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "Overall qualification remains incomplete with no invented percentage",
+      "passed": true
+    },
+    {
+      "name": "Actual installed28 recorded separately from historical25 qualification",
+      "passed": true
+    },
+    {
+      "name": "No candidate28 UI/startup/mixed qualification inherited",
+      "passed": true
+    },
+    {
+      "name": "Exact user-approved cleanup completed with original plan retained",
+      "passed": true
+    },
+    {
+      "name": "Full display switching qualification not claimed",
+      "passed": true
+    },
+    {
+      "name": "Protected runtime contents not falsely represented as directly hashed",
+      "passed": true
+    },
+    {
+      "name": "599 actual-window checks independently re-read",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: out/gx-application-evaluation/app-builds/20261110-071832-be5dfc/entry-default-unsigned.hap",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: out/gx-application-evaluation/font-display28-source-package-revalidation-attempt1.json",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: out/gx-application-evaluation/font-display27-28-exact-source-replay-attempt1.json",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: out/gx-application-evaluation/font-display28-cleanup-python-completed-revalidation-attempt1.json",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: out/gx-application-evaluation/font-display28-all-node-attempt1.log",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: out/gx-application-evaluation/font-display28-host-current-ctest-attempt1.log",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: out/gx-application-evaluation/diagnostic-cleanup-tests-attempt5.log",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: out/gx-application-evaluation/diagnostic-cleanup-authorized-attempt1/authorization.json",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: out/gx-application-evaluation/diagnostic-cleanup-authorized-attempt1/execution-attempt4/result.json",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: reports/emulator/font-display-window-20261110-074045-37e45d82/result.json",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: out/gx-application-evaluation/font-display28-window-offline-revalidation-attempt1/result.json",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: reports/emulator/font-raster-flush-mixed-revalidation-20261110-060136-da56fb5c/result.json",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: reports/gx-application-platform-status.json",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: reports/gx-font-status.json",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: reports/gx-persistent-runtime-status.json",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: reports/gx-resource-font-status.json",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: reports/gx-texture-load-route-status.json",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: reports/gx-texture-load-status.json",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: reports/gx-vector-font-status.json",
+      "passed": true
+    },
+    {
+      "name": "Bound evidence unchanged: out/gx-application-evaluation/font-display28-final-device-observation-attempt1/result.json",
+      "passed": true
+    },
+    {
+      "name": "All4502 original local diagnostic backups still intact after installation",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/app_report_log.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/application_runtime_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/audit-diagnostic-backups.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/build_provenance.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/build_provenance_graphics.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/build_provenance_png.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/capture-persistent-gx-host-reference.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/check-adaptation-status.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/check-app-package.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/check-graphics.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/check-helper-extraction.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/check-source.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/cleanup-backed-up-diagnostics.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/collect-gx-font-raster-flush-evaluation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/collect-gx-native-font-evaluation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/collect-gx-original-vector-font-evaluation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/collect-gx-persistent-evaluation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/collect-gx-platform-evaluation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/collect-gx-texture-context-evaluation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/collect-gx-texture-load-evaluation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/collect-gx-texture-load-route-evaluation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/collect-gx-texture1d-evaluation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/collect-gx-vector-font-state-evaluation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/desktop_command_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/desktop_shell_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/diagnostic_backup_audit.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/diagnostic_cleanup.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/font_display_reference.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/font_display_source_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/font_display_window_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/font_family_reference.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/font_family_window_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/font_raster_flush_application_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/font_raster_flush_current_qualification.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/font_raster_flush_mixed_progress_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/font_raster_flush_mixed_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/font_raster_flush_progress_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/font_raster_flush_startup_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/font_raster_flush_tool_profiles.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/font_raster_flush_window_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/generate-texture-load-fixtures.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/gx_application_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/gx_target_identity.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/hdc_install_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/layout_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/line_path_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/line_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/matrix_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/native_font_application_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/native_font_current_qualification.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/native_font_layout_window_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/native_font_mixed_progress_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/native_font_mixed_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/native_font_progress_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/native_font_raster_window_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/native_font_startup_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/native_font_tool_profiles.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/native_font_window_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/olex_font_resample_fixtures.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/olex_font_resample_window_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/olex_font_resource_fixtures.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/olex_font_resource_progress_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/olex_font_resource_window_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/options_document_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/original_log_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/original_renderer_capture.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/original_renderer_click.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/original_renderer_integration_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/original_renderer_receive.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/original_renderer_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/original_vector_font_application_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/original_vector_font_startup_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/original_vector_font_tool_profiles.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/original_vector_font_window_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/persistent_gx_application_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/persistent_gx_catalog_reference.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/persistent_gx_startup_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/persistent_gx_window_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/picker_readiness.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/png_texture_hook_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/png_texture_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/polygon_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-font-display-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-font-display-telemetry-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-font-family-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-font-raster-binary-proof.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-font-raster-flush-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-font-raster-flush-ui-tools.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-native-font-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-native-font-layout-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-native-font-raster-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-native-font-ui-tools.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-olex-font-resample-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-olex-font-resample-fixtures.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-olex-font-resource-call-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-olex-font-resource-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-olex-font-resource-fixtures.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-original-vector-font-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-original-vector-font-ui-tools.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-persistent-gx-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-persistent-gx-ui-tools.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-png-dependencies.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-png-texture-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-resource-font-resample-reference.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-resource-resample-wx-reference.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-texture-1d-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-texture-context-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-texture-context-ui-tools.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-texture-load-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-texture-load-route-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-texture-load-route-ui-tools.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-texture-load-ui-tools.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-texture-transfer-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-vector-font-state-candidate.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare-vector-font-state-ui-tools.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/prepare_texture_load_support.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/record-font-raster-flush-mixed-progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/record-font-raster-flush-progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/record-font-raster-flush-ui-progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/record-gx-platform-progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/record-gx-png-progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/record-gx-texture1d-progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/record-native-font-progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/record-olex-font-resource-progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/record-persistent-gx-progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/record-persistent-gx-ui-progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/record-texture-context-progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/record-texture-context-ui-progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/record-texture-load-mixed-progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/record-texture-load-progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/record-texture-load-route-ui-progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/record-vector-font-state-progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/renderer_probe_identity.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/report-port-coverage.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/report_artifact_paths.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/resource_font_resample_reference.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/revalidate-gx-startup-audit.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-app-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-device-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-font-display-window-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-font-family-shell-probe.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-font-family-window-smoke-v2.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-font-family-window-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-font-raster-flush-mixed-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-font-raster-flush-startup-audit.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-font-raster-flush-window-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-gx-startup-audit.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-image-memory-scope.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-image-resource-cpu.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-light-defaults-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-native-font-layout-window-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-native-font-mixed-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-native-font-raster-window-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-native-font-startup-audit.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-native-font-window-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-olex-font-resample-window-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-olex-font-resource-window-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-original-vector-font-startup-audit.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-original-vector-font-window-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-persistent-gx-startup-audit.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-persistent-gx-window-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-png-texture-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-texture-context-startup-audit.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-texture-context-window-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-texture-load-mixed-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-texture-load-route-startup-audit.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-texture-load-startup-audit.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-texture-load-window-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-vector-font-state-mixed-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-vector-font-state-startup-audit.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/run-vector-font-state-window-smoke.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/sync-verified-reports.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/test-original-renderer-validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/test-texture1d-application-evidence.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_app_reports.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_application_runtime_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_build_provenance.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_build_provenance_graphics.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_desktop_command_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_desktop_shell_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_device_build_directory.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_diagnostic_backup_audit.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_diagnostic_cleanup.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_font_display_profile.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_font_family_reference.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_font_raster_flush_current_qualification.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_font_raster_flush_mixed.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_font_raster_flush_mixed_progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_font_raster_flush_tool_profiles.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_font_raster_flush_ui_progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_gx_application_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_gx_startup_cli.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_gx_target_identity.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_hdc_install_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_image_memory_observation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_image_resource_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_line_path_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_line_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_matrix_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_native_font_layout_profile.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_native_font_mixed.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_native_font_progress.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_native_font_raster_profile.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_native_font_tool_profiles.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_native_font_window.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_olex_font_resample.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_olex_font_resource.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_options_document_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_original_log_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_original_vector_font.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_original_vector_font_tool_profiles.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_persistent_gx_application_structure.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_persistent_gx_catalog_reference.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_persistent_gx_startup_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_persistent_gx_window_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_picker_readiness.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_png_generated_provenance.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_png_texture_hook_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_png_texture_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_polygon_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_renderer_integration_summary.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_renderer_probe_identity.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_report_artifact_paths.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_status_consistency.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_texture_1d_window_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_texture_context_application_structure.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_texture_context_startup_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_texture_context_window_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_texture_load_route_tool_profiles.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_texture_load_route_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_texture_load_tool_profiles.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_texture_load_window_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_ui_input_injection.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_vector_font_state_current_qualification.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_vector_font_state_mixed.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_vector_font_state_profile.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/tests/test_vector_font_state_tool_profiles.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/texture_1d_application_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/texture_1d_window_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/texture_context_application_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/texture_context_startup_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/texture_context_window_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/texture_load_application_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/texture_load_route_application_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/texture_load_route_startup_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/texture_load_route_tool_profiles.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/texture_load_route_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/texture_load_startup_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/texture_load_tool_profiles.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/texture_load_window_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/vector_font_state_application_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/vector_font_state_current_qualification.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/vector_font_state_mixed_progress_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/vector_font_state_mixed_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/vector_font_state_progress_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/vector_font_state_startup_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/vector_font_state_tool_profiles.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/vector_font_state_window_validation.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/vendor_sources.py",
+      "passed": true
+    },
+    {
+      "name": "Executed Python input unchanged: scripts/write-original-renderer-integration-status.py",
+      "passed": true
+    },
+    {
+      "name": "Completion-dependent message remains unsent",
+      "passed": true
+    },
+    {
+      "name": "Current28 documentation precedence: AGENTS.md",
+      "passed": true
+    },
+    {
+      "name": "Current28 documentation precedence: README.md",
+      "passed": true
+    }
+  ],
+  "bound_records": 20,
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

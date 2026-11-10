@@ -1,0 +1,16 @@
+# Integration adapter only: resolve libpng against our source-built fixed zlib,
+# never a prebuilt system/SDK library. Upstream dependency files stay unchanged.
+if(NOT TARGET ZLIB::ZLIBSTATIC)
+  message(FATAL_ERROR "The fixed source-built zlib target must exist first")
+endif()
+if(NOT TARGET ZLIB::ZLIB)
+  add_library(ZLIB::ZLIB ALIAS zlibstatic)
+endif()
+set(ZLIB_FOUND TRUE)
+set(ZLIB_VERSION_STRING "1.4")
+set(ZLIB_VERSION "1.4")
+set(ZLIB_LIBRARIES ZLIB::ZLIBSTATIC)
+get_target_property(_fixed_zlib_source zlibstatic SOURCE_DIR)
+get_target_property(_fixed_zlib_binary zlibstatic BINARY_DIR)
+set(ZLIB_INCLUDE_DIRS "${_fixed_zlib_binary};${_fixed_zlib_source}")
+set(ZLIB_INCLUDE_DIR "${_fixed_zlib_source}")

@@ -1,0 +1,10 @@
+{
+  "app": {
+    "bundleName": "com.example.olex2harmonypc",
+    "vendor": "Community adaptation",
+    "versionCode": 220000,
+    "versionName": "0.22.0",
+    "icon": "$media:app_icon",
+    "label": "$string:app_name"
+  }
+}

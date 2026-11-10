@@ -1,0 +1,364 @@
+diff --git a/glib/glutil.h b/glib/glutil.h
+index 59bd50e..6cfad12 100644
+--- a/glib/glutil.h
++++ b/glib/glutil.h
+@@ -13,6 +13,8 @@
+ #include "bapp.h"
+ #include "sortedlist.h"
+ #include "spheresubmit.h"
++#include "primitivesubmit.h"
++#include <type_traits>
+ BeginGlNamespace()
+ 
+ // Retains the existing immediate-mode desktop backend and public API.
+@@ -20,6 +22,22 @@ struct SphereDesktopSink {
+   void BeginTriangles() { olx_gl::begin(GL_TRIANGLES); }
+   template <class V> void Normal(const V& v) { olx_gl::normal(v); }
+   template <class V> void Vertex(const V& v) { olx_gl::vertex(v); }
++  template <class X, class Y, class Z> void Normal(X x, Y y, Z z) {
++    typedef typename std::common_type<X,Y,Z>::type N;
++    olx_gl::normal(N(x),N(y),N(z));
++  }
++  template <class X, class Y, class Z> void Vertex(X x, Y y, Z z) {
++    typedef typename std::common_type<X,Y,Z>::type N;
++    olx_gl::vertex(N(x),N(y),N(z));
++  }
++  void Begin(PrimitiveTopology topology) {
++    switch (topology) {
++      case PrimitiveTopology::Triangles: olx_gl::begin(GL_TRIANGLES); break;
++      case PrimitiveTopology::Quads: olx_gl::begin(GL_QUADS); break;
++      case PrimitiveTopology::QuadStrip: olx_gl::begin(GL_QUAD_STRIP); break;
++      case PrimitiveTopology::ConvexPolygon: olx_gl::begin(GL_POLYGON); break;
++    }
++  }
+   void End() { olx_gl::end(); }
+ };
+ 
+@@ -62,125 +80,12 @@ public:
+       vecs, triags, norms, f_mask, t_mask, sink);
+   }
+   void RenderDisks(float_type rad, size_t t, float_type disk_s)  {
+-    vec_t sf(rad, 0, 0);
+-    float_type sa, sma, ca, cma;
+-    olx_sincos(2*M_PI/t, &sa, &ca);
+-    olx_sincos(-2*M_PI/t, &sma, &cma);
+-    olx_gl::begin(GL_POLYGON);
+-    olx_gl::normal(0, 0, -1);
+-    for( int i=0; i <= t; i++ )  {
+-      olx_gl::vertex(sf[0], sf[1], -disk_s/2);
+-      if( (i+1) > t )  break;
+-      float_type x = sf[0];
+-      sf[0] = (x*ca + sf[1]*sa);
+-      sf[1] = (sf[1]*ca - x*sa);
+-    }
+-    olx_gl::end();
+-    sf = vec_t(rad, 0, 0);
+-    olx_gl::begin(GL_POLYGON);
+-    olx_gl::normal(0, 0, 1);
+-    for( size_t i=0; i <= t; i++ )  {
+-      olx_gl::vertex(sf[0], sf[1], disk_s/2);
+-      if( (i+1) > t )  break;
+-      float_type x = sf[0];
+-      sf[0] = (x*cma + sf[1]*sma);
+-      sf[1] = (sf[1]*cma - x*sma);
+-    }
+-    olx_gl::end();
+-
+-    sf = vec_t(rad, 0, 0);
+-    olx_gl::begin(GL_POLYGON);
+-    olx_gl::normal(0, -1, 0);
+-    for( size_t i=0; i <= t; i++ )  {
+-      olx_gl::vertex(sf[1], -disk_s/2, sf[0]);
+-      if( (i+1) > t )  break;
+-      float_type x = sf[0];
+-      sf[0] = (x*ca + sf[1]*sa);
+-      sf[1] = (sf[1]*ca - x*sa);
+-    }
+-    olx_gl::end();
+-    sf = vec_t(rad, 0, 0);
+-    olx_gl::begin(GL_POLYGON);
+-    olx_gl::normal(0, 1, 0);
+-    for( size_t i=0; i <= t; i++ )  {
+-      olx_gl::vertex(sf[1], disk_s/2, sf[0]);
+-      if( (i+1) > t )  break;
+-      float_type x = sf[0];
+-      sf[0] = (x*cma + sf[1]*sma);
+-      sf[1] = (sf[1]*cma - x*sma);
+-    }
+-    olx_gl::end();
+-
+-    sf = vec_t(rad, 0, 0);
+-    olx_gl::begin(GL_POLYGON);
+-    olx_gl::normal(-1, 0, 0);
+-    for( size_t i=0; i <= t; i++ )  {
+-      olx_gl::vertex(-disk_s/2, sf[0], sf[1]);
+-      float_type x = sf[0];
+-      sf[0] = (x*ca + sf[1]*sa);
+-      sf[1] = (sf[1]*ca - x*sa);
+-    }
+-    olx_gl::end();
+-    sf = vec_t(rad, 0, 0);
+-    olx_gl::begin(GL_POLYGON);
+-    olx_gl::normal(1, 0, 0);
+-    for( size_t i=0; i <= t; i++ )  {
+-      olx_gl::vertex(disk_s/2, sf[0], sf[1]);
+-      float_type x = sf[0];
+-      sf[0] = (x*cma + sf[1]*sma);
+-      sf[1] = (sf[1]*cma - x*sma);
+-    }
+-    olx_gl::end();
++    SphereDesktopSink sink;
++    DiskPrimitiveSubmission<float_type>::RenderDisks(rad,t,disk_s,sink);
+   }
+   void RenderRims(float_type rad, size_t t, float_type disk_s)  {
+-    vec_t sf(rad, 0, 0), pv;
+-    float_type sa, ca;
+-    olx_sincos(2*M_PI/t, &sa, &ca);
+-    olx_gl::begin(GL_QUADS);
+-    for( size_t i=0; i <= t; i++ )  {
+-      olx_gl::normal(sf[0], sf[1], 0.0f);
+-      olx_gl::vertex(sf[0], sf[1], -disk_s/2);
+-      olx_gl::vertex(sf[0], sf[1], +disk_s/2);
+-      if( (i+1) > t )  break;
+-      float_type x = sf[0];
+-      sf[0] = (x*ca + sf[1]*sa);
+-      sf[1] = (sf[1]*ca - x*sa);
+-      olx_gl::normal(sf[0], sf[1], 0.0f);
+-      olx_gl::vertex(sf[0], sf[1], +disk_s/2);
+-      olx_gl::vertex(sf[0], sf[1], -disk_s/2);
+-    }
+-    olx_gl::end();
+-
+-    sf = vec_t(rad, 0, 0);
+-    olx_gl::begin(GL_QUADS);
+-    for( size_t i=0; i <= t; i++ )  {
+-      olx_gl::normal(sf[1], 0.0f, sf[0]);
+-      olx_gl::vertex(sf[1], -disk_s/2, sf[0]);
+-      olx_gl::vertex(sf[1], +disk_s/2, sf[0]);
+-      if( (i+1) > t )  break;
+-      float_type x = sf[0];
+-      sf[0] = (x*ca + sf[1]*sa);
+-      sf[1] = (sf[1]*ca - x*sa);
+-      olx_gl::normal(sf[1], 0.0f, sf[0]);
+-      olx_gl::vertex(sf[1], +disk_s/2, sf[0]);
+-      olx_gl::vertex(sf[1], -disk_s/2, sf[0]);
+-    }
+-    olx_gl::end();
+-
+-    sf = vec_t(rad, 0, 0);
+-    olx_gl::begin(GL_QUADS);
+-    for( size_t i=0; i <= t; i++ )  {
+-      olx_gl::normal(0.0f, sf[0], sf[1]);
+-      olx_gl::vertex(-disk_s/2, sf[0], sf[1]);
+-      olx_gl::vertex(+disk_s/2, sf[0], sf[1]);
+-      float_type x = sf[0];
+-      sf[0] = (x*ca + sf[1]*sa);
+-      sf[1] = (sf[1]*ca - x*sa);
+-      olx_gl::normal(0.0f, sf[0], sf[1]);
+-      olx_gl::vertex(+disk_s/2, sf[0], sf[1]);
+-      olx_gl::vertex(-disk_s/2, sf[0], sf[1]);
+-    }
+-    olx_gl::end();
++    SphereDesktopSink sink;
++    DiskPrimitiveSubmission<float_type>::RenderRims(rad,t,disk_s,sink);
+   }
+ };
+ 
+@@ -188,23 +93,8 @@ struct GlTorus {
+   //reference: www.opengl.org/resources/code/samples/redbook/torus.c
+   // tr - tube radius, r - torus radius
+   static void Render(double tr, double r, size_t sc, size_t tsc) {
+-    static const double tpi = 2 * M_PI;
+-    for (size_t i = 0; i < sc; i++) {
+-      olx_gl::begin(GL_QUAD_STRIP);
+-      for (size_t j = 0; j <= tsc; j++) {
+-        for (int k = 1; k >= 0; k--) {
+-          double s = (i + k) % sc + 0.5;
+-          double t = static_cast<double>(j % tsc);
+-          double a = cos(s * tpi / sc),
+-            b = cos(t * tpi / tsc),
+-            c = sin(t * tpi / tsc),
+-            d = sin(s * tpi / sc);
+-          olx_gl::normal(a * b, a * c, d);
+-          olx_gl::vertex((r + tr * a) * b, (r + tr * a) * c, tr * d);
+-        }
+-      }
+-      olx_gl::end();
+-    }
++    SphereDesktopSink sink;
++    TorusPrimitiveSubmission::Render(tr,r,sc,tsc,sink);
+   }
+ };
+ EndGlNamespace()
+diff --git a/glib/primitivesubmit.h b/glib/primitivesubmit.h
+new file mode 100644
+index 0000000..5eae764
+--- /dev/null
++++ b/glib/primitivesubmit.h
+@@ -0,0 +1,166 @@
++/******************************************************************************
++* Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
++*                                                                             *
++* This file is part of the OlexSys Development Framework.                     *
++*                                                                             *
++* This source file is distributed under the terms of the licence located in   *
++* the root folder.                                                            *
++******************************************************************************/
++
++// Original glutil helper loops, with only the output backend parameterized.
++// Geometry generation and legacy batch boundaries are intentionally retained.
++#ifndef __olx_primitive_submit_H
++#define __olx_primitive_submit_H
++#include "esphere.h"
++namespace glObj {
++enum class PrimitiveTopology { Triangles, Quads, QuadStrip, ConvexPolygon };
++template <typename float_type> struct DiskPrimitiveSubmission {
++  typedef TVector3<float_type> vec_t;
++  template <class Sink>
++  static void RenderDisks(float_type rad, size_t t, float_type disk_s, Sink& sink) {
++    vec_t sf(rad, 0, 0);
++    float_type sa, sma, ca, cma;
++    olx_sincos(2*M_PI/t, &sa, &ca);
++    olx_sincos(-2*M_PI/t, &sma, &cma);
++    sink.Begin(PrimitiveTopology::ConvexPolygon);
++    sink.Normal(0, 0, -1);
++    for( int i=0; i <= t; i++ )  {
++      sink.Vertex(sf[0], sf[1], -disk_s/2);
++      if( (i+1) > t )  break;
++      float_type x = sf[0];
++      sf[0] = (x*ca + sf[1]*sa);
++      sf[1] = (sf[1]*ca - x*sa);
++    }
++    sink.End();
++    sf = vec_t(rad, 0, 0);
++    sink.Begin(PrimitiveTopology::ConvexPolygon);
++    sink.Normal(0, 0, 1);
++    for( size_t i=0; i <= t; i++ )  {
++      sink.Vertex(sf[0], sf[1], disk_s/2);
++      if( (i+1) > t )  break;
++      float_type x = sf[0];
++      sf[0] = (x*cma + sf[1]*sma);
++      sf[1] = (sf[1]*cma - x*sma);
++    }
++    sink.End();
++
++    sf = vec_t(rad, 0, 0);
++    sink.Begin(PrimitiveTopology::ConvexPolygon);
++    sink.Normal(0, -1, 0);
++    for( size_t i=0; i <= t; i++ )  {
++      sink.Vertex(sf[1], -disk_s/2, sf[0]);
++      if( (i+1) > t )  break;
++      float_type x = sf[0];
++      sf[0] = (x*ca + sf[1]*sa);
++      sf[1] = (sf[1]*ca - x*sa);
++    }
++    sink.End();
++    sf = vec_t(rad, 0, 0);
++    sink.Begin(PrimitiveTopology::ConvexPolygon);
++    sink.Normal(0, 1, 0);
++    for( size_t i=0; i <= t; i++ )  {
++      sink.Vertex(sf[1], disk_s/2, sf[0]);
++      if( (i+1) > t )  break;
++      float_type x = sf[0];
++      sf[0] = (x*cma + sf[1]*sma);
++      sf[1] = (sf[1]*cma - x*sma);
++    }
++    sink.End();
++
++    sf = vec_t(rad, 0, 0);
++    sink.Begin(PrimitiveTopology::ConvexPolygon);
++    sink.Normal(-1, 0, 0);
++    for( size_t i=0; i <= t; i++ )  {
++      sink.Vertex(-disk_s/2, sf[0], sf[1]);
++      float_type x = sf[0];
++      sf[0] = (x*ca + sf[1]*sa);
++      sf[1] = (sf[1]*ca - x*sa);
++    }
++    sink.End();
++    sf = vec_t(rad, 0, 0);
++    sink.Begin(PrimitiveTopology::ConvexPolygon);
++    sink.Normal(1, 0, 0);
++    for( size_t i=0; i <= t; i++ )  {
++      sink.Vertex(disk_s/2, sf[0], sf[1]);
++      float_type x = sf[0];
++      sf[0] = (x*cma + sf[1]*sma);
++      sf[1] = (sf[1]*cma - x*sma);
++    }
++    sink.End();
++    }
++  template <class Sink>
++  static void RenderRims(float_type rad, size_t t, float_type disk_s, Sink& sink) {
++    vec_t sf(rad, 0, 0), pv;
++    float_type sa, ca;
++    olx_sincos(2*M_PI/t, &sa, &ca);
++    sink.Begin(PrimitiveTopology::Quads);
++    for( size_t i=0; i <= t; i++ )  {
++      sink.Normal(sf[0], sf[1], 0.0f);
++      sink.Vertex(sf[0], sf[1], -disk_s/2);
++      sink.Vertex(sf[0], sf[1], +disk_s/2);
++      if( (i+1) > t )  break;
++      float_type x = sf[0];
++      sf[0] = (x*ca + sf[1]*sa);
++      sf[1] = (sf[1]*ca - x*sa);
++      sink.Normal(sf[0], sf[1], 0.0f);
++      sink.Vertex(sf[0], sf[1], +disk_s/2);
++      sink.Vertex(sf[0], sf[1], -disk_s/2);
++    }
++    sink.End();
++
++    sf = vec_t(rad, 0, 0);
++    sink.Begin(PrimitiveTopology::Quads);
++    for( size_t i=0; i <= t; i++ )  {
++      sink.Normal(sf[1], 0.0f, sf[0]);
++      sink.Vertex(sf[1], -disk_s/2, sf[0]);
++      sink.Vertex(sf[1], +disk_s/2, sf[0]);
++      if( (i+1) > t )  break;
++      float_type x = sf[0];
++      sf[0] = (x*ca + sf[1]*sa);
++      sf[1] = (sf[1]*ca - x*sa);
++      sink.Normal(sf[1], 0.0f, sf[0]);
++      sink.Vertex(sf[1], +disk_s/2, sf[0]);
++      sink.Vertex(sf[1], -disk_s/2, sf[0]);
++    }
++    sink.End();
++
++    sf = vec_t(rad, 0, 0);
++    sink.Begin(PrimitiveTopology::Quads);
++    for( size_t i=0; i <= t; i++ )  {
++      sink.Normal(0.0f, sf[0], sf[1]);
++      sink.Vertex(-disk_s/2, sf[0], sf[1]);
++      sink.Vertex(+disk_s/2, sf[0], sf[1]);
++      float_type x = sf[0];
++      sf[0] = (x*ca + sf[1]*sa);
++      sf[1] = (sf[1]*ca - x*sa);
++      sink.Normal(0.0f, sf[0], sf[1]);
++      sink.Vertex(+disk_s/2, sf[0], sf[1]);
++      sink.Vertex(-disk_s/2, sf[0], sf[1]);
++    }
++    sink.End();
++    }
++};
++struct TorusPrimitiveSubmission {
++  template <class Sink>
++  static void Render(double tr, double r, size_t sc, size_t tsc, Sink& sink) {
++    static const double tpi = 2 * M_PI;
++    for (size_t i = 0; i < sc; i++) {
++      sink.Begin(PrimitiveTopology::QuadStrip);
++      for (size_t j = 0; j <= tsc; j++) {
++        for (int k = 1; k >= 0; k--) {
++          double s = (i + k) % sc + 0.5;
++          double t = static_cast<double>(j % tsc);
++          double a = cos(s * tpi / sc),
++            b = cos(t * tpi / tsc),
++            c = sin(t * tpi / tsc),
++            d = sin(s * tpi / sc);
++          sink.Normal(a * b, a * c, d);
++          sink.Vertex((r + tr * a) * b, (r + tr * a) * c, tr * d);
++        }
++      }
++      sink.End();
++    }
++    }
++};
++}
++#endif

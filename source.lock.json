@@ -1,0 +1,183 @@
+{
+  "repository": "https://github.com/pcxod/olex2.git",
+  "commit": "ca2b4c1b68ac9d7d8fddc53eb5fcf60797d2d3e1",
+  "upstream_branch": "master",
+  "local_branch": "codex/harmonypc-baseline",
+  "checked_at": "2026-11-08T21:31:46+08:00",
+  "source_kind": "pinned development snapshot; not asserted to be a stable release",
+  "license_file": "upstream/LICENCE.txt",
+  "license_sha256": "ffaf87b82fdb58c4afe80e329b2d67c15d9bd792cf6097f751f67aade19fa864",
+  "patches": [
+    {
+      "file": "patches/0001-fix-utf8-encode4-continuation-bytes.patch",
+      "sha256": "e693b8c0ce474b819cb4b7b6941584ccca49966c3768cb3e943cb0c9bfe3d443"
+    },
+    {
+      "file": "patches/0002-extract-shared-sphere-triangle-submission.patch",
+      "sha256": "b0452b278f6d403eb280896200a9fda544b875fbf2ad7be2f3f3505572d8a9cb"
+    },
+    {
+      "file": "patches/0003-extract-legacy-helper-primitives.patch",
+      "sha256": "1dae7c36faa74bcebd1bfa3366cdbb197b0762633910387f79d3015cd46832da"
+    },
+    {
+      "file": "patches/0004-decouple-color-values-from-desktop-gl.patch",
+      "sha256": "02de50b511b1028def68f482e8cea0e12a4f9d1fd7e17e0e37d7799d171a144c"
+    },
+    {
+      "file": "patches/0005-separate-material-values-from-legacy-init.patch",
+      "sha256": "0e1b6562f99a7b1da8c7b599192ce769abcc4696d3311332598078ed3bac158c"
+    },
+    {
+      "file": "patches/0006-extract-material-init-commands.patch",
+      "sha256": "4fd9dfe7f29c07c159452c58bd3b3a28a9c65ba8bf4a00c4d6bde43bf1cc2797"
+    },
+    {
+      "file": "patches/0007-extract-original-primitive-triangle-submission.patch",
+      "sha256": "255025f0e564bef24bac258d76df8825f1ab4cd6addb834161f5bb7ebb1c85c1"
+    },
+    {
+      "file": "patches/0008-add-owned-original-basis-matrix-exports.patch",
+      "sha256": "c01d8e466ac09b64af9eaceeedcab19e71f6ab03e4991aef0dbe2dbdb312be11"
+    },
+    {
+      "file": "patches/0009-extract-original-polygon-submission.patch",
+      "sha256": "ff1650b188fee774b2979e5936bb61e61680aea7de277ec5eaf0c1f00ad88e37"
+    },
+    {
+      "file": "patches/0010-allow-platform-options-save-override.patch",
+      "sha256": "f41f319c290680b6cee994164b1eda77917947fe9d0db01dfac25fda72b11596"
+    },
+    {
+      "file": "patches/0011-initialize-and-reset-hashed-container-count.patch",
+      "sha256": "d70ac0d301c2a09a0acb4ffcd432bc604e002c7d4c03f840c6febea166dfc01d"
+    },
+    {
+      "file": "patches/0012-add-explicit-utf8-settings-reader.patch",
+      "sha256": "544dc81a446d77739a535de9fadb84fc669ebb7dfa276b8d342ceefee20250bd"
+    },
+    {
+      "file": "patches/0013-extract-original-line-submission.patch",
+      "sha256": "5d8f4ec461800b73f9e33020d6ac15ba37b935bddbb219d619f014c4f3925a3b"
+    },
+    {
+      "file": "patches/0014-extract-original-line-path-submission.patch",
+      "sha256": "86658d6a0f41d4eeba26c3a7b6d4981cc9f78fd322f2ae8fa14349ae0ca39da6"
+    },
+    {
+      "file": "patches/0015-include-explicit-gl-texture-interface.patch",
+      "sha256": "7fd38c10d32093f1d2d80b4a2b6ed7627f3b5646e3e299e76a786c4373fcfe5c"
+    },
+    {
+      "file": "patches/0016-initialize-default-light-exponent.patch",
+      "sha256": "a6d58099fdb4f887fba1ebb52905cc9753df81f3854a30302eae84c8e83950b1"
+    }
+  ],
+  "patched_files": [
+    {
+      "file": "sdl/eutf8.h",
+      "sha256": "ce5c25e3bcc006c3740ab1daa03f22a97fe2d2bd8351817541cab45ae89f24d2"
+    },
+    {
+      "file": "glib/spheresubmit.h",
+      "sha256": "261f8c4cfe64a17e2b379b4489c7634688fa94c960c969cd783e63a3c8991325",
+      "new_file": true
+    },
+    {
+      "file": "glib/glutil.h",
+      "sha256": "f7e79ca9c878231adcfabbfcaa456a6ee57f0a6d0406e357451e43c8d42a59a5"
+    },
+    {
+      "file": "glib/primitivesubmit.h",
+      "sha256": "5bd7a86e6d3ea3f59883ee279f1b6fdf603365e54a999685c8e6e2028a50fdce",
+      "new_file": true
+    },
+    {
+      "file": "glib/glbase.h",
+      "sha256": "4c92a6305fff7582c03185db526fbeb96dbb0d3b118485810348be1b8d0ba45d"
+    },
+    {
+      "file": "glib/gloption.h",
+      "sha256": "bc4a4e9ea4f3cf45439f8361956120dbde7e2a42bc2aa49153c80502bc1ae558"
+    },
+    {
+      "file": "glib/glnamespace.h",
+      "sha256": "e908ead70c0801fb63a3b713b21f2b59ebf2c671781ecfa35e101f1e71b109f4",
+      "new_file": true
+    },
+    {
+      "file": "glib/glmaterial.cpp",
+      "sha256": "3d7534316c9856432299d8562bee844079590396559132195308247e682f4d27"
+    },
+    {
+      "file": "glib/glmaterial.h",
+      "sha256": "64d3c716601e565c551693364fa1645cf864371ef27437b5d0d886e5a46f00ba"
+    },
+    {
+      "file": "glib/glmaterial_legacy_init.h",
+      "sha256": "8c8321b865d38cbfac8754fdaa71b1ae146275ebdb6ce91af7f6ba8fe3198182",
+      "new_file": true
+    },
+    {
+      "file": "glib/materialcommands.h",
+      "sha256": "7987814357c0055eb1325f8d630eca53cd7196cbd75638c4648684c5843a004b",
+      "new_file": true
+    },
+    {
+      "file": "glib/glprimitive.cpp",
+      "sha256": "81f9a180d1bca3a356f267d9b9e8ac2e87e97460878f13b17242cd6126a6be26"
+    },
+    {
+      "file": "glib/glprimitive.h",
+      "sha256": "3579fab35bdf8446106803def6b859e686188a13524c14f0098b422d921b55d8"
+    },
+    {
+      "file": "glib/trianglesubmit.h",
+      "sha256": "659e9bee34c935899f110205b2b0c9811f745d0fb8b66e375e31f20e5116b986",
+      "new_file": true
+    },
+    {
+      "file": "sdl/ebasis.h",
+      "sha256": "92b70d11c558ceb016069f89d90da59a0e5aadbede0e81e2db3731a746d21fcc"
+    },
+    {
+      "file": "glib/polygonsubmit.h",
+      "sha256": "2c4c7d3eeff2890f42e3f3bbc6cc2828b5e685790002b971290c140fa56a9573",
+      "new_file": true
+    },
+    {
+      "file": "sdl/bapp.h",
+      "sha256": "6964cd1395da6e216f3ae38e453b09573dbc865e5c43e3ef9ac217d08ea1334f"
+    },
+    {
+      "file": "sdl/ehashed.h",
+      "sha256": "00fc0b39617dc34c115c2de9f9331467d105189dc62ff1612e5e81d013e89172"
+    },
+    {
+      "file": "sdl/settingsfile.h",
+      "sha256": "9d1f4cb9fc261ebc736e804c34669648f6494f0fbc62ac59dda7111610da5f49"
+    },
+    {
+      "file": "sdl/settingsfile.cpp",
+      "sha256": "092ee03fe60ebe58ea2c7cafc8e5c3ea2cbf8d7890d9badc3b0fec59e2963f7b"
+    },
+    {
+      "file": "glib/linesubmit.h",
+      "new_file": true,
+      "sha256": "40ff610fa3238dcebf6e12bcfb3cd305dfac8dba46009bef213556bead1138d0"
+    },
+    {
+      "file": "glib/linepathsubmit.h",
+      "new_file": true,
+      "sha256": "1321e990ec9a24745a5f4bf93c38c6b0364709016a2b6cb0758fc8edbb490089"
+    },
+    {
+      "file": "glib/gltexture.h",
+      "sha256": "c592aaea5fe44092642c20487b36740b221aaa8d17846d0e73bb339ea7c0cec5"
+    },
+    {
+      "file": "glib/gllight.cpp",
+      "sha256": "843960ffff212cee78caac7e9ebf9c4ecc1ec5b1ab1de30eb0762865e8e3960b"
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+--- a/gxlib/gxapp.h
++++ b/gxlib/gxapp.h
+@@ -10,6 +10,7 @@
+ #ifndef __olx_gxl_gxapp_H
+ #define __olx_gxl_gxapp_H
+ #include "gxbase.h"
++#include <vector>
+ #include "xapp.h"
+ #include "etable.h"
+ #include "symmlib.h"
+@@ -699,6 +700,10 @@
+   void SelectFragmentsBonds(const TNetPList& frags, bool v);
+   void SelectFragments(const TNetPList& frags, bool v);
+   TGlGroup* GroupFragments(const TNetPList& Fragments, const olxstr groupName);
++  // Target implementations return packed row-major RGB for a square image.
++  // The original texture loader retains naming, x/y convention and GL state.
++  virtual bool ReadPlatformTexture(const olxstr &filename, int &size,
++    std::vector<unsigned char> &rgb) const;
+   void LoadTextures(const olxstr &folder);
+   void ClearTextures(short flags);
+   // inverts current list of TLattice using Selected Fragments, returns
+--- a/gxlib/gxapp.cpp
++++ b/gxlib/gxapp.cpp
+@@ -308,9 +308,12 @@
+     GlScene = new TwxGlScene(GetBaseDir() + "etc/Fonts/");
+     wxFont Font(10, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);//|wxFONTFLAG_ANTIALIASED);
+     GlScene->CreateFont("Default", Font.GetNativeFontInfoDesc()).SetMaterial(glm);
+-#else
++#elif defined(__WIN32__)
+     GlScene = new TWGlScene();
+     GlScene->CreateFont("Default", "@20").SetMaterial(glm);
++#else
++    throw TInvalidArgumentException(__OlxSourceInfo,
++      "An external platform GL scene is required");
+ #endif
+   }
+   FGrowMode = gmCovalent;
+@@ -6513,20 +6516,24 @@
+   }
+ }
+ //..............................................................................
++bool TGXApp::ReadPlatformTexture(const olxstr &, int &,
++  std::vector<unsigned char> &) const
++{
++  throw TFunctionFailedException(__OlxSourceInfo,
++    "A platform texture image decoder is required");
++}
++//..............................................................................
+ void TGXApp::LoadTextures(const olxstr &folder) {
+   if (!TEFile::IsDir(folder)) {
+     throw TInvalidArgumentException(__OlxSourceInfo, "folder name");
+   }
+   GetRenderer().GetScene().MakeCurrent();
+-#if !defined(__WXWIDGETS__) && !defined(__WIN32__)
+-  throw TNotImplementedException(__OlxSourceInfo);
+-#endif
+   TTextureManager &tm = GetRenderer().GetTextureManager();
+   bool update=false;
+   olxstr dn = folder;
+   TEFile::AddPathDelimeterI(dn);
+   for (size_t i=0; i < TextureNames.Count(); i++) {
+-#if defined(__WXWIDGETS__)
++#if defined(__WXWIDGETS__) || !defined(__WIN32__)
+     olxstr fn = (olxstr(dn) << TextureNames[i]  << ".png");
+ #else
+     olxstr fn = (olxstr(dn) << TextureNames[i]  << ".bmp");
+@@ -6545,7 +6552,7 @@
+     {
+       sz = img.GetWidth();
+     }
+-#else
++#elif defined(__WIN32__)
+     HBITMAP bmp = (HBITMAP)LoadImage(NULL, fn.u_str(), IMAGE_BITMAP, 0, 0,
+       LR_CREATEDIBSECTION|LR_LOADFROMFILE);
+     if (bmp != NULL) {
+@@ -6557,6 +6564,13 @@
+       else {
+         ::DeleteObject(bmp);
+       }
++    }
++#else
++    std::vector<unsigned char> platform_rgb;
++    if (!ReadPlatformTexture(fn, sz, platform_rgb) || sz <= 0 ||
++        !olx_is_pow2(sz) || platform_rgb.size() != size_t(sz)*sz*3)
++    {
++      sz = -1;
+     }
+ #endif
+     if (sz == -1) {
+@@ -6576,7 +6590,7 @@
+         tex_data[off1+2] = img.GetBlue(ix,jx);
+       }
+     }
+-#else
++#elif defined(__WIN32__)
+     HDC hdc = CreateCompatibleDC(NULL);
+     ::SelectObject(hdc, bmp);
+     BITMAPINFO bmpInfo;
+@@ -6602,6 +6616,19 @@
+         olx_swap(tex_data[off1+2], tex_data[off2+0]);
+       }
+     }
++#else
++    // Same x/y convention as the original wxImage path above, not a new UV
++    // convention. The target decoder supplies packed row-major RGB bytes.
++    unsigned char *tex_data = new unsigned char[size_t(sz)*sz*3];
++    for (int ix=0; ix < sz; ix++) {
++      for (int jx=0; jx < sz; jx++) {
++        const size_t destination = (size_t(ix)*sz+jx)*3;
++        const size_t source = (size_t(jx)*sz+ix)*3;
++        for (size_t c=0; c < 3; c++) {
++          tex_data[destination+c] = platform_rgb[source+c];
++        }
++      }
++    }
+ #endif
+     TGlTexture *tex = tm.FindByName(TextureNames[i]);
+     if (tex == NULL) {

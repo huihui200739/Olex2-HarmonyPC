@@ -1,0 +1,20 @@
+{
+  "scope": "Recorded application observation plus separate labeled synthetic image references; test mutations are isolated synthetic validation cases, not target runs",
+  "hap_sha256": "d4fbb047a8192efafacf1b4ea12178db023c77cd8be2cf458130dfbd1672b48e",
+  "application_pid": 2256,
+  "source_runtime_report": "out/gx-application-evaluation/source/reports/app/20261109-193652-74acd8/result.json",
+  "scope_limits": [
+    "initial UI run stopped due missing host reference log, not native image execution failure",
+    "this fixture alone is not the full UI regression result"
+  ],
+  "files": [
+    {
+      "file": "gx_platform_observation.json",
+      "sha256": "20ae0c7a4b95508574cc2602bd29f648a81fcd7be887d3f7ad06bafd619bb44b"
+    },
+    {
+      "file": "gx_synthetic_images.json",
+      "sha256": "1940f25a02de0275a0a517a2683e57202175a255f60b435168d0e5514e4e84ae"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "passed": true,
+  "schema_version": 2,
+  "hap_sha256": "3c66b1aeda753d2963cfe0e1810d8b3067ec04a7634e0e8bea7e54d8b6c25cb0",
+  "input_manifest_sha256": "b9abe09f94d4d1b4b50f92df3f43a6bfae2b89e7fbc58339645162565096f5ed",
+  "snapshot_sha256": "b37d8fb8df082d37881a49e20b6cbda12086c909f44665af05fd6c6c2e72eb14",
+  "staged_files": 2440,
+  "compiled_native_sources": 615,
+  "native_dependency_files": 1942,
+  "generated_header_inputs": 2,
+  "tools": 12,
+  "sdk": {
+    "apiVersion": "24",
+    "displayName": "Native",
+    "meta": {
+      "metaVersion": "3.0.0"
+    },
+    "path": "native",
+    "releaseType": "Release",
+    "version": "6.1.1.125"
+  },
+  "native_libraries": 3,
+  "full_port_complete": false,
+  "workspace_matches": true,
+  "limits": [
+    "Diagnostic subset only; original full GUI, renderer, Python and plugins are not certified.",
+    "Unsigned debug traceability, not authenticated release provenance or a digital signature.",
+    "Records the actual local build; does not assert independently reproducible HAP bytes.",
+    "Native dependency evidence is compiler/Ninja input tracing, not ArkTS transitive dependency tracing.",
+    "Tool hashes and SDK package metadata identify selected local tools, not an audit of the entire SDK.",
+    "Emulator, physical-PC and runtime test evidence are separate and must bind the final HAP hash.",
+    "Includes fixed third-party C/C++ and all packaged native libraries; not complete original renderer certification.",
+    "Does not directly hash installed target code when the OS denies shell access."
+  ]
+}

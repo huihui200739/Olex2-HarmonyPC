@@ -1,0 +1,785 @@
+/******************************************************************************
+* Copyright (c) 2004-2026 O. Dolomanov, OlexSys                               *
+*                                                                             *
+* This file is part of the OlexSys Development Framework.                     *
+*                                                                             *
+* This source file is distributed under the terms of the licence located in   *
+* the root folder.                                                            *
+******************************************************************************/
+
+#include "dataitem.h"
+#include "estrbuffer.h"
+#include "estack.h"
+#include "xml.h"
+
+UseEsdlNamespace()
+using namespace exparse::parser_util;
+
+TDataItem::TDataItem(TDataItem* Prnt, const olxstr& nm, const olxstr& val)
+  : Name(nm), Value(val)
+{
+  Level = (Prnt == 0 ? 0 : Prnt->GetLevel() + 1);
+  Parent = Prnt;
+  Data = 0;
+}
+//..............................................................................
+TDataItem::~TDataItem() {
+  Clear();
+}
+//..............................................................................
+void TDataItem::Clear() {
+  Fields.Clear();
+  for (size_t i = 0; i < Items.Count(); i++) {
+    if (Items.GetObject(i)->DecRef() == 0) {
+      delete Items.GetObject(i);
+    }
+    else {
+      if (Items.GetObject(i)->GetParent() == this) {
+        Items.GetObject(i)->SetParent(0);
+      }
+    }
+  }
+  Items.Clear();
+}
+//..............................................................................
+TDataItem& TDataItem::Root() {
+  if (GetParent() == 0) {
+    return *this;
+  }
+  TDataItem* P = GetParent();
+  while (P->GetParent() != 0) {
+    P = P->GetParent();
+  }
+  return *P;
+}
+//..............................................................................
+TEStrBuffer& TDataItem::writeFullName(TEStrBuffer& bf) const {
+  if (GetParent() == 0) {
+    bf << Name;
+  }
+  else {
+    TStack<TDataItem*> tmp;
+    TDataItem* P = GetParent();
+    while (P->GetParent() != 0) {
+      tmp.Push(P);
+      P = P->GetParent();
+    }
+    while (!tmp.IsEmpty()) {
+      bf << tmp.Pop()->GetName() << '.';
+    }
+    bf << Name;
+  }
+  return bf;
+}
+//..............................................................................
+olxstr TDataItem::GetFullName(const olxstr& sep, const TDataItem* upto) const {
+  if (GetParent() == 0) {
+    return GetName();
+  }
+  olxstr_buf res = GetName();
+  TDataItem* p = GetParent();
+  if (upto == 0) {
+    while (p != 0 && p->GetParent() != 0) {
+      res << sep << p->GetName();
+      p = p->GetParent();
+    }
+  }
+  else {
+    while (p != 0 && p != upto) {
+      res << sep << p->GetName();
+      p = p->GetParent();
+    }
+  }
+  return olxstr::FromExternal(
+    res.ReverseRead(olx_malloc<olxch>(res.Length() + 1)), res.Length());
+}
+//..............................................................................
+TDataItem* TDataItem::DotItem_(const olxstr& DotName, TStrList* Log) {
+  TDataItem* root = &Root();
+  TStrList SL(DotName, '.');
+  for (size_t i = 0; i < SL.Count(); i++) {
+    root = root->FindItem(SL[i]);
+    if (root == 0) {
+      if (Log != 0) {
+        Log->Add("Unresolved reference: ") << DotName;
+      }
+      break;
+    }
+  }
+  return root;
+}
+//..............................................................................
+olxstr* TDataItem::DotField(const olxstr& DotName, olxstr& RefFieldName) {
+  TDataItem* root = &Root(), * PrevItem;
+  TStrList SL(DotName, '.');
+  olxstr* Str = 0;
+  for (size_t i = 0; i < SL.Count(); i++) {
+    PrevItem = root;
+    root = root->FindItem(SL[i]);
+    if (root == 0) {
+      RefFieldName = SL[i];
+      Str = PrevItem->FieldPtr(SL[i]);
+      break;
+    }
+  }
+  return Str;
+}
+//..............................................................................
+TDataItem *TDataItem::FindAnyItem(const olxstr& Name) const {
+  TDataItem *DI = FindItem(Name);
+  if (DI == 0) {
+    for (size_t i=0; i < ItemCount(); i++) {
+      DI = GetItemByIndex(i).FindAnyItem(Name);
+      if (DI != 0) {
+        return DI;
+      }
+    }
+  }
+  return DI;
+}
+//..............................................................................
+TDataItem *TDataItem::FindAnyItemi(const olxstr &Name) const {
+  TDataItem *DI = FindItemi(Name);
+  if (DI == 0) {
+    for (size_t i=0; i < ItemCount(); i++) {
+      DI = GetItemByIndex(i).FindAnyItemi(Name);
+      if (DI != 0) {
+        return DI;
+      }
+    }
+  }
+  return DI;
+}
+//..............................................................................
+void TDataItem::AddCopy(const TDataItem& DI, bool extend) {
+  if (extend) {
+    TDataItem* di = FindItem(DI.GetName());
+    if (di != 0) {
+      for (size_t i = 0; i < DI.Fields.Count(); i++) {
+        di->AddField(DI.Fields.GetKey(i), DI.Fields.GetValue(i).GetA());
+      }
+      for (size_t i = 0; i < DI.ItemCount(); i++) {
+        di->AddCopy(DI.GetItemByIndex(i), true);
+      }
+      return;
+    }
+    else {
+      AddCopy(DI, false);
+    }
+  }
+  else {
+    TDataItem& r = AddItem(DI.GetName(), DI.GetValue());
+    r.Fields = DI.Fields;
+    for (size_t i = 0; i < DI.ItemCount(); i++) {
+      r.AddCopy(DI.GetItemByIndex(i), false);
+    }
+  }
+}
+//..............................................................................
+void TDataItem::AddContent(TDataItem& DI, bool extend) {
+  if (extend) {
+    for (size_t i = 0; i < DI.ItemCount(); i++) {
+      TDataItem* di = FindItem(DI.GetItemByIndex(i).GetName());
+      if (di != 0) {
+        for (size_t j = 0; j < DI.GetItemByIndex(i).ItemCount(); j++) {
+          di->AddItem(DI.GetItemByIndex(i).GetItemByIndex(j)).SetParent(di);
+        }
+      }
+      else {
+        AddItem(DI.GetItemByIndex(i)).SetParent(this);
+      }
+    }
+  }
+  else {
+    for (size_t i = 0; i < DI.ItemCount(); i++) {
+      size_t ii = ItemIndex(DI.GetItemByIndex(i).GetName());
+      if (ii != InvalidIndex) {
+        DeleteItemByIndex(ii);
+      }
+      AddItem(DI.GetItemByIndex(i)).SetParent(this);
+    }
+  }
+}
+//..............................................................................
+void TDataItem::DeleteItem(TDataItem* Item) {
+  if (Item->GetParent() != this) {
+    if (Item->GetParent() != 0) {
+      Item->GetParent()->DeleteItem(Item);
+    }
+    else {
+      if (Item->GetRefCount() == 0) {
+        delete Item;
+      }
+    }
+    return;
+  }
+  size_t index = Items.IndexOfObject(Item);
+  if (index != InvalidIndex) {
+    Items.Delete(index);
+  }
+  if (Item->DecRef() == 0) {
+    delete Item;
+  }
+  else {
+    Item->SetParent(0);
+  }
+}
+//..............................................................................
+void TDataItem::DeleteItemByIndex(size_t idx) {
+  TDataItem* di = Items.GetObject(idx);
+  Items.Delete(idx);
+  if (di->DecRef() == 0) {
+    delete di;
+  }
+  else {
+    di->SetParent(0);
+  }
+}
+//..............................................................................
+bool TDataItem::DeleteByName(const olxstr& name) {
+  TStrList toks(name, '.');
+  TDataItem* root = this;
+  size_t ii = InvalidIndex;
+  for (size_t i = 0; i < toks.Count(); i++) {
+    ii = root->ItemIndex(toks[i]);
+    if (ii == InvalidIndex) {
+      if ((i + 1) < toks.Count()) {
+        return false;
+      }
+      ii = root->FieldIndex(toks[i]);
+      if (ii == InvalidIndex) {
+        if (toks[i] == "value") {
+          root->SetValue(EmptyString());
+          return true;
+        }
+        return false;
+      }
+      root->DeleteFieldByIndex(ii);
+      return true;
+    }
+    if ((i + 1) == toks.Count()) {
+      break; // leave ii to point to the right item index in the right root
+    }
+    root = &root->GetItemByIndex(ii);
+  }
+  if (ii != InvalidIndex) {
+    root->DeleteItemByIndex(ii);
+    return true;
+  }
+  return false;
+}
+//..............................................................................
+TDataItem& TDataItem::AddItem(const olxstr& Name, TDataItem* Reference) {
+  TDataItem& I = AddItem(Name);
+  I.AddItem(*Reference);
+  return I;
+}
+//..............................................................................
+TDataItem& TDataItem::AddItem(TDataItem& Item) {
+  Items.Add(Item.GetName(), &Item);
+  if (Item.GetParent() == 0) {
+    Item.SetParent(this);
+  }
+  Item.IncRef();
+  return Item;
+}
+//..............................................................................
+TDataItem& TDataItem::AddItem(const olxstr& name, const olxstr& val) {
+  //  if( !(Name == "!--") )  // comment
+  //    if( ItemExists(Name) )
+  //      BasicApp->Log->Exception(olxstr("TDataItem: dublicate definition: ") + Name, false);
+  return AddItem(*(new TDataItem(this, name, val)));
+}
+//..............................................................................
+void TDataItem::SetFieldValue(const olxstr& name, const olxstr& value) {
+  TStrList toks(name, '.');
+  TDataItem* root = this;
+  for (size_t i = 0; i < toks.Count()-1; i++) {
+    size_t ii = root->ItemIndex(toks[i]);
+    if (ii == InvalidIndex) {
+      for (size_t j = i; j < toks.Count()-1; j++) {
+        TDataItem* di = new TDataItem(root, toks[j]);
+        root->AddItem(*di);
+        root = di;
+      }
+      break;
+    }
+    root = &root->GetItemByIndex(ii);
+  }
+  if (toks.GetLastString() == "value") {
+    root->SetValue(value);
+  }
+  else {
+    root->AddField(toks.GetLastString(), value);
+  }
+}
+//..............................................................................
+size_t TDataItem::LoadFromString(size_t start, const olxstr& Data,
+  TStrList* Log)
+{
+  const size_t sl = Data.Length();
+  for (size_t i = start; i < sl; i++) {
+    olxch ch = Data[i];
+    if (ch == '<') {
+      const size_t name_start_i = i + 1;
+      while (++i < sl) {
+        ch = Data[i];
+        if (olxstr::o_isoneof(ch, "<>\"") || olxstr::o_iswhitechar(ch)) {
+          break;
+        }
+      }
+      olxstr ItemName = Data.SubString(name_start_i, i - name_start_i);
+      if (ItemName.IsEmpty() && Log != 0) {
+        Log->Add((this->GetName() + ':') << " empty item name!");
+      }
+      TDataItem* DI = 0;
+      try { DI = &AddItem(ItemName); }
+      catch (...) {
+        if (Log != 0) {
+          Log->Add((this->GetName() + ':') << " cannot add item");
+        }
+      }
+      if (DI != 0) {
+        i = DI->LoadFromString(i, Data, Log);
+        continue;
+      }
+    }
+
+    if (ch == '>') {
+      return i;
+    }
+    if (ch == '/' || ch == '\\') {
+      continue;
+    }
+    if (!olxstr::o_iswhitechar(ch)) {
+      olxstr FieldName, FieldValue;
+      if (is_quote(ch)) {  // item value
+        parse_string(Data, Value, i);
+        Value = unescape(Value);
+        if (i < sl && (Data[i] == '>')) {
+          return i;
+        }
+        continue;
+      }
+      if ((i + 1) >= sl) {
+        return sl + 1;
+      }
+      const size_t fn_start = i;
+      while (i < sl) {  // extract field name
+        ch = Data.CharAt(i);
+        if (olxstr::o_isoneof(ch, "=><\"\'") || olxstr::o_iswhitechar(ch)) {
+          break;
+        }
+        i++;
+      }
+      FieldName = Data.SubString(fn_start, i - fn_start);
+      if ((skip_whitechars(Data, i)) >= sl) {
+        return sl + 1;
+      }
+      if (Data[i] == '=') {  // extract field value
+        i++;
+        if ((skip_whitechars(Data, i)) >= sl) {
+          return sl + 1;
+        }
+        if (is_quote(Data[i])) { // field value
+          parse_string(Data, FieldValue, i);
+        }
+      }
+      else { // the spaces can separate just two field names
+        i--;
+      }
+      if (FieldName.IndexOf('.') != InvalidIndex) {  // a reference to an item
+        TDataItem* DI = DotItem_(FieldName, Log);
+        if (DI != 0) {
+          AddItem(*DI);
+        }
+        else {  // unresolved so far if !DI
+          olxstr RefFieldName;
+          olxstr* RefField = DotField(FieldName, RefFieldName);
+          if (RefField == 0) {
+            _AddField(FieldName, FieldValue);
+          }
+          else {
+            _AddField(RefFieldName, *RefField);
+          }
+        }
+      }
+      else {
+        _AddField(FieldName, FieldValue);
+      }
+      if ((i + 1) >= sl) {
+        return sl + 1;
+      }
+      if (Data[i] == '>') {
+        return i;
+      }
+    }
+  }
+  return sl + 1;
+}
+//..............................................................................
+size_t TDataItem::LoadFromXMLString(size_t start, const olxstr& Data,
+  TStrList* Log)
+{
+  static const olxch* wch = olxT(" \t\r\n");
+  static size_t wch_l = olxstr::o_strlen(wch);
+  bool can_have_fields = true;
+  const size_t sl = Data.Length();
+  if (Name.StartsFrom('!')) {
+    size_t i = start, ob = 1;
+    while (i < sl) {
+      if (Data[i] == '>' && --ob == 0) {
+        SetValue(Data.SubString(start, i - start));
+        return i;
+      }
+      else if (Data[i] == '<') {
+        ob++;
+      }
+      i++;
+    }
+    return sl + 1;
+  }
+  for (size_t i = start; i < sl; i++) {
+    olxch ch = Data[i];
+    if (ch == '<') {
+      const size_t name_start_i = i + 1;
+      while (++i < sl) {
+        ch = Data[i];
+        if (ch == '>' || olxstr::o_isoneof(ch, wch, wch_l)) {
+          break;
+        }
+      }
+      olxstr ItemName = Data.SubString(name_start_i, i - name_start_i);
+      if (ItemName.IsEmpty() && Log != 0) {
+        Log->Add((this->GetName() + ':') << " empty item name!");
+      }
+      if (ItemName.StartsFrom('/') && ch == '>') {
+        if (!ItemName.SubStringFrom(1).Equals(GetName())) {
+          if (Log != 0) {
+            Log->Add((this->GetName() + ':') << " wrong closing token: '" <<
+              ItemName << '\'');
+          }
+        }
+        return i;
+      }
+      TDataItem* DI = 0;
+      try {
+        if (ch == '>' && ItemName.EndsWith('/')) {
+          AddItem(ItemName.SubStringTo(ItemName.Length() - 1));
+          continue;
+        }
+        DI = &AddItem(ItemName);
+      }
+      catch (...) {
+        if (Log != 0) {
+          Log->Add((this->GetName() + ':') << " cannot add item");
+        }
+      }
+      if (DI != 0) {
+        i = DI->LoadFromXMLString(i, Data, Log);
+        continue;
+      }
+    }
+    if (ch == '>') {
+      can_have_fields = false;
+      continue;
+    }
+    if (ch == '?' && (i + 1) < sl && Data[i + 1] == '>') {
+      return i + 1;
+    }
+    if (ch == '/') {
+      if (i + 1 < sl && Data[i + 1] == '>')
+        return i + 1;
+      else {
+        if (Log != 0) {
+          Log->Add((this->GetName() + ':') << " invalid / occurance");
+        }
+      }
+    }
+    if (!olxstr::o_isoneof(ch, wch, wch_l)) {
+      if (can_have_fields) {
+        olxstr FieldName, FieldValue;
+        const size_t fn_start = i;
+        while (i < sl) {  // extract field name
+          ch = Data.CharAt(i);
+          if (ch == '=' || olxstr::o_isoneof(ch, wch, wch_l)) {
+            break;
+          }
+          i++;
+        }
+        FieldName = Data.SubString(fn_start, i - fn_start);
+        if ((skip_chars(Data, i, wch, wch_l)) >= sl) {
+          return sl + 1;
+        }
+        if (Data[i] == '=') {  // extract field value
+          i++;
+          if ((skip_chars(Data, i, wch, wch_l)) >= sl) {
+            return sl + 1;
+          }
+          if (is_quote(Data[i])) { // field value
+            parse_string(Data, FieldValue, i);
+          }
+        }
+        else { // the spaces can separate just two field names
+          i--;
+        }
+        Fields.Add(FieldName, XML::decode(FieldValue)).SetB(Fields.Count());
+        if ((i + 1) >= sl) {
+          return sl + 1;
+        }
+        if (Data[i] == '/' && Data[i + 1] == '>') {
+          return i + 1;
+        }
+      }
+      else {
+        const size_t fn_start = i;
+        while (i < sl) {  // extract field name
+          ch = Data.CharAt(i);
+          if (ch == '<') {
+            break;
+          }
+          i++;
+        }
+        Value = XML::decode(Data.SubString(fn_start, i - fn_start));
+        i--;
+      }
+    }
+  }
+  return sl + 1;
+}
+//..............................................................................
+void TDataItem::ResolveFields(TStrList* Log) {  // resolves referenced fields
+  for (size_t i = 0; i < FieldCount(); i++) {
+    const olxstr& Tmp = Fields.GetKey(i);
+    if (Tmp.Contains('.')) {  // a reference to an item
+      TDataItem* DI = DotItem_(Tmp, Log);
+      if (DI != 0) {
+        AddItem(*DI);
+        if (Log != 0) {
+          Log->Add(olxstr("Resolved: ").quote() << Tmp);
+        }
+        Fields.Delete(i--);  // might be very slow !!!
+      }
+      else {
+        olxstr RefFieldName;
+        olxstr* RefFieldValue = DotField(Tmp, RefFieldName);
+        if (RefFieldValue == 0) {
+          if (Log != 0) {
+            Log->Add(olxstr("UNRESOLVED: ").quote() << Tmp);
+          }
+        }
+        else {
+          if (Log != 0) {
+            Log->Add(olxstr("Resolved field: ").quote() << Tmp);
+          }
+          size_t idx = Fields.GetValue(i).GetB();
+          Fields.Delete(i);
+          Fields.Add(RefFieldName, *RefFieldValue).SetB(idx);
+        }
+      }
+    }
+  }
+  for (size_t i = 0; i < ItemCount(); i++) {
+    if (GetItemByIndex(i).GetParent() == this) {
+      GetItemByIndex(i).ResolveFields(Log);
+    }
+  }
+}
+//..............................................................................
+void TDataItem::SaveToStrBuffer(TEStrBuffer& Data) const {
+  bool itemsadded = false;
+  if (GetParent() != 0) {
+    if (!Data.IsEmpty()) {
+      Data << NewLineSequence();
+    }
+    Data << olxstr::CharStr(' ', Level - 1);
+    Data << '<' << Name;
+    if (!Value.IsEmpty()) {
+      Data << " \"" << escape(Value) << "\"";
+    }
+  }
+  const size_t fc = FieldCount();
+  for (size_t i = 0; i < fc; i++) {
+    Data << ' ' << GetFieldName(i) << '=';
+    Data << '\"' << escape(GetFieldByIndex(i)) << '\"';
+  }
+  const size_t ic = ItemCount();
+  for (size_t i = 0; i < ic; i++) {
+    // dot operator
+    if (GetItemByIndex(i).GetParent() != this &&
+      GetItemByIndex(i).GetParent() != 0)
+    {
+      Data << ' ';
+      GetItemByIndex(i).writeFullName(Data);
+    }
+  }
+  for (size_t i = 0; i < ic; i++) {
+    if (GetItemByIndex(i).GetParent() == this ||
+      GetItemByIndex(i).GetParent() == 0)
+    {
+      GetItemByIndex(i).SaveToStrBuffer(Data);
+      itemsadded = true;
+    }
+  }
+  if (GetParent() != 0) {
+    if (itemsadded) {
+      Data << NewLineSequence() << olxstr::CharStr(' ', Level - 1);
+    }
+    Data << '>';
+  }
+}
+//..............................................................................
+void TDataItem::SaveToXMLStrBuffer(TEStrBuffer& Data) const {
+  olxstr ident = olxstr::CharStr(' ', Level);
+  const size_t ic = ItemCount();
+  size_t si = 0;
+  for (size_t i = 0; i < ic; i++) {
+    // dot operator
+    if (GetItemByIndex(i).GetParent() != this &&
+      GetItemByIndex(i).GetParent() != 0)
+    {
+      Data << ident << "value=\"";
+      GetItemByIndex(i).writeFullName(Data);
+      Data << '"';
+    }
+    else {
+      si++;
+    }
+  }
+  if (si == 0) {
+    if (GetParent() == 0) {
+      return;
+    }
+    if (Data.Length() != 0) {
+      Data << NewLineSequence();
+    }
+    Data << ident.SubStringFrom(1);
+    Data << '<' << Name;
+    if (Name.StartsFrom('!')) {
+      Data << XML::encode(GetValue()) << '>';
+    }
+    else {
+      for (size_t i = 0; i < Fields.Count(); i++) {
+        Data << ' ' << GetFieldName(i) << "=\"" <<
+          XML::encode(GetFieldByIndex(i)) << '"';
+      }
+      if (!Value.IsEmpty()) {
+        Data << '>' << XML::encode(Value) << "</" << Name << '>';
+      }
+      else {
+        Data << (Name.StartsFrom('?') ? '?' : '/') << '>';
+      }
+    }
+    return;
+  }
+  else {
+    if (GetParent() != 0) {
+      if (Data.Length() != 0) {
+        Data << NewLineSequence();
+      }
+      Data << ident.SubStringFrom(1);
+      Data << '<' << Name;
+      if (!Value.IsEmpty()) {
+        Data << " value=\"" << XML::encode(Value) << '"';
+      }
+      for (size_t i = 0; i < Fields.Count(); i++) {
+        Data << ' ' << GetFieldName(i) << "=\"" <<
+          XML::encode(GetFieldByIndex(i)) << '"';
+      }
+      if (si > 0) {
+        Data << '>';
+      }
+    }
+    for (size_t i = 0; i < ic; i++) {
+      if (GetItemByIndex(i).GetParent() == this ||
+        GetItemByIndex(i).GetParent() == 0)
+      {
+        GetItemByIndex(i).SaveToXMLStrBuffer(Data);
+      }
+    }
+  }
+  if (GetParent() != 0) {
+    if (si == 0) {
+      Data << "/>";
+    }
+    else {
+      Data << NewLineSequence() << ident.SubStringFrom(1);
+      Data << "</" << Name << '>';
+    }
+  }
+}
+//..............................................................................
+void TDataItem::FindSimilarItems(const olxstr& StartsFrom,
+  TPtrList<TDataItem>& List)
+{
+  for (size_t i = 0; i < ItemCount(); i++) {
+    if (Items[i].StartsFromi(StartsFrom)) {
+      List.Add(Items.GetObject(i));
+    }
+  }
+}
+//..............................................................................
+// sorts fields and items - improve the access by name performance
+void TDataItem::Sort() {
+  Items.QSort(false);
+}
+//..............................................................................
+void TDataItem::Validate(TStrList& Log) {
+  for (size_t i = 0; i < ItemCount(); i++) {
+    if (GetItemByIndex(i).GetParent() != 0 &&
+      (GetItemByIndex(i).GetParent() != this))
+    {
+      Log.Add("Referred item from ") << this->GetFullName() << "->" <<
+        GetItemByIndex(i).GetFullName();
+    }
+    if (GetItemByIndex(i).GetParent() == 0) {
+      Log.Add("Item with null Parent: ") <<
+        GetItemByIndex(i).GetFullName();
+    }
+  }
+}
+//..............................................................................
+const_strstrlist TDataItem::GetOrderedFieldList() const {
+  TStrStrList rv(Fields.Count());
+  for (size_t i = 0; i < Fields.Count(); i++) {
+    size_t idx = Fields.GetValue(i).GetB();
+    if (idx >= Fields.Count()) {
+      throw TFunctionFailedException(__OlxSourceInfo, "field set is modified");
+    }
+    rv[idx] = Fields.GetKey(i);
+    rv.GetObject(idx) = Fields.GetValue(i).GetA();
+  }
+  return rv;
+}
+//..............................................................................
+void TDataItem::UpdateFieldIndices(size_t deleted) {
+  for (size_t i = 0; i < Fields.Count(); i++) {
+    if (Fields.GetValue(i).GetB() > deleted) {
+      Fields.GetValue(i).b--;
+    }
+  }
+}
+//..............................................................................
+void TDataItem::ValueFieldToValue() {
+  size_t vidx = Fields.IndexOf("value");
+  if (vidx != InvalidIndex) {
+    SetValue(Fields.GetValue(vidx).GetA());
+    DeleteFieldByIndex(vidx, true);
+  }
+  for (size_t i = 0; i < Items.Count(); i++) {
+    Items.GetObject(i)->ValueFieldToValue();
+  }
+}
+//..............................................................................
+TDataItem& TDataItem::operator = (const TDataItem& i) {
+  Clear();
+  Name = i.Name;
+  Value = i.Value;
+  Data = i.Data;
+  Fields = i.Fields;
+  for (size_t j = 0; j < i.Items.Count(); j++) {
+    AddCopy(i.GetItemByIndex(j), false);
+  }
+  return *this;
+}
+//..............................................................................

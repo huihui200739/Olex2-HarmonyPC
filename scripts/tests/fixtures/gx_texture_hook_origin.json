@@ -1,0 +1,9 @@
+{
+  "scope": "Actual native virtual-hook startup observation; isolated test mutations are synthetic, not target executions",
+  "pid": 31961,
+  "hap_sha256": "720239e5095368f3daccd94be291f83041dbd1239cb82df813bec2873976ca9b",
+  "source_runtime_observation": "out/gx-application-evaluation/candidate2-startup-observation.json",
+  "source_sha256": "00b41a060ba6b02a36c17f281dceb863f40b2da014826a56419ca174f29dedaa",
+  "fixture_sha256": "59d43771edf9f0df9e50c9d13c7cd01a5f25fdc33316bf1ed70b4eb518afd144",
+  "full_ui_run": "pending at fixture collection; final independent receipt is separate"
+}
