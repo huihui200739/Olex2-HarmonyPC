@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "scope": "Fresh local clone recovery, not a remote download or device test",
+  "snapshot_files_verified": 2539,
+  "source28_original_bytes_and_modes_restored": true,
+  "upstream_worktree_all_original_bytes_unchanged": true,
+  "shallow_boundary_restored": true,
+  "original_source_checks_with_explicit_outer_git_discovery_boundary": 156,
+  "existing_destination_overwrite_rejected": true,
+  "failed_attempts_retained_locally": true,
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}
