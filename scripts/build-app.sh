@@ -2,6 +2,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 HERE="$ROOT/out/gx-application-evaluation"
+mkdir -p "$HERE"
 SOURCE="${GX_APP_SOURCE:-$ROOT}"
 PROVENANCE_TOOL="$ROOT/scripts/build_provenance_ffi_v1.py"
 DEVECO=/Applications/DevEco-Studio.app/Contents
