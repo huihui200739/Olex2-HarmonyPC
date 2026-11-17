@@ -1,0 +1,331 @@
+/******************************************************************************
+* Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
+*                                                                             *
+* This file is part of the OlexSys Development Framework.                     *
+*                                                                             *
+* This source file is distributed under the terms of the licence located in   *
+* the root folder.                                                            *
+******************************************************************************/
+
+#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
+#include "frameext.h"
+#include "msgbox.h"
+#include "bapp.h"
+#include "log.h"
+#include "eutf8.h"
+#include "native_text_positions.h"
+#include <algorithm>
+#include <stdexcept>
+#include <utility>
+using namespace olex2::harmony::ui;
+namespace ctrl_ext {
+namespace {
+std::string Bytes(const olxstr& text) {
+  TextUtf16Offset(text, text.Length());
+  auto encoded = TUtf8::Encode(text);
+  return std::string(encoded.c_str(), encoded.Length());
+}
+}
+struct TMainFrame::State {
+  std::shared_ptr<FramePlatform> platform;
+  std::shared_ptr<DialogBackend> dialogs;
+  std::shared_ptr<UiScheduler> scheduler;
+  std::shared_ptr<TdlgMsgBox> alert;
+  olxstr name, title;
+  bool busy = false, ownerAlive = true, deliver = true;
+  UiScheduler::Ticket failedAlertObserver = 0;
+  FrameCompletion failedAlertDone;
+  void PollFailedAlert() {
+    if (!failedAlertDone) return;
+    if (!alert->IsShown() && !alert->IsClosing()) {
+      auto hold = std::move(alert);
+      auto done = std::move(failedAlertDone);
+      FrameResult result; result.error = "The alert could not be shown; its native view is now detached";
+      done(result);
+    }
+  }
+};
+thread_local std::vector<TMainFrame*> TMainFrame::MainFrames;
+TMainFrame::TMainFrame(NodeBackend& nodes, std::shared_ptr<FramePlatform> platform,
+  std::shared_ptr<DialogBackend> dialogs, std::shared_ptr<UiScheduler> scheduler,
+  const olxstr& title, const olxstr& name, Size contentSize)
+  : Widget(nodes, NodeKind::Column, nullptr, -1, {0, 0}, contentSize), AOlxCtrl(this),
+    state_(std::make_shared<State>()) {
+  if (!platform || !dialogs || !scheduler || name.IsEmpty())
+    throw std::invalid_argument("A main frame needs its real window, dialog and UI environment");
+  if (contentSize.width <= 0 || contentSize.height <= 0)
+    throw std::out_of_range("Main-frame content dimensions must be positive vp");
+  state_->platform = std::move(platform);
+  state_->dialogs = std::move(dialogs);
+  state_->scheduler = std::move(scheduler);
+  state_->name = name;
+  state_->title = title;
+  Bytes(name); Bytes(title);
+  ReadWindowRect(); // Validate the bound real window; never move or resize it at mount.
+  MainFrames.push_back(this);
+}
+TMainFrame::~TMainFrame() {
+  state_->ownerAlive = false;
+  state_->deliver = false;
+  if (state_->failedAlertObserver) {
+    try { state_->scheduler->Stop(state_->failedAlertObserver); } catch (...) {}
+  }
+  state_->failedAlertDone = {};
+  state_->alert.reset(); // DialogWindow retains a live view until native detach.
+  auto found = std::find(MainFrames.begin(), MainFrames.end(), this);
+  if (found != MainFrames.end()) MainFrames.erase(found);
+}
+TMainFrame& TMainFrame::GetMainFrameInstance() {
+  if (MainFrames.empty()) throw std::logic_error("There is no main frame on this UI thread");
+  return *MainFrames.back();
+}
+FrameRectPx TMainFrame::ReadWindowRect() const {
+  AssertThread();
+  auto rect = state_->platform->ReadRect();
+  if (rect.width <= 0 || rect.height <= 0) throw std::out_of_range("The real window has invalid pixel geometry");
+  return rect;
+}
+void TMainFrame::Begin(const std::function<void(FrameCompletion)>& start, FrameCompletion completion) {
+  AssertThread();
+  if (!completion) throw std::invalid_argument("A main-frame operation needs asynchronous completion");
+  auto state = state_;
+  if (state->busy) throw std::logic_error("A main-frame request is already pending");
+  state->busy = true;
+  auto finished = std::make_shared<bool>(false);
+  std::weak_ptr<State> weak = state;
+  auto done = [weak, finished, completion = std::move(completion)](const FrameResult& result) {
+    if (*finished) return;
+    *finished = true;
+    auto self = weak.lock();
+    if (!self || !self->ownerAlive) return;
+    self->busy = false;
+    try { if (self->deliver) completion(result); } catch (...) { /* No unwinding through platform callbacks. */ }
+  };
+  try { start(done); }
+  catch (...) { FrameResult failure; failure.error = "The main-frame request could not be started"; done(failure); }
+}
+void TMainFrame::SavePosition(TMainFrame& target) {
+  AssertThread(); target.AssertThread();
+  WindowPos[target.state_->name] = target.ReadWindowRect();
+}
+void TMainFrame::RestorePosition(TMainFrame& target, FrameCompletion completion) {
+  AssertThread(); target.AssertThread();
+  auto found = WindowPos.find(target.state_->name);
+  if (found == WindowPos.end()) {
+    if (!completion) throw std::invalid_argument("Position restoration needs completion");
+    FrameResult result; result.ok = true; completion(result); return;
+  }
+  // The original method restores position only, not window size.
+  target.MoveWindow(found->second.left, found->second.top, std::move(completion));
+}
+void TMainFrame::SavePosition(const olxstr& name, DialogWindow& dialog) {
+  AssertThread();
+  if (name.IsEmpty()) throw std::invalid_argument("Dialog position needs its stable class name");
+  DialogPos[name] = dialog.Geometry(); // vp remains vp; no OS-pixel conversion.
+}
+void TMainFrame::RestorePosition(const olxstr& name, DialogWindow& dialog) {
+  AssertThread();
+  auto found = DialogPos.find(name);
+  if (found != DialogPos.end()) dialog.SetPosition(found->second.offset, found->second.centered);
+}
+void TMainFrame::MoveWindow(int left, int top, FrameCompletion completion) {
+  auto platform = state_->platform;
+  Begin([platform, left, top](FrameCompletion done) { platform->Move(left, top, std::move(done)); }, std::move(completion));
+}
+void TMainFrame::ResizeWindow(int width, int height, FrameCompletion completion) {
+  if (width <= 0 || height <= 0) throw std::out_of_range("System window pixel dimensions must be positive");
+  auto platform = state_->platform;
+  Begin([platform, width, height](FrameCompletion done) { platform->Resize(width, height, std::move(done)); }, std::move(completion));
+}
+void TMainFrame::SetWindowTitle(const olxstr& title, FrameCompletion completion) {
+  AssertThread();
+  if (!completion) throw std::invalid_argument("A title change needs asynchronous completion");
+  auto bytes = Bytes(title);
+  auto platform = state_->platform;
+  std::weak_ptr<State> weak = state_;
+  Begin([platform, bytes](FrameCompletion done) { platform->SetTitle(bytes, std::move(done)); },
+    [weak, title, completion = std::move(completion)](const FrameResult& result) {
+      if (auto state = weak.lock()) if (result.ok) state->title = title;
+      if (completion) completion(result);
+    });
+}
+void TMainFrame::PickFile(const olxstr& caption, const olxstr& filter, const olxstr& folder,
+  const olxstr& file, bool open, FrameCompletion completion) {
+  AssertThread();
+  FrameFileRequest request{Bytes(caption), Bytes(filter), Bytes(folder), Bytes(file), open};
+  // DocumentViewPicker accepts suffix groups, not PortableFilter's filename
+  // bracket globs. Conversion is performed by the typed platform companion.
+  auto platform = state_->platform;
+  Begin([platform, request](FrameCompletion done) { platform->PickFile(request, std::move(done)); }, std::move(completion));
+}
+bool TMainFrame::HasPendingRequests() const { AssertThread(); return state_->busy; }
+bool TMainFrame::HasAlert() const { AssertThread(); return state_->alert != nullptr; }
+void TMainFrame::SilenceCompletions() { AssertThread(); state_->deliver = false; }
+void TMainFrame::CloseAlert(int result) {
+  AssertThread();
+  auto alert = state_->alert;
+  if (!alert) return;
+  if (alert->IsClosing()) alert->RetryClose(); else if (alert->IsShown()) alert->EndModal(result);
+  state_->PollFailedAlert();
+}
+void TMainFrame::Alert(const olxstr& message, const olxstr& title, uint32_t flags, FrameCompletion completion) {
+  auto& frame = *this;
+  frame.AssertThread();
+  if (!completion) throw std::invalid_argument("An alert needs asynchronous completion");
+  auto state = frame.state_;
+  if (state->busy) throw std::logic_error("A main-frame request is already pending");
+  auto alert = std::make_shared<TdlgMsgBox>(frame.Backend(), state->dialogs, state->scheduler,
+    &frame, message, title, "Remember my decision", flags, false);
+  state->alert = alert;
+  std::weak_ptr<State> weak = state;
+  frame.Begin([weak, alert](FrameCompletion done) {
+    try {
+      alert->ShowModalEx(true, [weak, done](int result) {
+        auto state = weak.lock();
+        if (!state || !state->ownerAlive) return;
+        auto hold = std::move(state->alert); // Keep the object through its own completion stack.
+        FrameResult value; value.ok = true; value.dialogResult = result;
+        value.cancelled = result == MessageResultCancel;
+        done(value);
+      });
+    } catch (...) {
+      auto state = weak.lock();
+      if (state && (alert->IsShown() || alert->IsClosing())) {
+        // A failed show can still leave a closing native dialog. Do not free
+        // the frame, restore its parent or report completion before detach.
+        state->failedAlertDone = std::move(done);
+        try {
+          state->failedAlertObserver = state->scheduler->Start(16, false, [weak] {
+            if (auto self = weak.lock()) {
+              self->PollFailedAlert();
+              if (!self->failedAlertDone && self->failedAlertObserver) {
+                self->scheduler->Stop(self->failedAlertObserver);
+                self->failedAlertObserver = 0;
+              }
+            }
+          });
+        } catch (...) { /* Explicit CloseAlert/unmount retries keep ownership. */ }
+        return;
+      }
+      if (state) state->alert.reset();
+      throw;
+    }
+  }, std::move(completion));
+}
+void TMainFrame::ShowAlert(const olxstr& message, const olxstr& title, uint32_t flags, FrameCompletion completion) {
+  GetMainFrameInstance().Alert(message, title, flags, std::move(completion));
+}
+void TMainFrame::ShowAlert(const TExceptionBase& error, const olxstr& message, bool log, FrameCompletion completion) {
+  TStrList trace;
+  error.GetException()->GetStackTrace(trace);
+  if (log) TBasicApp::NewLogEntry() << "Exception occured:" << NewLineSequence() << message << NewLineSequence() << trace;
+  olxstr displayed(message);
+  if (!displayed.IsEmpty()) displayed << NewLineSequence();
+  displayed << trace.Text(NewLineSequence());
+  ShowAlert(displayed, EsdlObjectName(*error.GetException()), MessageOk | MessageError, std::move(completion));
+}
+olxstr TMainFrame::PortableFilter(const olxstr& filter) {
+  olxstr result;
+  TStrList groups(filter, '|');
+  for (std::size_t i = 0; i + 1 < groups.Count(); i += 2) {
+    if (i) result << '|';
+    result << groups[i] << '|';
+    TStrList masks(groups[i + 1], ';');
+    for (std::size_t j = 0; j < masks.Count(); ++j) {
+      if (j) result << ';';
+      auto dot = masks[j].LastIndexOf('.');
+      if (dot == InvalidIndex) { result << masks[j]; continue; }
+      result << masks[j].SubStringTo(dot + 1);
+      for (std::size_t k = dot + 1; k < masks[j].Length(); ++k)
+        result << '[' << olxstr::o_tolower(masks[j].CharAt(k)) << olxstr::o_toupper(masks[j].CharAt(k)) << ']';
+    }
+  }
+  return result;
+}
+}
+
+#else
+#include "frameext.h"
+#include "estrlist.h"
+#include "bapp.h"
+#include "log.h"
+
+IMPLEMENT_CLASS(TMainFrame, wxFrame)
+
+TMainFrame* TMainFrame::MainFrameInstance = NULL;
+
+// restores previously saved position
+void TMainFrame::RestorePosition(wxWindow *Window)  {
+  size_t ind = WindowPos.IndexOf(Window->GetName());
+  if ( ind == InvalidIndex )  return;
+  TWindowInfo &wi = WindowPos.Get(Window->GetName());
+  Window->Move(wi.x, wi.y);
+}
+//..............................................................................
+//saves current position of the window on screen
+void TMainFrame::SavePosition(wxWindow *Window)  {
+  TWindowInfo &wi = WindowPos.Add(Window->GetName());
+  Window->GetPosition(&(wi.x), &(wi.y));
+}
+//..............................................................................
+olxstr TMainFrame::PortableFilter(const olxstr& filter)  {
+#if defined(__WIN32__) || defined(__MAC__)
+  return filter;
+#else
+  olxstr rv;
+  TStrList fitems(filter, '|');
+  for( int i=0; i < fitems.Count(); i+=2 )  {
+    if( i+1 >= fitems.Count() )
+      break;
+    if( i != 0 )
+      rv << '|';
+    rv << fitems[i] << '|';
+    TStrList masks(fitems[i+1], ';');
+    for( size_t j=0; j < masks.Count(); j++ )  {
+      size_t di = masks[j].LastIndexOf('.');
+      if( di == InvalidIndex )  {
+        rv << masks[j];
+        if( j+1 < masks.Count() )
+          rv << ';';
+        continue;
+      }
+      rv << masks[j].SubStringTo(di+1);
+      for( size_t k=di+1; k < masks[j].Length(); k++ ) {
+        rv << '[' << olxstr::o_tolower(masks[j].CharAt(k)) <<
+          olxstr::o_toupper(masks[j].CharAt(k)) << ']';
+      }
+      if( j+1 < masks.Count() )
+        rv << ';';
+    }
+  }
+  return rv;
+#endif
+}
+//..............................................................................
+olxstr TMainFrame::PickFile(const olxstr &Caption, const olxstr &Filter,
+  const olxstr &DefFolder, const olxstr &DefFile, bool Open)
+{
+  int Style = Open ? wxFD_OPEN : wxFD_SAVE;
+  wxFileDialog dlgFile(this, Caption.u_str(),
+    DefFolder.u_str(), DefFile.u_str(), PortableFilter(Filter).u_str(), Style);
+  return (dlgFile.ShowModal() == wxID_OK ? olxstr(dlgFile.GetPath())
+    : EmptyString());
+}
+//..............................................................................
+int TMainFrame::ShowAlert(const olxstr &msg, const olxstr &title, int flags)  {
+  return ::wxMessageBox(msg.u_str(), title.u_str(), flags, MainFrameInstance);
+}
+//..............................................................................
+void TMainFrame::ShowAlert(const TExceptionBase &e, const olxstr &msg, bool log)  {
+  TStrList sl;
+  e.GetException()->GetStackTrace(sl);
+  if( log )  {
+    TBasicApp::NewLogEntry() << "Exception occured:" << NewLineSequence() <<
+      msg << NewLineSequence() << sl;
+  }
+  wxMessageBox(sl.Text(NewLineSequence()).u_str(),
+    EsdlObjectName(*e.GetException()).u_str(),
+    wxOK|wxICON_ERROR, MainFrameInstance);
+}
+
+#endif // native main frame / original wx

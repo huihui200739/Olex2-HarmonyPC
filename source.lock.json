@@ -1,0 +1,1003 @@
+{
+  "repository": "https://github.com/pcxod/olex2.git",
+  "commit": "ca2b4c1b68ac9d7d8fddc53eb5fcf60797d2d3e1",
+  "upstream_branch": "master",
+  "local_branch": "codex/harmonypc-baseline",
+  "checked_at": "2026-11-16T00:33:16+08:00",
+  "source_kind": "pinned development snapshot; not asserted to be a stable release",
+  "license_file": "upstream/LICENCE.txt",
+  "license_sha256": "ffaf87b82fdb58c4afe80e329b2d67c15d9bd792cf6097f751f67aade19fa864",
+  "patches": [
+    {
+      "file": "patches/0001-fix-utf8-encode4-continuation-bytes.patch",
+      "sha256": "e693b8c0ce474b819cb4b7b6941584ccca49966c3768cb3e943cb0c9bfe3d443"
+    },
+    {
+      "file": "patches/0002-extract-shared-sphere-triangle-submission.patch",
+      "sha256": "b0452b278f6d403eb280896200a9fda544b875fbf2ad7be2f3f3505572d8a9cb"
+    },
+    {
+      "file": "patches/0003-extract-legacy-helper-primitives.patch",
+      "sha256": "1dae7c36faa74bcebd1bfa3366cdbb197b0762633910387f79d3015cd46832da"
+    },
+    {
+      "file": "patches/0004-decouple-color-values-from-desktop-gl.patch",
+      "sha256": "02de50b511b1028def68f482e8cea0e12a4f9d1fd7e17e0e37d7799d171a144c"
+    },
+    {
+      "file": "patches/0005-separate-material-values-from-legacy-init.patch",
+      "sha256": "0e1b6562f99a7b1da8c7b599192ce769abcc4696d3311332598078ed3bac158c"
+    },
+    {
+      "file": "patches/0006-extract-material-init-commands.patch",
+      "sha256": "4fd9dfe7f29c07c159452c58bd3b3a28a9c65ba8bf4a00c4d6bde43bf1cc2797"
+    },
+    {
+      "file": "patches/0007-extract-original-primitive-triangle-submission.patch",
+      "sha256": "255025f0e564bef24bac258d76df8825f1ab4cd6addb834161f5bb7ebb1c85c1"
+    },
+    {
+      "file": "patches/0008-add-owned-original-basis-matrix-exports.patch",
+      "sha256": "c01d8e466ac09b64af9eaceeedcab19e71f6ab03e4991aef0dbe2dbdb312be11"
+    },
+    {
+      "file": "patches/0009-extract-original-polygon-submission.patch",
+      "sha256": "ff1650b188fee774b2979e5936bb61e61680aea7de277ec5eaf0c1f00ad88e37"
+    },
+    {
+      "file": "patches/0010-allow-platform-options-save-override.patch",
+      "sha256": "f41f319c290680b6cee994164b1eda77917947fe9d0db01dfac25fda72b11596"
+    },
+    {
+      "file": "patches/0011-initialize-and-reset-hashed-container-count.patch",
+      "sha256": "d70ac0d301c2a09a0acb4ffcd432bc604e002c7d4c03f840c6febea166dfc01d"
+    },
+    {
+      "file": "patches/0012-add-explicit-utf8-settings-reader.patch",
+      "sha256": "544dc81a446d77739a535de9fadb84fc669ebb7dfa276b8d342ceefee20250bd"
+    },
+    {
+      "file": "patches/0013-extract-original-line-submission.patch",
+      "sha256": "5d8f4ec461800b73f9e33020d6ac15ba37b935bddbb219d619f014c4f3925a3b"
+    },
+    {
+      "file": "patches/0014-extract-original-line-path-submission.patch",
+      "sha256": "86658d6a0f41d4eeba26c3a7b6d4981cc9f78fd322f2ae8fa14349ae0ca39da6"
+    },
+    {
+      "file": "patches/0015-include-explicit-gl-texture-interface.patch",
+      "sha256": "7fd38c10d32093f1d2d80b4a2b6ed7627f3b5646e3e299e76a786c4373fcfe5c"
+    },
+    {
+      "file": "patches/0016-initialize-default-light-exponent.patch",
+      "sha256": "a6d58099fdb4f887fba1ebb52905cc9753df81f3854a30302eae84c8e83950b1"
+    },
+    {
+      "file": "patches/0017-platform-graphics-scene-and-texture-hook-evaluation.patch",
+      "sha256": "5aedc16cad7a12d0ea3e8dcdaed1d2b8371930ad203825f515e2ba98d3c0be8c"
+    },
+    {
+      "file": "patches/0018-texture-transfer-alignment-and-state.patch",
+      "sha256": "d16facf3715cc42e512c6f559fe096d8271264a0be49713c385d180300744fa4"
+    },
+    {
+      "file": "patches/0019-texture-1d-upload-and-target-aware-recreation.patch",
+      "sha256": "faae8a64f74e870614904dad5fcabc0ef08939315057c92c6b788cd003994011"
+    },
+    {
+      "file": "patches/0020-texture-manager-detached-context-destruction.patch",
+      "sha256": "0a3b80f4723ccbec7806617aed9fa8a9ec0ca6565a7f7d7e14e621be47243de3"
+    },
+    {
+      "file": "patches/0021-flush-platform-font-raster-glyph-batches.patch",
+      "sha256": "c132ca7383f06fcfbabf468cb315a54698ca02cfa3e3524fb4a4d05cf835c154"
+    },
+    {
+      "file": "patches/0022-respect-available-https-transport.patch",
+      "sha256": "a22cf2fd11db6869acaf1811dcc08a6b6de2f98ab9d99ab7b2ace5252b1fe358"
+    },
+    {
+      "file": "patches/0023-decouple-zip-url-helpers-from-wx.patch",
+      "sha256": "b56e70f53c4193591e3505b1e2aee9b231bb1f8e599b06acaf0a4e5527dc8e29"
+    },
+    {
+      "file": "patches/0024-use-native-utf8-language-dictionary.patch",
+      "sha256": "b3f9c57bcdf4339da80baffbe5241f26ab5b815d3adad9188b4a6c0e956863db"
+    },
+    {
+      "file": "patches/0025-refresh-console-example-platform-interfaces.patch",
+      "sha256": "614307c4b454a1321a7909adb7351015ac89bb3227a9579f67c4d0c74d5df6f2"
+    },
+    {
+      "file": "patches/0026-add-native-read-only-zip-backend.patch",
+      "sha256": "56b059d0600b9c5e9f632cf92025abcde6b5ba32a68959a57235b3448fbfa1a7"
+    },
+    {
+      "file": "patches/0027-connect-source-built-static-ffi.patch",
+      "sha256": "558ba4bd077beb216520e22029703dc54fe4c6a12030832f620101161253de24"
+    },
+    {
+      "file": "patches/0028-port-native-ftp-and-independent-launcher.patch",
+      "sha256": "0444b6516bc4d96f048e67a6ea617e20cf0256949af6153d56bc71bfd4ef4bfa"
+    },
+    {
+      "file": "patches/0029-port-original-label-and-slider-to-native-arkui.patch",
+      "sha256": "104ec318289c5e77033c4e7be891fd667876b34f5977f137e0d4d64d0cf4e25f"
+    },
+    {
+      "file": "patches/0030-port-original-checkbox-and-choice-to-native-arkui.patch",
+      "sha256": "2e46ac60e5384a0b4829794215b102a455f53c77a8d8f5412cd093b100533d23"
+    },
+    {
+      "file": "patches/0031-port-original-input-and-list-controls-to-native-arkui.patch",
+      "sha256": "7f06c094206f121f30966e02fe9a19be3bc7d42d2573fe4cfa4be95c25be7a12"
+    },
+    {
+      "file": "patches/0032-port-original-calendar-and-color-to-native-arkui.patch",
+      "sha256": "fed4e603fde0e03dc210ed0e64f9da7188beac7fc3caf0509bec7336ac72156b"
+    },
+    {
+      "file": "patches/0033-port-original-text-bitmap-and-image-buttons-to-native-arkui.patch",
+      "sha256": "1e2cf737b206ccaf0e051a908c5cfda691c6f37827330beca06349ff7833f559"
+    },
+    {
+      "file": "patches/0034-port-original-menus-and-tree-view-to-native-arkui.patch",
+      "sha256": "c78ba22c326bd5965a8f4b6ae21eddb5efd49eff3370fa429a31e007213f70f2"
+    },
+    {
+      "file": "patches/0035-port-original-command-line-to-native-arkui.patch",
+      "sha256": "e23e5c901beb5f8e4066607643ac9806f182e1abc0c28b8471d32b185ab73e5d"
+    },
+    {
+      "file": "patches/0036-port-original-dialogs-timers-and-message-boxes.patch",
+      "sha256": "5be01b8a1be023b0b8728687c8cf2fa49f66a6251db5db4af0b9547bf1cf2091"
+    },
+    {
+      "file": "patches/0037-port-original-update-options-dialog.patch",
+      "sha256": "181eac60d8f0e29d55d1e18a2c2923d78f341b971bf44e7b67f6edfe08be1024"
+    },
+    {
+      "file": "patches/0038-port-original-main-frame-to-system-window.patch",
+      "sha256": "7d68d6861702a58573364551dad7523231fbf6a046fc78f11e471205ffd11f3b"
+    },
+    {
+      "file": "patches/0039-port-original-display-option-dialogs.patch",
+      "sha256": "9a30a524d5a5c79fc3f5495534280a34765f3f6af51bd934640289ca715d1323"
+    },
+    {
+      "file": "patches/0040-port-original-generation-options-dialog.patch",
+      "sha256": "543433d45593c4e75e2416af887b3e8087eb9d4b26d1fa3c16b507b7adedea21"
+    },
+    {
+      "file": "patches/0041-port-original-periodic-table-dialog.patch",
+      "sha256": "5d9355f97426cbad4f1023a0f1f2ddef76171aa123add0102add681b84c367dd"
+    },
+    {
+      "file": "patches/0042-include-harmony-compatible-nui-initializer.patch",
+      "sha256": "cde9b65f64d8f9f234f8f0d3544959abcac69f74426d983645eb3cc97fa82180"
+    },
+    {
+      "file": "patches/0043-port-original-text-editor-dialog.patch",
+      "sha256": "343dd81c838ee785ded617705fc16e9d63f6d5631f8f0c51abc854a82bb4f470"
+    },
+    {
+      "file": "patches/0044-port-updater-worker-without-wx.patch",
+      "sha256": "a854f90efe9cc350877f8eccd0a873154206c89510031d8ca4de62157c905490"
+    },
+    {
+      "file": "patches/0045-port-original-scene-parameters-dialog.patch",
+      "sha256": "a3c53306579541f81c00465097fbdf2fd502db976ccf0b4b0f791dbd9cd8a801"
+    },
+    {
+      "file": "patches/0046-port-material-properties-dialog-to-native-arkui.patch",
+      "sha256": "57bae174c57409b2b64a3a410ea6dc3472853b3a65f8dc37596cb13611c22554"
+    },
+    {
+      "file": "patches/0047-port-original-scene-to-harmony-surface-and-fonts.patch",
+      "sha256": "a9843fccc5aef0c5ac00b4b98293bed6bb49615109af8aaa5a6711d17c6cbd28"
+    },
+    {
+      "file": "patches/0048-port-windows-gl-scene-to-harmony-framebuffer.patch",
+      "sha256": "fd4ef6072803fc6d95bd1276e214d1315696e4f3636f9c7a6c063e1c28a454af"
+    },
+    {
+      "file": "patches/0049-dispatch-scene-font-context-through-offscreen-backend.patch",
+      "sha256": "48c86396ec4c0343fd5dbeb68f38b42e30e7de6161e8615baeece4275b54f28f"
+    },
+    {
+      "file": "patches/0050-select-harmony-egl-header-types-without-x11.patch",
+      "sha256": "79f1a4a3efef1e1621439ae551d31ca96af6800bc7e7d4bda4f5ec959458ae6d"
+    },
+    {
+      "file": "patches/0051-use-original-gl4es-state-for-offscreen-scene.patch",
+      "sha256": "52bc43386c1802397f4fb9c04552c28044f3ca3696ed7e04f11e1444f4f8cae2"
+    },
+    {
+      "file": "patches/0052-enable-framebuffer-prototypes-for-original-gl-bridge.patch",
+      "sha256": "03a6ba3a9afdcd9f3d946a9e20a5af6bb44dc5bdf82a713e19c47696aa338f10"
+    },
+    {
+      "file": "patches/0053-preserve-application-gl-state-on-offscreen-close.patch",
+      "sha256": "03b23cffc78b39621811e6ddb1a36b0fbd1dc59096f85e3a6d335374cc1ef9fc"
+    },
+    {
+      "file": "patches/0054-port-python-registry-bridge-to-harmony-preferences.patch",
+      "sha256": "9f05b8f36efade5a8f272aa43f3c02d7c9b9efd77168971271c91bd766c4b575"
+    },
+    {
+      "file": "patches/0055-port-startup-and-cell-change-tasks-to-harmony.patch",
+      "sha256": "33fe7c16b03b12a6e4411fcafda583f0b3507f63b73a4a87e8bd407a751bb289"
+    },
+    {
+      "file": "patches/0056-port-original-skeleton-renderer-to-harmony.patch",
+      "sha256": "b9457ea182ed085304f929f9d151d87b31bf833427fef6c94a2d9f917e6c10c3"
+    },
+    {
+      "file": "patches/0057-port-native-surface-input-bridge.patch",
+      "sha256": "4fd9edadeb152179f6cf8fd4c1fe22f03fc3e410a7f2107843a010d45bd51a93"
+    },
+    {
+      "file": "patches/0058-port-native-html-image-cell-to-arkui.patch",
+      "sha256": "56689c2c75ac41212c97c297b68253012896c8980fff843df3b61f9477d8bf1a"
+    },
+    {
+      "file": "patches/0059-port-original-file-format-bootstrap-to-harmony.patch",
+      "sha256": "eb80d0aaf38c3f531786d7bcd7a75d884c997d807c22e92ec1942273117eecca"
+    },
+    {
+      "file": "patches/0060-port-native-html-help-documents-to-arkui.patch",
+      "sha256": "9de522fca28006562424f7ad82d0571399f5af2db7404a425b75496d03fb2faf"
+    },
+    {
+      "file": "patches/0061-port-original-form-utility-functions-to-harmony.patch",
+      "sha256": "ef485b9875e9669c711d87a863bd2769da00013cf1201494eb8de36ee58ad990"
+    },
+    {
+      "file": "patches/0062-port-main-gui-model-actions-to-harmony.patch",
+      "sha256": "1b5f97516d26d55641f5e9de20d8d3f159946947926b46c3d1627548ca70f50e"
+    },
+    {
+      "file": "patches/0063-port-original-frame-visibility-action-to-harmony.patch",
+      "sha256": "eaebb9bf6dce0025850cf80c497a0d1416746127d182cff658582f3df7cbfb35"
+    },
+    {
+      "file": "patches/0064-port-original-show-all-to-harmony.patch",
+      "sha256": "ce234a8a5e6babc22ddc208c8d3f2fb286730f328e837059361d514db2a25312"
+    },
+    {
+      "file": "patches/0065-guard-optional-processor-for-harmony-visibility.patch",
+      "sha256": "dfd2543ed236d2f2afc4bc58d8818c076d23a3b9846ef00192f1ecdff01509b7"
+    },
+    {
+      "file": "patches/0066-port-show-all-without-desktop-macro-processor.patch",
+      "sha256": "2981a9241926c8c508e8f26cc29dee58ed0a47570b4c673e1b9a70cba84e94f5"
+    },
+    {
+      "file": "patches/0067-port-original-model-center-to-harmony.patch",
+      "sha256": "35d27bd1b344fd23c375c2b003241ac67bf74a059b7289132c3949f8b182e240"
+    },
+    {
+      "file": "patches/0068-sync-model-center-camera-reference.patch",
+      "sha256": "2af8b29614249e72c8fc140bd72203d986746251d23d4b2ddd15519a20727bdb"
+    },
+    {
+      "file": "patches/0069-port-original-view-along-to-harmony.patch",
+      "sha256": "eb802a2a4c83c67e5797a4e046e53c6e7854fcfb05017f99b29901acf8699666"
+    },
+    {
+      "file": "patches/0070-allow-view-along-through-napi.patch",
+      "sha256": "dca7366cf6d70e086bc8ee1586f10221894f163c1179c62c553a0ee47dd6ab9f"
+    },
+    {
+      "file": "patches/0071-clarify-view-action-validation-message.patch",
+      "sha256": "f5ff679e43ed799b29b7527806f8a6c70c66a0d8d50cdf27f39c46bc75abf251"
+    },
+    {
+      "file": "patches/0072-view-along-selected-bond-or-plane.patch",
+      "sha256": "05855d1668a690ae5b9e581b5b313ee759e654b87835c7fac68fd7db8b500475"
+    },
+    {
+      "file": "patches/0073-port-original-hide-selection-action.patch",
+      "sha256": "22fe99c477ee194567e502714cf1b7e2ea8dca950c4db7eb3eb8f7153464e745"
+    },
+    {
+      "file": "patches/0074-port-original-grid-visibility-action.patch",
+      "sha256": "02217fa9a41f1bef1c440a7fb1c1a42f735846fd2e63732c9727c457cc969cbe"
+    },
+    {
+      "file": "patches/0075-fix-original-document-action-observation.patch",
+      "sha256": "005845d816a37929f3f5e94eb6424ecf919d371a53eca65b0ac320e24ec26c39"
+    },
+    {
+      "file": "patches/0076-port-original-drawing-quality-actions.patch",
+      "sha256": "82c079ac25f77395dc5f5c0009b8a13b4b2c47c2258506312975fac2ab4f8104"
+    },
+    {
+      "file": "patches/0077-port-original-hydrogen-and-q-peak-visibility.patch",
+      "sha256": "9e9aa18adc70170d1f1b61537c11efe32c5d1e4c67e5321598bfd6ed0fa03798"
+    },
+    {
+      "file": "patches/0078-port-original-label-visibility.patch",
+      "sha256": "c84eb94555dc92da4ba58a1882297471c6f5a16a66a99154e14ed7311b8904ad"
+    },
+    {
+      "file": "patches/0079-verify-original-visibility-state-readback.patch",
+      "sha256": "1036144034e41d64238770e0d50e6de65a2b9afbff17546c5df7f58ed1f75a88"
+    },
+    {
+      "file": "patches/0080-port-original-structure-visibility.patch",
+      "sha256": "979a5cea46ab69aaea6372af26968a6d2ad8c754963a91dd7de534a109662ccc"
+    },
+    {
+      "file": "patches/0081-readback-original-cell-basis-frame-grid-visibility.patch",
+      "sha256": "b7a33213576469a180441aacc6bd796e8b9ddb09add066b84a0383691ab3a35f"
+    },
+    {
+      "file": "patches/0082-tolerate-ordinary-action-errors-in-session-state.patch",
+      "sha256": "44d3d2a472bc496e0e4a8f23da57a71f0ed0db7c90117d3d07bcad3e7c55ab18"
+    },
+    {
+      "file": "patches/0083-port-original-fragment-actions.patch",
+      "sha256": "d23189b6dad99964864dd442bf0769d7e98303ca752a2e8b4be62f94673e038f"
+    },
+    {
+      "file": "patches/0084-port-original-command-executor.patch",
+      "sha256": "e07497144dba9a318b59f8d620536824103374d2a07dccd408ea183858d4ea53"
+    },
+    {
+      "file": "patches/0085-redraw-original-document-after-commands.patch",
+      "sha256": "f0c52fc1624000add2be95b7c6d4bd7cfa5bcd3709ee367c4deb8bdb4b5e2ca4"
+    },
+    {
+      "file": "patches/0086-port-original-atom-information.patch",
+      "sha256": "6c770a4d76802f33787ec3b60e77227949693f617e239d42db9f90bd4add2c92"
+    },
+    {
+      "file": "patches/0087-port-original-atom-type-change.patch",
+      "sha256": "af46c9c2fdee97df73788a9ad461f11f44389548b576e961c7a3e06c9e93f17f"
+    },
+    {
+      "file": "patches/0088-port-original-occupancy-change.patch",
+      "sha256": "37606eae4597a2a6041c62d4af8cad5992fc608e987fcaf3710b534de7f281b2"
+    },
+    {
+      "file": "patches/0089-port-original-uiso-change.patch",
+      "sha256": "a6e0b9e8f8f925439022652595bb557594e7dcd71defdfeb1f9de7fe8de54122"
+    },
+    {
+      "file": "patches/0090-port-original-generation-dialog-and-model-edit-rebind.patch",
+      "sha256": "479f17491689a6571e5271a58c1465801c644c8a61c2336e886f038ad4ac8a7e"
+    },
+    {
+      "file": "patches/0091-port-original-periodic-table-dialog.patch",
+      "sha256": "c68d49b9c25c5c6ae8325544dcad4ab7eeaef6af6abf65c86491878654450f39"
+    },
+    {
+      "file": "patches/0092-port-original-connectivity-and-bonded-sample.patch",
+      "sha256": "8a2050d73577e792dccc7c266e29539743a036c855e1c40f64d0a87c3dd2df06"
+    },
+    {
+      "file": "patches/0093-port-original-polyhedra-actions.patch",
+      "sha256": "c383330de53056f6f853087eddc1ce216061936a6c7228f9c1a14e8fcf7e4b74"
+    },
+    {
+      "file": "patches/0094-port-original-material-dialog.patch",
+      "sha256": "184d1a11cc7e26620587a32ab6f0360dd6e7a85cb31426b3cefb85942a9f6896"
+    },
+    {
+      "file": "patches/0095-port-original-xyz-format-sample.patch",
+      "sha256": "2eee3a6d270db09796ebb0864a0c62526f54745958434dbc0807e35ea3b29d40"
+    },
+    {
+      "file": "patches/0096-port-original-part-change-and-readback.patch",
+      "sha256": "87f5bcbfcf3947bdabf82cc89be1c72a812ec6d31fc36a2ff3a08ad561212783"
+    },
+    {
+      "file": "patches/0097-allow-original-xyz-documents.patch",
+      "sha256": "8e9af4c11374dc6fafbc219b41248357866f2ef9190f63315988013c018739e0"
+    },
+    {
+      "file": "patches/0098-material-dialog-fit-and-parts-status.patch",
+      "sha256": "dfb5458d10b0ae39cea35bda89dd8c95e929a342ef4021518d205693f26803f3"
+    },
+    {
+      "file": "patches/0099-material-dialog-footer-hit-area.patch",
+      "sha256": "582dceafada0a91a693b31f7b7f194116dce9b783257c4a59d8c033e1505ae82"
+    },
+    {
+      "file": "patches/0100-port-original-scene-properties-dialog.patch",
+      "sha256": "fe5e5e4471baaffd9405427bec7ad98be036ff7ad8aabded710fec9c6d0ec09d"
+    },
+    {
+      "file": "patches/0101-port-original-background-gradient-dialog.patch",
+      "sha256": "7ed793f69bff8d4652395c4000e3ae7f7d63dcebf105923698a067ffc7d99898"
+    },
+    {
+      "file": "patches/0102-port-original-primitives-dialog.patch",
+      "sha256": "0d75b13a768593baa65b1c20959dd8defe7d117c513b2e6871d2250faea16c8a"
+    },
+    {
+      "file": "patches/0103-port-original-shelx-ins-sample.patch",
+      "sha256": "a3aa5894e7c947020ab60df8329dcf2af3de27cffc96fd55bf0a624a72a40cd9"
+    },
+    {
+      "file": "patches/0104-fix-ins-duplicate-symmetry-operations.patch",
+      "sha256": "c2248f393d1ac0cb6f74cc6d118a1cfc9d43d5002754f9f9ed4907de629834f2"
+    },
+    {
+      "file": "patches/0105-normalise-ins-symmetry-translations.patch",
+      "sha256": "071d164c4185031023b6b21f6347a9a923f561301e04135ddbf46919cf95a3cd"
+    },
+    {
+      "file": "patches/0106-rebind-presented-identity-after-text-apply.patch",
+      "sha256": "1ab2f61871b2e2738771a37fbaaa3581e104da8a3c186256ef460a4c5a059a68"
+    },
+    {
+      "file": "patches/0107-reconcile-refresh-presented-identity.patch",
+      "sha256": "629b701bee92d3870dfacc9f541b5b7ba6006cc13bbd86b918af1d204f5a049c"
+    },
+    {
+      "file": "patches/0108-add-original-drawing-style-macros.patch",
+      "sha256": "134978838383bd8d43a8ca0725bba09a1853460f110a1d79b2fa3bc4558680f6"
+    },
+    {
+      "file": "patches/0109-add-original-collectivise-actions.patch",
+      "sha256": "c6b23473017ae081ea01df81f283860c693d7d6b221d76cd9a14b472aa5a5c6b"
+    },
+    {
+      "file": "patches/0110-integrate-original-callback-registry.patch",
+      "sha256": "c99996a693616a2c18fd065ffcec60b3eadc0993f5ffd9c1074a7e74c3fb90b9"
+    },
+    {
+      "file": "patches/0111-initialise-original-state-and-mode-registries.patch",
+      "sha256": "9b14317c01688cc1092601d802506fba94165a997d60a09df69b011aaa9519ec"
+    },
+    {
+      "file": "patches/0112-add-command-line-history.patch",
+      "sha256": "19ac9e2b70c95b93ac36d0d2ef35d2e73609fa5a48a4a252021509d3ba866907"
+    },
+    {
+      "file": "patches/0113-add-recent-documents-list.patch",
+      "sha256": "eb05c9fd6433bb8b61938b93c7fb5a2ed05a5762731894972d0e2415acc2a46d"
+    },
+    {
+      "file": "patches/0114-expose-original-bond-radius.patch",
+      "sha256": "ad4fdaa86f8473af03f97c430ca0cbdd1cc9be5dc142c5f1ffd842308cf4a939"
+    },
+    {
+      "file": "patches/0115-keep-session-for-source-stable-style-changes.patch",
+      "sha256": "b51e9004b3d3a9b2298cb42e9ac1c2ecf46e3fcf58d17fd7881f1fdb4091fcac"
+    },
+    {
+      "file": "patches/0116-port-original-update-options-dialog.patch",
+      "sha256": "feb761b6fea15112c32adbb6637a2e6b16f48d20f21e8aef6a6ba448155c1cd3"
+    },
+    {
+      "file": "patches/0117-update-store-destination-fallback.patch",
+      "sha256": "91d794f9c50c1b4641272280a15fed5dae976a713fb22e9244116a0fb2e2a53f"
+    },
+    {
+      "file": "patches/0118-update-options-default-repositories.patch",
+      "sha256": "f17fdc9cea913df09aa23b6ef0d2092766bbad2dd4f31258a4b6f699ebc41a79"
+    },
+    {
+      "file": "patches/0119-add-original-bond-radius-setter.patch",
+      "sha256": "81bdb1da3425c72afb9e2c2207db03be9fa5c7000a676996b2747fed8ba9c332"
+    },
+    {
+      "file": "patches/0120-port-atom-grow-sel-rings-lattice-actions.patch",
+      "sha256": "bf740b3ecc246fa9e0eb548328df77bbd02cba67c552b39e15fde6f77fb1b29d"
+    },
+    {
+      "file": "patches/0121-add-original-pdb-format-sample.patch",
+      "sha256": "d1549a63e0b3e27d99d665629bb1c67d46623bb5149760900d86e63ef11d38b3"
+    },
+    {
+      "file": "patches/0122-port-selection-label-and-bond-length-dialog.patch",
+      "sha256": "f038b293e36e03bab291cc916bbf821b38186ffd45a047fc63cd607e16f8c854"
+    }
+  ],
+  "patched_files": [
+    {
+      "file": "examples/cchnp/main.cpp",
+      "sha256": "b1494e4954356983a7acef9ea6a989c1a1e44eaf9c97a96af12b0788f7bfb159"
+    },
+    {
+      "file": "examples/io/example.cpp",
+      "sha256": "b435fe2abdf7d4e346e42b3e55eeacf9eb967feaf790e50d384e59073f7ef4c8"
+    },
+    {
+      "file": "glib/glbase.h",
+      "sha256": "4c92a6305fff7582c03185db526fbeb96dbb0d3b118485810348be1b8d0ba45d"
+    },
+    {
+      "file": "glib/glfont.cpp",
+      "sha256": "7cfb4ec4000079be3c450eabbdd8841b8f6d4d3841d421bd93067d869778087e"
+    },
+    {
+      "file": "glib/gllight.cpp",
+      "sha256": "843960ffff212cee78caac7e9ebf9c4ecc1ec5b1ab1de30eb0762865e8e3960b"
+    },
+    {
+      "file": "glib/glmaterial.cpp",
+      "sha256": "3d7534316c9856432299d8562bee844079590396559132195308247e682f4d27"
+    },
+    {
+      "file": "glib/glmaterial.h",
+      "sha256": "64d3c716601e565c551693364fa1645cf864371ef27437b5d0d886e5a46f00ba"
+    },
+    {
+      "file": "glib/glmaterial_legacy_init.h",
+      "sha256": "8c8321b865d38cbfac8754fdaa71b1ae146275ebdb6ce91af7f6ba8fe3198182",
+      "new_file": true
+    },
+    {
+      "file": "glib/glnamespace.h",
+      "sha256": "e908ead70c0801fb63a3b713b21f2b59ebf2c671781ecfa35e101f1e71b109f4",
+      "new_file": true
+    },
+    {
+      "file": "glib/gloption.h",
+      "sha256": "bc4a4e9ea4f3cf45439f8361956120dbde7e2a42bc2aa49153c80502bc1ae558"
+    },
+    {
+      "file": "glib/glpixelstorescope.h",
+      "sha256": "dddcf5e5a82258b54b11b9c3e718da9e20b71776658d5321c54b7a06a6ff79ce",
+      "new_file": true
+    },
+    {
+      "file": "glib/glprimitive.cpp",
+      "sha256": "81f9a180d1bca3a356f267d9b9e8ac2e87e97460878f13b17242cd6126a6be26"
+    },
+    {
+      "file": "glib/glprimitive.h",
+      "sha256": "3579fab35bdf8446106803def6b859e686188a13524c14f0098b422d921b55d8"
+    },
+    {
+      "file": "glib/gltexture.cpp",
+      "sha256": "4423aad8715f748002b2ad539fa6cd62825a304165f2f72418169aa7812485ff"
+    },
+    {
+      "file": "glib/gltexture.h",
+      "sha256": "c592aaea5fe44092642c20487b36740b221aaa8d17846d0e73bb339ea7c0cec5"
+    },
+    {
+      "file": "glib/glutil.h",
+      "sha256": "f7e79ca9c878231adcfabbfcaa456a6ee57f0a6d0406e357451e43c8d42a59a5"
+    },
+    {
+      "file": "glib/linepathsubmit.h",
+      "new_file": true,
+      "sha256": "1321e990ec9a24745a5f4bf93c38c6b0364709016a2b6cb0758fc8edbb490089"
+    },
+    {
+      "file": "glib/linesubmit.h",
+      "new_file": true,
+      "sha256": "40ff610fa3238dcebf6e12bcfb3cd305dfac8dba46009bef213556bead1138d0"
+    },
+    {
+      "file": "glib/materialcommands.h",
+      "sha256": "7987814357c0055eb1325f8d630eca53cd7196cbd75638c4648684c5843a004b",
+      "new_file": true
+    },
+    {
+      "file": "glib/polygonsubmit.h",
+      "sha256": "2c4c7d3eeff2890f42e3f3bbc6cc2828b5e685790002b971290c140fa56a9573",
+      "new_file": true
+    },
+    {
+      "file": "glib/primitivesubmit.h",
+      "sha256": "5bd7a86e6d3ea3f59883ee279f1b6fdf603365e54a999685c8e6e2028a50fdce",
+      "new_file": true
+    },
+    {
+      "file": "glib/spheresubmit.h",
+      "sha256": "261f8c4cfe64a17e2b379b4489c7634688fa94c960c969cd783e63a3c8991325",
+      "new_file": true
+    },
+    {
+      "file": "glib/trianglesubmit.h",
+      "sha256": "659e9bee34c935899f110205b2b0c9811f745d0fb8b66e375e31f20e5116b986",
+      "new_file": true
+    },
+    {
+      "file": "gxlib/gxapp.cpp",
+      "sha256": "84caeca8e3ba889c2b80cc7c13b497f38ed215ac6aefa462caddaa929472aa77"
+    },
+    {
+      "file": "gxlib/gxapp.h",
+      "sha256": "49b7022ef04d409d1eeb19b8143dcc9d23d9e56a306d1a6daf21b0cb4d3926e5"
+    },
+    {
+      "file": "gxlib/olx_control_state.h",
+      "sha256": "a24ac04584391c299682334c90db2abf06a84b70b96dff50749cca2addf56aa4"
+    },
+    {
+      "file": "gxlib/olxstate.h",
+      "sha256": "20b8704962fcfc664a375fbf74ac388e7de6da96d64afb03a3fc7dbf0307d8ed"
+    },
+    {
+      "file": "gxlib/wglscene.cpp",
+      "sha256": "10285aa3f2b9666dfe9306fdece7103f0b7a740feea7cd38f1bfe89c400cc779"
+    },
+    {
+      "file": "gxlib/wglscene.h",
+      "sha256": "190ddec94b64d013619b2e381cbedf8108d3c0676c91519b61053bba31a2aebd"
+    },
+    {
+      "file": "gxlib/wxglscene.cpp",
+      "sha256": "b76a962a7cf6dcecdfc1f43d9bb28334e245e900e77006bbd15d9096a17974bf"
+    },
+    {
+      "file": "gxlib/wxglscene.h",
+      "sha256": "48b548c2d34ba7cddae4e82a7268040f3bcc4f65ccf6b5af186f68f96e4e31a1"
+    },
+    {
+      "file": "olex/cmdline.cpp",
+      "sha256": "023791fae387c0b58d078ec07fe9426e80e441435d438f1dfd20423d8cb8f639"
+    },
+    {
+      "file": "olex/cmdline.h",
+      "sha256": "7ccc1cad43e7c60ee20912b586ca15244124bcb885ee673cb3822fb605f81688"
+    },
+    {
+      "file": "olex/ctrls.cpp",
+      "sha256": "d4d5c9817434ca90dee0ead384232857e77dade18641841d5513a54427826e65"
+    },
+    {
+      "file": "olex/ctrls.h",
+      "sha256": "ffccc058f5cf95d958caa077a8ccaed4be5a46459e105760ded109ca7f4f1e63"
+    },
+    {
+      "file": "olex/ctrls/btnext.cpp",
+      "sha256": "6f85904db8f2268ec0ebf8a197150aaa17d71e6eadd30fe16b944b3058a4a48c"
+    },
+    {
+      "file": "olex/ctrls/btnext.h",
+      "sha256": "ee9e812e9856e5891c7214a697cc539c8cfc996108eb7787c6997496b0f3c3a7"
+    },
+    {
+      "file": "olex/ctrls/checkboxext.cpp",
+      "sha256": "539b4f56810c0e5a0d6da62e2c408a4b8ca6c9dbb27af4341823520234373f91"
+    },
+    {
+      "file": "olex/ctrls/checkboxext.h",
+      "sha256": "a727d443be7c6ac1cedcdf8e10f500df07433ec9a28c4a56b589686f83b5b524"
+    },
+    {
+      "file": "olex/ctrls/choiceext.cpp",
+      "sha256": "949fd53ad413750f2fb4cd078c7756fd5e7a4330b931d01c56478b11d7f3600f"
+    },
+    {
+      "file": "olex/ctrls/choiceext.h",
+      "sha256": "fecf9eaf9800b609686e5fad784593f9de09fcd0c4295bad9113d283dbca1d14"
+    },
+    {
+      "file": "olex/ctrls/colorext.cpp",
+      "sha256": "2970c52cda53f2615a308bc2b3dcfc5df205ac4dde9a93f601256ec7e0b117c5"
+    },
+    {
+      "file": "olex/ctrls/colorext.h",
+      "sha256": "c88dd34a6c03b52ea57890f873b2809a194366f6f0289c19df6524f7dadcdf29"
+    },
+    {
+      "file": "olex/ctrls/comboext.cpp",
+      "sha256": "172ff0e0eab4645a4c1afc9b59fafcc643f56adbc580fae65f4b190f602103ef"
+    },
+    {
+      "file": "olex/ctrls/comboext.h",
+      "sha256": "fe271a6e970b2c707f106db46d7204d07127cabe64cfd5937b37c4529614d089"
+    },
+    {
+      "file": "olex/ctrls/datectrlext.cpp",
+      "sha256": "0087849d161e6ae212f931137b71d46b4d6875730d14f3f2862590426193e162"
+    },
+    {
+      "file": "olex/ctrls/datectrlext.h",
+      "sha256": "5fed58d88a29ca38743fa9ce966857d68cf87d7f00b8d0fc50298a35f8bf1526"
+    },
+    {
+      "file": "olex/ctrls/frameext.cpp",
+      "sha256": "9c754e02571a3850e2c8dcb8302c9f598e721ca3c8bdbad2c418574f513484f8"
+    },
+    {
+      "file": "olex/ctrls/frameext.h",
+      "sha256": "95691d15ccd8a6d288813c599fa744de1dd57c7c0a1361ae98fe4acc4d7009aa"
+    },
+    {
+      "file": "olex/ctrls/itemlist.h",
+      "sha256": "905f53f197daa0fb3bafbb3a6a7bd44fb71d3e3c427013ca4bbdb2a85b378a85"
+    },
+    {
+      "file": "olex/ctrls/labelext.cpp",
+      "sha256": "be751eabac93f9fd0a2fb26111deaa84f4255a62bc91a42ed3f7365dedfaf923"
+    },
+    {
+      "file": "olex/ctrls/labelext.h",
+      "sha256": "834bdf600cb22ffd027519115d8ded510fe5a09d70aa0ccc3346617fc1383294"
+    },
+    {
+      "file": "olex/ctrls/listboxext.cpp",
+      "sha256": "f969153f7c2fab0aec8dd74257b7172c8f7324a57cb2bc8806f24547ab96c07a"
+    },
+    {
+      "file": "olex/ctrls/listboxext.h",
+      "sha256": "e6b59767ecf52c4defbcd52aaa1f5fc8cdb7ff5a1ff6d90f1d00588943bf62ed"
+    },
+    {
+      "file": "olex/ctrls/menuext.cpp",
+      "sha256": "7900aade69639c805157d86100e00a987eea9e4db23404ec5399ced6d61bce79"
+    },
+    {
+      "file": "olex/ctrls/menuext.h",
+      "sha256": "88fee5e13336a0e4eddc82efe30c184760dc627c33e50d353823301beabbcbf4"
+    },
+    {
+      "file": "olex/ctrls/olxctrlbase.h",
+      "sha256": "38224b041fd8d20e5a1b4d4a4cb53f2cad307baa4aa858bcaefe79962f7804ed"
+    },
+    {
+      "file": "olex/ctrls/spinctrlext.cpp",
+      "sha256": "2c3e595554c18bc661020d8a476e121981e9e37782758ba25622dc92dd1cdbda"
+    },
+    {
+      "file": "olex/ctrls/spinctrlext.h",
+      "sha256": "56d180ef08e9ae3b2fa4715aa9373a17f2926cb3e6761e847b10c3415078d460"
+    },
+    {
+      "file": "olex/ctrls/texteditext.cpp",
+      "sha256": "010a3dfa5ef0d33b1a1688c4db259946a737863f4f34e1d2e7966e188bb65149"
+    },
+    {
+      "file": "olex/ctrls/texteditext.h",
+      "sha256": "38b059703d92def1d2ee8c7a0870ca3cacc66617394b4413d179c8a5458cdd43"
+    },
+    {
+      "file": "olex/ctrls/trackbarext.cpp",
+      "sha256": "ace2d7d0b68f9dd28cd5e0175d6be1f3f20cec2df73ab9fb07c269ddb7033ad6"
+    },
+    {
+      "file": "olex/ctrls/trackbarext.h",
+      "sha256": "2e1c39182b58971c2ed090e9270693d602b8dbb5f4b90553018f5b40ab8481ee"
+    },
+    {
+      "file": "olex/ctrls/treeviewext.cpp",
+      "sha256": "d33540530b53a8042e85e2b9226f715915c096f679234dff60a61bb7dbe78779"
+    },
+    {
+      "file": "olex/ctrls/treeviewext.h",
+      "sha256": "b2c99b55569a11ac6644e6251b565b967f78dc569d154ed86516697f3ad6f926"
+    },
+    {
+      "file": "olex/dgenopt.cpp",
+      "sha256": "290585fb8e286edbea29e216160a6a18276ce55969cd7b02c6d7dfbf9a8f6ebf"
+    },
+    {
+      "file": "olex/dgenopt.h",
+      "sha256": "73cbd670e07c9551ca12dff26a6c98ffe0ba9a4a762af551b891282eab255402"
+    },
+    {
+      "file": "olex/dgrad.cpp",
+      "sha256": "ee58d588b0c05fc91154aae4eac02fb64b0e44e75cfa8a3fd5c1ea048b9cd2c4"
+    },
+    {
+      "file": "olex/dgrad.h",
+      "sha256": "5109124b98cc5d9f6ebed1ede3da9e59b9df0402a1b51458a29d387ca46ee23a"
+    },
+    {
+      "file": "olex/edit.cpp",
+      "sha256": "fdcb55bd80c6c36cd1234eb980a690c9f7511e8230521c261a8eb118c5cd3991"
+    },
+    {
+      "file": "olex/edit.h",
+      "sha256": "ecae6c05b23bdd4644d52275928b043fc6cd6bea1ebbec9b63c54a1d5085dac9"
+    },
+    {
+      "file": "olex/html/htmlext.cpp",
+      "sha256": "1804331fb28249be972b35f36027b6e3d3509ad746aaf10d3f83ba19d6955c9f"
+    },
+    {
+      "file": "olex/html/htmlext.h",
+      "sha256": "54088e88b5c563f3e88236e1c75101b37e100671fa8129c4461b50e3bedf9109"
+    },
+    {
+      "file": "olex/html/htmlmanager.cpp",
+      "sha256": "2c36affb93501369547d6f3c42acbf4c9e7acd03f44f074e1d524b33e70e04b3"
+    },
+    {
+      "file": "olex/html/htmlmanager.h",
+      "sha256": "b5a3ef5601222950c14d9ae4a08a6b9e73eccc15de024d8f9dcbc7879691e7dc"
+    },
+    {
+      "file": "olex/html/htmlnative.h",
+      "sha256": "5fba7980fc8132207da79308dfaba0a4f780bd869f8a2357f7cd156d935a2e9f",
+      "new_file": true
+    },
+    {
+      "file": "olex/html/htmlprep.cpp",
+      "sha256": "da4b5a01f11e74e50f68c4501f9720be90cf532945e6307974953e53299ff5c1"
+    },
+    {
+      "file": "olex/html/htmlswitch.cpp",
+      "sha256": "55aa046aa48598257394a11e8f96683210d0672d275da84b3cb4eb9603bbee05"
+    },
+    {
+      "file": "olex/html/htmltags.cpp",
+      "sha256": "463b3be91f29377ab57480ac39ff83d0fae9293355686d97514e992ad3cbfa80"
+    },
+    {
+      "file": "olex/html/imgcellext.cpp",
+      "sha256": "2a779c552b808feca308ee378b8a852379e8175af6e683d60ee15bb929d1c447"
+    },
+    {
+      "file": "olex/html/imgcellext.h",
+      "sha256": "f04d46e0375fc798ff66322a10dc81cb5642a6b549721356c26e2f577cf84241"
+    },
+    {
+      "file": "olex/langdict.cpp",
+      "sha256": "1560ced487ab9c3667a6478bb5cc493cb9a55f1d26dda9af7403d7b4fba107cf"
+    },
+    {
+      "file": "olex/main_gui.cpp",
+      "sha256": "2723ff700d5579a198be68043183b6cc58afe889ab0e4f3a9fa1e570b45a6cb5"
+    },
+    {
+      "file": "olex/mainform.cpp",
+      "sha256": "6442e59ccdc817f32e0700e368c4c02eaaf6eb5001973519fa747598b4ea6f70"
+    },
+    {
+      "file": "olex/matprop.cpp",
+      "sha256": "e7646c3633accc44a1996fe4ceba7a782b4efb611ce36b732a49b03b3d944be1"
+    },
+    {
+      "file": "olex/matprop.h",
+      "sha256": "922ce28875fd5012d77f6f4c383c5415a61a1fe647c141bda542d461c77385f8"
+    },
+    {
+      "file": "olex/msgbox.cpp",
+      "sha256": "80a7064f6d57365486ba02aec43614cd742c8a46580a0d1e151c93adb2602c05"
+    },
+    {
+      "file": "olex/msgbox.h",
+      "sha256": "8db5faa7a29ec67ea27023b3e027841ef6506b08acd504dcd984c234e5a6ebf3"
+    },
+    {
+      "file": "olex/nui/nui.h",
+      "sha256": "51ef1ca1f0e5ba865de90d5f2c90b05f316fdecdf23c489fc6552d7df7932361"
+    },
+    {
+      "file": "olex/nui/skeleton.cpp",
+      "sha256": "2e49924c43aa59f9592ded52e2f01830721bee5acb99c45df5861e9fe22a9811"
+    },
+    {
+      "file": "olex/primtvs.cpp",
+      "sha256": "25230daa5a33e32150160adb0c37c35d040c9fdb2b9fd81eaf92a7d75d61318d"
+    },
+    {
+      "file": "olex/primtvs.h",
+      "sha256": "7cbc2c4df6a943fb44dd029315fdd8bdc6698e5d1051295104dd6289272cee2d"
+    },
+    {
+      "file": "olex/ptable.cpp",
+      "sha256": "04acb564ecd2775c78ee703cb97e9b732042b74c84aef73ad6c8816948c40032"
+    },
+    {
+      "file": "olex/ptable.h",
+      "sha256": "067559e457c75894096a3b7be8d1641c602ef980901612f4c5fafa4b68eaa744"
+    },
+    {
+      "file": "olex/scenep.cpp",
+      "sha256": "296c35425e22cd3014013152f875551a97f17bfe940d9ff39a56e52501dc0b21"
+    },
+    {
+      "file": "olex/scenep.h",
+      "sha256": "3754d4c7e55743282a138a1ee2f7c763a9fc28255c0353922996c43b9d748d49"
+    },
+    {
+      "file": "olex/tasks.cpp",
+      "sha256": "d4660eb4fe42cc14c74ad87120393691a7c64754eb089448d8c4f41308a7cc64"
+    },
+    {
+      "file": "olex/updateoptions.cpp",
+      "sha256": "baf9e8a10f8461ff37f2787f43dd4727c74e8d15233e9ea4a3d6d0828d7274b0"
+    },
+    {
+      "file": "olex/updateoptions.h",
+      "sha256": "6dced321b1713f067da3dc8c93f5df6fd2c2f7b7ddc8b629bb2ceef37fb3cbfd"
+    },
+    {
+      "file": "olex/updateth.cpp",
+      "sha256": "37b5724c934589e2ff6c6471d49404445c41a52920672d5ac2b187eabc73fc83"
+    },
+    {
+      "file": "olex/wininterface.h",
+      "sha256": "eab6a1eb04c3162b7804835483435927b47bfbe925bc0b8778c462b378ff24c7"
+    },
+    {
+      "file": "olex/xglapp.cpp",
+      "sha256": "04e5194351d1dd57fe3b19c7527bd34272b61b78bf6b67a403ddc137330cc4c5"
+    },
+    {
+      "file": "olex/xglcanv.cpp",
+      "sha256": "eed67ea64e63328bf9ae6bd7676c440891ad2877ce55258d1ac5034386cbff5c"
+    },
+    {
+      "file": "olex/xglcanv.h",
+      "sha256": "ee1c9b64946001e461e5c966bf52a26ada11e229e7ae6ba60c27ba877ac6af2c"
+    },
+    {
+      "file": "olex/xpprocs.cpp",
+      "sha256": "4ee92d183c4764d5574942dc3daa16dec3341059fd56b3bbbbd517c95e74f7d0"
+    },
+    {
+      "file": "repository/fsext.cpp",
+      "sha256": "70447663e759bbbcab89a2ddf40ab269ca15bf03170c5e75cf30666a02e106c2"
+    },
+    {
+      "file": "repository/fsext.h",
+      "sha256": "49543c8d9b148ed66f8232fe1ec39683860b342679765b0311f6fe71c44a1c7e"
+    },
+    {
+      "file": "repository/httpfs.cpp",
+      "sha256": "b8b98feb450d7b412aea0f876042fa75ff84b2cb00d123a4772cc459b7de3376"
+    },
+    {
+      "file": "repository/olxffi.cpp",
+      "sha256": "1da96d86205f9e7630f58f07b3de6b9c758750f0a680ee3e8c092a10330888d6"
+    },
+    {
+      "file": "repository/py_reg.cpp",
+      "sha256": "54519459a0cc340089977cb172132c3cc020cc07d31eeae0c9de4ca9286c9e62"
+    },
+    {
+      "file": "repository/updateapi.cpp",
+      "sha256": "c10c3c4ff9d3a6b21b9708009afa2e51de7da098354db76ff60d046f74ea96a3"
+    },
+    {
+      "file": "repository/wxftpfs.h",
+      "sha256": "80eb59fea2595b4a4683116392be329f5d6d9356945aaa86df7091674fb9dbd6"
+    },
+    {
+      "file": "repository/wxzipfs.cpp",
+      "sha256": "db63f0fda07f4143562cb09851a55cc30be66e83edfae595eae51fd502e21974"
+    },
+    {
+      "file": "repository/wxzipfs.h",
+      "sha256": "af9b1d02cb5d38fd0af63eb7824ba0a3158d24b44316307fb8097149289fb0f4"
+    },
+    {
+      "file": "repository/zipurl.h",
+      "sha256": "b177a57036f6ffa362e38e080b0506672aab30f9336f8a888ca6e89a20c6a842",
+      "new_file": true
+    },
+    {
+      "file": "sdl/bapp.h",
+      "sha256": "6964cd1395da6e216f3ae38e453b09573dbc865e5c43e3ef9ac217d08ea1334f"
+    },
+    {
+      "file": "sdl/ebasis.h",
+      "sha256": "92b70d11c558ceb016069f89d90da59a0e5aadbede0e81e2db3731a746d21fcc"
+    },
+    {
+      "file": "sdl/ehashed.h",
+      "sha256": "00fc0b39617dc34c115c2de9f9331467d105189dc62ff1612e5e81d013e89172"
+    },
+    {
+      "file": "sdl/eutf8.h",
+      "sha256": "ce5c25e3bcc006c3740ab1daa03f22a97fe2d2bd8351817541cab45ae89f24d2"
+    },
+    {
+      "file": "sdl/settingsfile.cpp",
+      "sha256": "092ee03fe60ebe58ea2c7cafc8e5c3ea2cbf8d7890d9badc3b0fec59e2963f7b"
+    },
+    {
+      "file": "sdl/settingsfile.h",
+      "sha256": "9d1f4cb9fc261ebc736e804c34669648f6494f0fbc62ac59dda7111610da5f49"
+    },
+    {
+      "file": "unirun/main.cpp",
+      "sha256": "2dee922fffba363ee662f6d62bf04dfd8f5a95ccfbb2cc8bf51f04bd31d6eb12"
+    }
+  ],
+  "evaluation_scope": "0.22.62 ordinary non-biological Harmony PC port. Original TdlgGenerate and TPTableDlg dialogs use native ArkUI controls; original text editing uses a native editable input/textarea with asynchronous dialog completion. The styled editor preserves text editing but explicitly reports that syntax highlighting is unavailable. The Windows 32-bit Kinect/NUI initializer is compiled with its upstream platform guard intact and remains unavailable on Harmony. Host fixtures use recording backends only; full native sources are separately compiled and strictly linked against Harmony. No application page connection, real system window, HAP/ZIP, install, macro, application Python, research calculation, or overall functional-completion claim is made. The original UpdateThread source now uses only the portable app/log API on Harmony and retains the original mainform include in the wx branch; worker execution and application update workflow remain unconnected. The original THtmlImageCell has a Harmony-specific ArkUI image-node path with ImageKit-backed decoding, image-map hit-testing, responsive sizing, and accessible alternative text. THtml, THtmlManager and the original tag translation unit now provide a native static-help renderer for text, common entities, anchors, image resources, and custom rectangle/circle image maps; it uses an injected platform resource provider and never executes script or embedded macros. The wxWidgets source paths remain byte-identical in the desktop branch. CSS layout, interactive INPUT/SNIPPET/INCLUDE/switch expansion, animated GIF, and integration into the current application page remain incomplete and the new UI path has not been device/simulator verified. The original selected-object SetView behavior is now exposed on Harmony for exactly one selected TXBond or TXPlane: it aligns the view normal, centers on the object, and updates visible grid depth. The action is routed through the retained document session and has targeted C++ translation-unit and plain-TypeScript validation only; full ArkTS build, strict relink, and simulator interaction remain pending; original fragment hide/show-only/select actions are wired through the actual renderer selection; ordinary action errors no longer invalidate the presented document session."
+}
