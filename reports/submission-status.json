@@ -1,0 +1,23 @@
+{
+  "at": "2026-11-11T11:41:33.574628+00:00",
+  "version": "0.22.61",
+  "status": "stage_development_package_ready_not_full_port",
+  "submission_bundle": {
+    "path": "deliverables/Olex2-HarmonyPC-0.22.61-development.zip",
+    "bytes": 61910858,
+    "sha256": "0663464795003d002e17f0c86d19e2104f2672158693a5233764bd5d97c93f32",
+    "mode": 420
+  },
+  "source_file_count": 7119,
+  "source_logical_bytes": 147130388,
+  "new_scoped_ui_assertions_in_distinct_receipts": 12,
+  "single_from_start_all_passed": false,
+  "original_false_results_preserved": true,
+  "production_signed": false,
+  "full_port_complete": false,
+  "functional_completion_percent": null,
+  "canonical_backup_pointer": "backup/latest-source.json",
+  "remote_backup_verified": true,
+  "remote_source_commit": "c4728e8874506fcf2236f7bbd7d23375c213bf6e",
+  "remote_backup_receipt": "backup/evidence/documents61/remote-source-verification-v2.json"
+}

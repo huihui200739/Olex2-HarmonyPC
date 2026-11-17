@@ -1,0 +1,33 @@
+# 构建产物
+/out/
+/build/
+**/build/
+**/.cxx/
+**/.hvigor/
+**/.preview/
+**/oh_modules/
+**/node_modules/
+*.hap
+*.so
+*.a
+*.o
+*.pyc
+__pycache__/
+.DS_Store
+
+# 密钥与本地配置
+*.p12
+*.pfx
+*.keystore
+local.properties
+.env
+.env.local
+.env.production
+
+# 证据与归档：工作树只留 reports/ 里的小收据
+/snapshots/
+/backup/
+/experiments/
+/deliverables/
+reports/document-history/
+*.log
