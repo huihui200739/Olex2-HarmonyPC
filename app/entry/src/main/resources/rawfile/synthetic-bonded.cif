@@ -1,0 +1,30 @@
+# SYNTHETIC NON-BIOLOGICAL PLATFORM DISPLAY FIXTURE.
+# Artificial tetrahedral marker coordinates, not measurements or research data.
+# Used only to check original bond perception, connectivity and polyhedra display.
+data_synthetic_bonded_display
+_audit_creation_method 'Harmony PC platform interoperability display fixture'
+_chemical_name_common 'SYNTHETIC NON-BIOLOGICAL DISPLAY ONLY'
+_cell_length_a 10
+_cell_length_b 10
+_cell_length_c 10
+_cell_angle_alpha 90
+_cell_angle_beta 90
+_cell_angle_gamma 90
+_cell_formula_units_Z 1
+_symmetry_space_group_name_H-M 'P 1'
+loop_
+_symmetry_equiv_pos_as_xyz
+'x,y,z'
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+_atom_site_U_iso_or_equiv
+C1 C 0.500 0.500 0.500 1 0.02
+H1 H 0.567 0.567 0.567 1 0.03
+H2 H 0.433 0.433 0.567 1 0.03
+H3 H 0.433 0.567 0.433 1 0.03
+H4 H 0.567 0.433 0.433 1 0.03

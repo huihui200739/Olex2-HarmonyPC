@@ -1,0 +1,28 @@
+# SYNTHETIC NON-BIOLOGICAL PLATFORM DISPLAY FIXTURE.
+# Artificial marker coordinates, not measurements or research data.
+# Used only to check original-file loading and native window presentation.
+data_synthetic_platform_display
+_audit_creation_method 'Harmony PC platform interoperability display fixture'
+_chemical_name_common 'SYNTHETIC NON-BIOLOGICAL DISPLAY ONLY'
+_cell_length_a 20
+_cell_length_b 20
+_cell_length_c 20
+_cell_angle_alpha 90
+_cell_angle_beta 90
+_cell_angle_gamma 90
+_cell_formula_units_Z 1
+_symmetry_space_group_name_H-M 'P 1'
+loop_
+_symmetry_equiv_pos_as_xyz
+'x,y,z'
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+_atom_site_U_iso_or_equiv
+He1 He 0.25 0.35 0.50 1 0.02
+Ne1 Ne 0.75 0.35 0.50 1 0.02
+Ar1 Ar 0.50 0.75 0.50 1 0.02
