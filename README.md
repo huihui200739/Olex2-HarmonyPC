@@ -5,7 +5,7 @@
 
 | 项 | 值 |
 |---|---|
-| 上游 | `pcxod/olex2` @ `ca2b4c1b68ac9d7d8fddc53eb5fcf60797d2d3e1`（[source.lock.json](source.lock.json)），GPL-2.0 |
+| 上游 | `pcxod/olex2` @ `ca2b4c1b68ac9d7d8fddc53eb5fcf60797d2d3e1`（[source.lock.json](source.lock.json)），OlexSys BSD 三条款式许可 |
 | 应用工程 | `app/`（HarmonyOS，DevEco/ArkTS + C++ N-API） |
 | 适配层 | `native/`（203 个文件：ArkUI 宿主、N-API 桥、原版窗口/菜单/对话框接入） |
 | 上游改造 | `patches/`（122 份补丁，逐字节可重放） |
@@ -30,7 +30,7 @@ app/                   HarmonyOS 应用工程（entry: ArkTS 页面 + C++ 原生
 native/                适配层 C++：ArkUI 宿主、N-API、原版窗口/命令/对话框
 patches/               122 份上游补丁（source.lock.json 记录每份 SHA-256）
 cmake/                 上游 GLU/Core/运行时 构建模块与导出符号表
-upstream/              固定的上游 Olex2 源码（GPL-2.0）
+upstream/              固定的上游 Olex2 源码（OlexSys 许可）
 vendor/                cpython / libffi / zlib / libpng / gl4es / glu
 scripts/               构建、设备验证、来源核对脚本（目录见 scripts/README.md）
 tests/fixtures/        设备验证脚本的输入样例（*-inputs.json）
@@ -86,4 +86,8 @@ git checkout pre-tidy-2026-11-17 -- experiments/original-document62/cpp442-main-
 
 ## 许可
 
-上游 Olex2 为 GPL-2.0（[upstream/LICENCE.txt](upstream/LICENCE.txt)），本仓库的适配代码与补丁同样按 GPL-2.0 使用与分发。
+上游 Olex2（OlexSys development framework）采用 BSD 三条款式许可，全文见 [LICENSE](LICENSE) 与
+[upstream/LICENCE.txt](upstream/LICENCE.txt)：保留版权与免责声明，二进制分发需附声明，不得以 OlexSys 名义背书。
+
+本仓库的适配代码与 122 份补丁按同一许可使用与分发；vendor/ 下 CPython、libffi、zlib、libpng、gl4es、glu
+各自保留上游许可（随各自目录内的 LICENSE 文件分发）。

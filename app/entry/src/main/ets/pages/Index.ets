@@ -4163,7 +4163,7 @@ struct Index {
         Column({ space: 10 }) {
           Text('Olex2').fontSize(24).fontWeight(FontWeight.Bold).fontColor('#000000')
           Text('Harmony PC adaptation 0.22.62').fontSize(12).fontColor('#333333')
-          Text('Original project: Olex2 (OlexSys) — GPL-2.0;\noriginal command library, renderer and dialogs are reused.')
+          Text('Original project: Olex2 (OlexSys) — OlexSys BSD licence;\noriginal command library, renderer and dialogs are reused.')
             .fontSize(11).fontColor('#333333').textAlign(TextAlign.Center)
           Button('关闭').id('olex2-about-close').height(30).fontSize(12)
             .fontColor('#000000').backgroundColor('#F0F0F0')
