@@ -91,4 +91,5 @@ hdc install out/gx-application-evaluation/app-builds/<构建ID>/entry-default-un
 
 - `Olex2 source missing`：`upstream/` 不全，重新 clone 或核对 `source.lock.json`
 - `hvigorw: command not found`：DevEco 不在默认路径，调整脚本里的 `DEVECO` 或把 SDK 加进 PATH
+- `check-source.py` 需要 `upstream/.git`：镜像或 tarball 克隆没有上游仓库时，verify.sh 会跳过 commit 级核对与补丁重放，只核对补丁哈希
 - 构建报 `native/... not found`：`patches/` 未按顺序应用，或 `upstream/` 版本不对
