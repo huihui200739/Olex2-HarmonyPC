@@ -10,6 +10,7 @@
 | 适配层 | `native/`（203 个文件：ArkUI 宿主、N-API 桥、原版窗口/菜单/对话框接入） |
 | 上游改造 | `patches/`（122 份补丁，逐字节可重放） |
 | 目标平台 | OpenHarmony 6.1.1.125 / API 24，arm64；当前只用模拟器验收 |
+| 镜像 | AtomGit https://atomgit.com/2501_93573368/ohos_Olex2（内容与 GitHub 一致） |
 
 ## 当前状态（0.22.62 开发树）
 

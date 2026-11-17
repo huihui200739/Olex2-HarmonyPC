@@ -21,11 +21,11 @@
 ## 获取源码
 
 ```bash
-git clone https://atomgit.com/OpenHarmonyPCDeveloper/ohos_Olex2.git
+git clone https://atomgit.com/2501_93573368/ohos_Olex2.git
 cd ohos_Olex2
 ```
 
-> 上游 GitHub 镜像：`https://github.com/huihui200739/Olex2-HarmonyPC`（内容一致）
+> 同步镜像：GitHub `huihui200739/Olex2-HarmonyPC`；社区组织仓 `OpenHarmonyPCDeveloper/ohos_Olex2` 申请通过后迁移。两份镜像内容逐字节一致（tree `a4eb076`）。
 
 ## 构建
 
