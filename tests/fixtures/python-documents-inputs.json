@@ -1,0 +1,42 @@
+{
+  "version": "0.22.37",
+  "version_code": 223700,
+  "base": "0.22.36",
+  "scope": "Multiline trusted Python text editor and bounded UTF-8 system document load/save; explicit execution through unchanged existing native VM.",
+  "files": {
+    "app/AppScope/app.json5": {
+      "bytes": 225,
+      "sha256": "4cf83e96627f3a7f9b7415991fbd185cbe75392afa168fbb8fe5dd30e7d8ea1d"
+    },
+    "app/entry/src/main/ets/model/PythonDocumentStore.ets": {
+      "bytes": 2441,
+      "sha256": "38b5839453bfda203dd11252b3136c088ed1da92fcd2fc9bcd2467de9fb5daed"
+    },
+    "app/entry/src/main/ets/model/PythonDocument.ts": {
+      "bytes": 7408,
+      "sha256": "95202ab2c2e59c467bb738959886cd6d2bc69f44675c9b04bce85ddec8402611"
+    },
+    "app/entry/src/main/ets/pages/PythonEditor.ets": {
+      "bytes": 3109,
+      "sha256": "6478f2034b529141502e111ac1b0ce947e708331fead2c362b68041f0d584206"
+    },
+    "app/entry/src/main/ets/pages/Index.ets": {
+      "bytes": 60791,
+      "sha256": "326583d1f0d719eefaef6147d70b6e2311034b6a4df4a72b26dd3d1b1037c28c"
+    }
+  },
+  "native_upstream_vendor_byte_identical_to34": true,
+  "host_document_unit_tests": 17,
+  "device_verified": false,
+  "full_port_complete": false,
+  "functional_completion_percent": null,
+  "focus_lifecycle_fix": "Use mounted TextArea defaultFocus rather than a zero-delay request before component creation.35 failure retained; no Python script executed in35.",
+  "host_test_qualification": {
+    "original_candidate": "0.22.35",
+    "tests": 17,
+    "model_byte_identical": true,
+    "model_sha256": "95202ab2c2e59c467bb738959886cd6d2bc69f44675c9b04bce85ddec8402611",
+    "rerun": false
+  },
+  "programmatic_edit_fix": "Only user-originated changed text marks dirty; loading or clearing text must not trigger a spurious discard confirmation."
+}

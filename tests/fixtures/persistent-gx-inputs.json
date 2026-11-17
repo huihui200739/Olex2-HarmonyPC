@@ -1,0 +1,32 @@
+{
+  "version": "0.22.13",
+  "base": "0.22.11",
+  "files": {
+    "native/application_runtime.cpp": {
+      "sha256": "7347b2830be1dc8411790c0c2088b4d61fefda8e767f02d6c2de7e750891a144",
+      "bytes": 16143
+    },
+    "native/application_runtime.h": {
+      "sha256": "2848e8b3b530ce95592021df4a1baa08ba41f48d353f4aed4865695389813aa4",
+      "bytes": 3280
+    },
+    "native/original_renderer_bridge.cpp": {
+      "sha256": "19bf4946ef4d59edd95dadd5cb139112d913f6d769e4d99e30636c4d07a20e55",
+      "bytes": 1189
+    },
+    "native/platform_window_scene.h": {
+      "sha256": "b47a6ade919464c6d8729331c75a910dcdb7daa8a274e8f30b0b94673f6cc876",
+      "bytes": 2128
+    },
+    "native/persistent_gx_window.h": {
+      "sha256": "0281e96d50cfb8a17e73db88e278292e3de2fa3066fa8b346000c7b50a0fa470",
+      "bytes": 421
+    },
+    "native/persistent_gx_window.cpp": {
+      "sha256": "717d72152489014ad6bf403ad1a3f8d1fad7fb322c84d176e96c84c7d0bdd9c8",
+      "bytes": 11118
+    }
+  },
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

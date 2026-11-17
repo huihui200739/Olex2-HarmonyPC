@@ -1,0 +1,29 @@
+{
+  "version": "0.22.30",
+  "base": "0.22.28",
+  "scope": "Real platform desktop menus, guarded global shortcuts, collapsible sidebar and narrow-window layout. Existing settings picker and native routes reused, not full original UI or command coverage.",
+  "base_manifest_sha256": "26f8eaf86af8c9db83225802915e83a0590e4df0bba629b15583f2664c2dbe61",
+  "files": {
+    "app/entry/src/main/ets/pages/Index.ets": {
+      "bytes": 52253,
+      "sha256": "067afa7fcdcad3930dcf80ea642b9db4732b56f46aff5c7acd188a26ea642c7f"
+    },
+    "app/entry/src/main/ets/model/DesktopActions.ts": {
+      "bytes": 1331,
+      "sha256": "752ca5dfa0ebf2012f762476976c46ae9199d23b021d8e30fc4f18a0949314fb"
+    },
+    "app/AppScope/app.json5": {
+      "bytes": 225,
+      "sha256": "5a0bac10268004640ab4ca8f5af8b8846213462b3307e4049ae8e216a72ec9de"
+    }
+  },
+  "native_sources_unchanged": true,
+  "native_files_compared": 113,
+  "recipe": {
+    "path": "scripts/prepare-desktop-shell-candidate-v2.py",
+    "sha256": "f482b5333c73d3e443239a2e9826d9eba3b259a33cc06e9dea76c39c8b9d16cd"
+  },
+  "device_executed": false,
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

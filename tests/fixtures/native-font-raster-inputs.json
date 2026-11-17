@@ -1,0 +1,18 @@
+{
+  "version": "0.22.19",
+  "base": "0.22.18",
+  "base_layout_manifest_sha256": "ba57e107488dfd6b01ff0e25c84c3323b232dbf4eb01fa4d266683f56c08f2d6",
+  "scope": "retain integer32 original glyph draws; additionally record actual original projection/modelview for independent float32 FMA position analysis",
+  "files": {
+    "native/original_font_window_probe.cpp": {
+      "sha256": "4af6f32dfc619fbc5bbc5cf228dfb934b06bc28c6d2940bfea7a04181a0bae9e",
+      "bytes": 4282
+    },
+    "app/AppScope/app.json5": {
+      "sha256": "d4265a016c8488bb4def753cade9c69323702f29f336fe8c6006a8da422a72a6",
+      "bytes": 225
+    }
+  },
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

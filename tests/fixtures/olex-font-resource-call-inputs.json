@@ -1,0 +1,18 @@
+{
+  "version": "0.22.23",
+  "base": "0.22.22",
+  "base_manifest_sha256": "526f3640114606dea9a1984f5753b63bc221da3234edc2aac5cba88c3faaf18f",
+  "scope": "Use actual original two-argument DrawRasterText after unchanged integer raster origin;22 build failure retained",
+  "files": {
+    "native/original_resource_font_window_probe.cpp": {
+      "bytes": 6193,
+      "sha256": "4abb35e2335c4aa8666e6c4c045964cbf9c5a92afd3aec257a85e56c2e70c005"
+    },
+    "app/AppScope/app.json5": {
+      "bytes": 225,
+      "sha256": "f55949c70d18a6ce8137b09d68952ad68b9679f9e114c5181a1aa107a66cdbae"
+    }
+  },
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

@@ -1,0 +1,37 @@
+{
+  "version": "0.22.25",
+  "base": "0.22.24",
+  "base_manifest_sha256": "42b5eb210af67e13780d00f0d17303a6099c341aa392a06ece12472c737ef6ac",
+  "scope": "Platform-only original raster-glyph batch flush; preserves glyphs/metrics/positions and unmodified vendor;24 raw four-pixel failure retained",
+  "files": {
+    "upstream/glib/glfont.cpp": {
+      "bytes": 75627,
+      "sha256": "7cfb4ec4000079be3c450eabbdd8841b8f6d4d3841d421bd93067d869778087e"
+    },
+    "patches/0021-flush-platform-font-raster-glyph-batches.patch": {
+      "bytes": 527,
+      "sha256": "c132ca7383f06fcfbabf468cb315a54698ca02cfa3e3524fb4a4d05cf835c154"
+    },
+    "source.lock.json": {
+      "bytes": 8338,
+      "sha256": "b9a60973e79c26e6f2a1a4555788fa40b32fb9f5293f173499cb0d1b040d3543"
+    },
+    "original-vector-font-inputs.json": {
+      "bytes": 1795,
+      "sha256": "e95d723f18e3fddf405f9ef97f7777082936aaaa2bf49aee364ae1155648c6be"
+    },
+    "app/entry/src/main/cpp/CMakeLists.txt": {
+      "bytes": 4918,
+      "sha256": "3b3428b375c27d901374910f84ed4aec66f1432d1466a4f656fe90eb7450e457"
+    },
+    "app/AppScope/app.json5": {
+      "bytes": 225,
+      "sha256": "91c77ece95595af010302e44c2a34e56207804099c48dca4122f355eb0620dcf"
+    }
+  },
+  "original_font_source_before_sha256": "ed5a5373ac1920d338a330ec3d0d7d79e131bc02d5f332a5896cd98d1c69f196",
+  "original_font_source_after_sha256": "7cfb4ec4000079be3c450eabbdd8841b8f6d4d3841d421bd93067d869778087e",
+  "patches": 21,
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

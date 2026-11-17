@@ -1,0 +1,61 @@
+{
+  "version": "0.22.24",
+  "base": "0.22.23",
+  "base_manifest_sha256": "96f2813083760efc07f7148a151f98e35978f0725484841ab531c62a0b09c215",
+  "scope": "Original entry8/72 selection and opaque RGB high-quality resampling; source-model wx3.2.6 strict double; no default fallback, alpha/mask/gamma or complete wx runtime qualification",
+  "files": {
+    "native/platform_font_factory.cpp": {
+      "bytes": 6424,
+      "sha256": "0aa0d0cea633dde8c48049a315bf321b8849dd1af582dd856f423bbbdcf18ab3"
+    },
+    "native/platform_font_factory.h": {
+      "bytes": 1338,
+      "sha256": "c5bdcbab61c2a6c8ed2c88e8a3dbbfcb99a56785f7cf2c27cad2e6e4787dc985"
+    },
+    "native/resource_font_resample.cpp": {
+      "bytes": 5212,
+      "sha256": "95c62e8e010405e474c605bc25a49ffc8762550b4735a8931c28b0b6075c16d0"
+    },
+    "native/resource_font_resample.h": {
+      "bytes": 905,
+      "sha256": "325b070221a57cf9e02a41d8c402e6b46d826be8bfa4f2e36f1771202ea5ce22"
+    },
+    "native/resampled_resource_font_window_probe.cpp": {
+      "bytes": 7331,
+      "sha256": "eab35c7a28a83c79435ea740863e9b12a67896d764bb43ac277ce539c4453ebe"
+    },
+    "native/resampled_resource_font_window_probe.h": {
+      "bytes": 246,
+      "sha256": "37d52785aebd610aaafcd360f467f3b885c4f0ebaeb5a6564c4322e0787dd7f1"
+    },
+    "native/olex_font_resample_fixture.h": {
+      "bytes": 103305,
+      "sha256": "7ce94a8f7487057ee0a7bac811e0343a0cfc5ead39241642bb7c1256dd75475f"
+    },
+    "native/original_font_window_probe.cpp": {
+      "bytes": 4645,
+      "sha256": "02344abd4037363f75a5864795d24b0f973b3214accb8addb4e0c2c161bf5674"
+    },
+    "app/entry/src/main/cpp/CMakeLists.txt": {
+      "bytes": 4748,
+      "sha256": "a52dc20d5de6797a9ecc65edebb3271cceb74922c2de01c6798ec7872bfcad36"
+    },
+    "app/AppScope/app.json5": {
+      "bytes": 225,
+      "sha256": "bb5f65df3880b8436e01d6aa0e70a3c5f54d42499a229b7ac663df807e3fd508"
+    }
+  },
+  "fixture_manifest_sha256": "e5066ee615b44b41689357cd477be2a605108c772fe3e5dd6ba23b655b538e38",
+  "wx_image_source_sha256": "41c8a0bcad8487b6c1ac0d9758cbd92b3c7b3d72499331de8d4f844cf5afcb39",
+  "original_font_requests_per_action": 15,
+  "resample_cases": [
+    "small",
+    "large",
+    "large-scaled",
+    "large-restored",
+    "fixed-italic",
+    "identity"
+  ],
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

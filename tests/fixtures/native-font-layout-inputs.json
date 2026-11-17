@@ -1,0 +1,18 @@
+{
+  "version": "0.22.18",
+  "base": "0.22.17",
+  "base_native_font_manifest_sha256": "afe3242fd4a407da48d017982060dc90673ba2b9a5969593c8ced7baf90665c9",
+  "scope": "repair extra-row clipping without reducing original controls or minimum viewport height",
+  "files": {
+    "app/entry/src/main/ets/pages/Index.ets": {
+      "sha256": "ddf9fc7151d94d327d2147d9cb54db43f52570cebab3fda9610c578d0cee1be9",
+      "bytes": 45915
+    },
+    "app/AppScope/app.json5": {
+      "sha256": "d1728b07f8bd2448b28411fc368f44d86b243e62a6fbf5bc62146f0a027f5b1a",
+      "bytes": 225
+    }
+  },
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

@@ -1,0 +1,29 @@
+{
+  "version": "0.22.31",
+  "base": "0.22.30",
+  "base_manifest_sha256": "c18ec30a87bf9985a9b91113b659ffb299532c744184cd4962c06ed9561bd3e6",
+  "scope": "Compact large summary cards and hide diagnostic side panel in short/narrow windows so actual view controls remain accessible. No native/menu/shortcut logic changes.",
+  "files": {
+    "app/entry/src/main/ets/pages/Index.ets": {
+      "bytes": 52576,
+      "sha256": "9c57ca8067589ab5c9fd41003c2cb14519ad92ac09d3e717ba133eb410913003"
+    },
+    "app/entry/src/main/ets/model/DesktopActions.ts": {
+      "bytes": 1727,
+      "sha256": "b4ae4774b1ae9eb88d3ecb07d30b5a81b2ea7b40ea57fdff32d73982a39888d0"
+    },
+    "app/AppScope/app.json5": {
+      "bytes": 225,
+      "sha256": "a5ad708777b5e05d76c472131841ad7562a5d4aa7c38bb837ebe9496ba7c8c87"
+    }
+  },
+  "menu_and_shortcut_block_unchanged_sha256": "a56f49ba3a5cc149d323d5eb40cb80c77acb73211a1f110d33335187672efbb4",
+  "native_sources_unchanged": true,
+  "recipe": {
+    "path": "scripts/prepare-desktop-layout-candidate.py",
+    "sha256": "a38074963d411f65881b8366729e4b0afb025c2c95b27b05d62116cf27893165"
+  },
+  "device_executed": false,
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}

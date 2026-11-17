@@ -1,0 +1,96 @@
+{
+  "version": "0.22.27",
+  "base": "0.22.26",
+  "base_manifest_sha256": "bf0ab1715bee6a2cd1703e3cfc1928381cba6856dbd90aaff367c70bd1c1cf8f",
+  "scope": "Actual own-main-window display xDPI/yDPI for native/exact-family point fonts; monitor/DPI events, invalidation, cache identity and physical horizontal scale; original bitmap/vector semantics unchanged; no fixed96/default-monitor fallback",
+  "original_font_requests_per_action": 20,
+  "device_executed": false,
+  "files": {
+    "native/display_font_metrics.h": {
+      "bytes": 3560,
+      "sha256": "38de50604b50f77071eaa1c24641b327b8281a06aae8d23df89fe0b1f2174dbe"
+    },
+    "app/entry/src/main/ets/model/FontDisplayMetrics.ts": {
+      "bytes": 693,
+      "sha256": "ad15639448fd151b9f514605492a8527d189bf49cfabf1f256ccafdee510d419"
+    },
+    "app/entry/src/main/ets/model/MainWindowFontMetrics.ets": {
+      "bytes": 3711,
+      "sha256": "17819e6588c62dfbe7f736628a92e0bd1152c825539dae402f0e15458892415d"
+    },
+    "native/original_renderer_host.h": {
+      "bytes": 710,
+      "sha256": "cee8e1fb2f5a4f012fb7ccf0c5605d22bc0dade7b206853bfa3b244084031539"
+    },
+    "native/harmony_glyph_raster.h": {
+      "bytes": 887,
+      "sha256": "5e208cfa117dd7b42f0cca45cacd63082f876510943cf01c764c0238a81fe02a"
+    },
+    "native/harmony_glyph_raster.cpp": {
+      "bytes": 6437,
+      "sha256": "a799a399405ca7dddcf1c182238bc6e65e59554494a7ac1c041e4602449eaebd"
+    },
+    "native/platform_font_factory.h": {
+      "bytes": 2230,
+      "sha256": "f6f5349c49e6fa03a1a0fa4e160b8184c26823db00c02b33e070f9d1e6de739a"
+    },
+    "native/platform_font_factory.cpp": {
+      "bytes": 7996,
+      "sha256": "ff3032f3b3870026b5c7291a24afe55437771ba1c5a0632cbe58dbcf3b69a48b"
+    },
+    "native/platform_window_scene.h": {
+      "bytes": 3044,
+      "sha256": "729bed936819da04a255ad07d36f4f7e2b400b77700e04c2a02c6c79b1d827e1"
+    },
+    "native/original_font_window_probe.cpp": {
+      "bytes": 5023,
+      "sha256": "295ee180682d51c7404f8b9e2cc89fcafe47477382f084e00adca23442c8558a"
+    },
+    "native/family_font_window_probe.cpp": {
+      "bytes": 7775,
+      "sha256": "8a1fd6953405bc8a76ca73abc7106a5489e63555296bcd98bfe7b758e6b37074"
+    },
+    "app/entry/src/main/cpp/shared_original_probe.h": {
+      "bytes": 398,
+      "sha256": "a1639a909c174ad9e811e387d35e643ed58208d64faf0d784dd687cc534cb7a1"
+    },
+    "app/entry/src/main/cpp/shared_original_probe.cpp": {
+      "bytes": 13914,
+      "sha256": "622d84412bbe2265abde3b5c0651ae126c913f33a1094651560316422d062f4f"
+    },
+    "app/entry/src/main/cpp/renderer.h": {
+      "bytes": 5752,
+      "sha256": "d417bd6401ccdc91dfe160c8f96af995856edc28f7f74a88c974191f60728967"
+    },
+    "app/entry/src/main/cpp/renderer.cpp": {
+      "bytes": 34484,
+      "sha256": "26821fc84a49e3809781ab1d50d8d8e0c6194c43035ee736f8eb399568ff34e0"
+    },
+    "app/entry/src/main/cpp/napi_init.cpp": {
+      "bytes": 34697,
+      "sha256": "b62e06215e9bf77a399ae245a2a7b941a919509b102f704814fed688d6901863"
+    },
+    "app/entry/src/main/cpp/types/libolex2native/index.d.ts": {
+      "bytes": 7384,
+      "sha256": "a736e55b0607cffcab0ba86c20cc56dfcacb9e17d99c62ed411541daf057910e"
+    },
+    "app/entry/src/main/ets/entryability/EntryAbility.ets": {
+      "bytes": 2425,
+      "sha256": "a11bfe4ae2098ff13251ce5565e95cf0db1bd8adf804de317adca4acc714ebe9"
+    },
+    "app/entry/src/main/ets/pages/Index.ets": {
+      "bytes": 46275,
+      "sha256": "735f8e45d3f946c86c995d51d5e97a64baa67ef818e1a19c91ec8edf88f54b95"
+    },
+    "app/AppScope/app.json5": {
+      "bytes": 225,
+      "sha256": "c37ad7c9c848d6f6a388779fe18014fdd0d10c1f81f895f92b72dec5386b94f1"
+    }
+  },
+  "recipe": {
+    "path": "scripts/prepare-font-display-candidate.py",
+    "sha256": "012fc5464cb159881484195893d9c2c08ab22e968ff522a497e6e438b447ad57"
+  },
+  "full_port_complete": false,
+  "functional_completion_percent": null
+}
