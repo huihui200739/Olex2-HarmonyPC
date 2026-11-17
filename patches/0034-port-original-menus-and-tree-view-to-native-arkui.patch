@@ -1,0 +1,448 @@
+diff --git a/olex/ctrls/menuext.h b/olex/ctrls/menuext.h
+--- a/olex/ctrls/menuext.h
++++ b/olex/ctrls/menuext.h
+@@ -7,6 +7,100 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#ifndef __olx_ctrl_menu_H
++#define __olx_ctrl_menu_H
++#include "olxctrlbase.h"
++#include "native_menu.h"
++#include <memory>
++#include <thread>
++#include <vector>
++namespace ctrl_ext {
++const short mtSeparator=-1,mtNormalItem=0,mtCheckItem=1,mtRadioItem=2;
++class TMenuItem;
++class TMenu:public IOlxObject {
++  std::vector<std::unique_ptr<TMenuItem>> items_;
++  olxstr name_;
++  std::shared_ptr<olex2::harmony::ui::MenuPopup> popup_;
++  std::shared_ptr<int> session_;
++  std::weak_ptr<void> ownerLife_;
++  std::shared_ptr<int> life_=std::make_shared<int>(0);
++  std::thread::id thread_=std::this_thread::get_id();
++  TMenu* parent_=nullptr;
++  olex2::harmony::ui::Widget* owner_=nullptr;
++  std::function<void(int)> selected_;
++  std::string error_;
++  void OpenLevel(TMenu* level);
++  void Choose(TMenu* level,int position);
++  void AssertThread()const;
++public:
++  class MenuData:public IOlxObject {public:olx_pdict<int,olxstr> macros;};
++private:
++  std::unique_ptr<MenuData> data_;
++public:
++  explicit TMenu(const olxstr& name=EmptyString(),std::shared_ptr<olex2::harmony::ui::MenuPopup> popup={});
++  ~TMenu()override;
++  TMenu(const TMenu&)=delete;
++  TMenu& operator=(const TMenu&)=delete;
++  TMenu* Clone()const{return CopyMenu(*this);}
++  static TMenu* CopyMenu(const TMenu&);
++  static TMenu* CreateMenu(const olxstr&,int first_id=0,TMenu* menu=nullptr);
++  TMenuItem* Append(int id,const olxstr& label,const olxstr& help=EmptyString(),short kind=mtNormalItem);
++  TMenuItem* Append(int id,const olxstr& label,TMenu* submenu,const olxstr& help=EmptyString());
++  TMenuItem* Append(TMenuItem*);
++  TMenuItem* AppendSeparator();
++  bool Destroy(TMenuItem*);
++  void Clear();
++  size_t GetMenuItemCount()const{return items_.size();}
++  TMenuItem* FindItemByPosition(size_t index)const;
++  TMenuItem* FindItem(int id)const;
++  MenuData* GetClientObject()const{return data_.get();}
++  void SetClientObject(MenuData* data){AssertThread();data_.reset(data);}
++  void Popup(olex2::harmony::ui::Widget* owner,std::function<void(int)> selected);
++  void Close();
++  bool Activate(int id);
++  const std::string& LastPopupError()const{return error_;}
++  const olxstr& GetTitle()const{return name_;}
++  friend class TMenuItem;
++};
++class TMenuItem:public AActionHandler {
++  TActionQList Actions;
++  TActionQueue* ActionQueue=nullptr;
++  olxstr DependMode,Command,OnModeChangeCmd,label_,help_;
++  short DependentOn=0,kind_;
++  int id_;
++  TMenu* parent_=nullptr;
++  bool enabled_=true,checked_=false;
++  std::unique_ptr<TMenu> submenu_;
++public:
++  TMenuItem(short type,int id,TMenu* parent=nullptr,const olxstr& name=EmptyString());
++  ~TMenuItem()override;
++  void SetActionQueue(TActionQueue&,const olxstr&,short);
++  void OnRemove(TActionQueue* caller=nullptr)override {if(!caller||caller==ActionQueue)ActionQueue=nullptr;}
++  bool Execute(const IOlxObject*,const IOlxObject*,TActionQueue*)override;
++  void ValidateState();
++  int GetId()const{return id_;}
++  short GetKind()const{return kind_;}
++  bool IsSeparator()const{return kind_==mtSeparator;}
++  bool IsCheckable()const{return kind_==mtCheckItem||kind_==mtRadioItem;}
++  bool IsChecked()const{return checked_;}
++  bool IsEnabled()const{return enabled_;}
++  void Check(bool=true);
++  void Enable(bool value=true){enabled_=value;}
++  const olxstr& GetItemLabel()const{return label_;}
++  void SetItemLabel(const olxstr& label){label_=label;}
++  const olxstr& GetHelp()const{return help_;}
++  void SetHelp(const olxstr& help){help_=help;}
++  TMenu* GetSubMenu()const{return submenu_.get();}
++  DefPropC(olxstr,Command)
++  TActionQueue& OnModeChange;
++  static const short ModeDependent=1,StateDependent=2;
++  friend class TMenu;
++};
++}
++#endif
++
++#else
+ #ifndef __olx_ctrl_menu_H
+ #define __olx_ctrl_menu_H
+ #include "olxctrlbase.h"
+@@ -73,3 +167,5 @@
+   };
+ };  // end namespace ctrl_ext
+ #endif
++
++#endif // native ordinary navigation branch
+diff --git a/olex/ctrls/menuext.cpp b/olex/ctrls/menuext.cpp
+--- a/olex/ctrls/menuext.cpp
++++ b/olex/ctrls/menuext.cpp
+@@ -7,6 +7,102 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "menuext.h"
++#include "original_button_mode.h"
++#include "original_menu_state.h"
++#include "olx_control_state.h"
++#include "eutf8.h"
++#include <algorithm>
++#include <limits>
++#include <stdexcept>
++using namespace ctrl_ext;
++using namespace olex2::harmony::ui;
++namespace {
++std::string MenuUtf8(const olxstr& value) {auto s=TUtf8::Encode(value);return {s.c_str(),s.Length()};}
++}
++void TMenu::AssertThread()const {if(thread_!=std::this_thread::get_id())throw std::runtime_error("Menus require their owning UI thread");}
++TMenu::TMenu(const olxstr& name,std::shared_ptr<MenuPopup> popup):name_(name),popup_(popup?std::move(popup):CreateArkUiMenuPopup()) {
++  if(!popup_)throw std::invalid_argument("A real native menu presenter is required");
++}
++TMenu::~TMenu(){life_.reset();try{popup_->Close();}catch(...){}items_.clear();}
++TMenuItem::TMenuItem(short type,int id,TMenu* parent,const olxstr& name):kind_(type),id_(id),parent_(parent),label_(name),OnModeChange(Actions.New(evt_on_mode_change_id)) {
++  if(type!=mtSeparator&&type!=mtNormalItem&&type!=mtCheckItem&&type!=mtRadioItem)throw std::invalid_argument("Unknown menu item kind");SetToDelete(false);
++}
++TMenuItem::~TMenuItem(){if(ActionQueue)ActionQueue->Remove(this);}
++TMenuItem* TMenu::Append(TMenuItem* item) {
++  AssertThread();if(!item||item->parent_&&item->parent_!=this)throw std::invalid_argument("Menu item already belongs to another menu");
++  for(const auto& old:items_)if(old.get()==item)throw std::invalid_argument("Menu item already appended");
++  if(items_.size()>=static_cast<size_t>(std::numeric_limits<int>::max()-1))throw std::length_error("Menu too large");items_.reserve(items_.size()+1);Close();item->parent_=this;items_.emplace_back(item);return item;
++}
++TMenuItem* TMenu::Append(int id,const olxstr& label,const olxstr& help,short kind) {
++  auto item=std::make_unique<TMenuItem>(kind,id,nullptr,label);item->help_=help;auto* result=Append(item.get());item.release();return result;
++}
++TMenuItem* TMenu::Append(int id,const olxstr& label,TMenu* submenu,const olxstr& help) {
++  AssertThread();if(!submenu||submenu==this||submenu->parent_)throw std::invalid_argument("Submenu must be uniquely owned");
++  for(auto* p=this;p;p=p->parent_)if(p==submenu)throw std::invalid_argument("Menu ownership cycle");
++  auto item=std::make_unique<TMenuItem>(mtNormalItem,id,nullptr,label);item->help_=help;
++  auto* result=Append(item.get());item.release();result->submenu_.reset(submenu);submenu->parent_=this;return result;
++}
++TMenuItem* TMenu::AppendSeparator(){return Append(-1,EmptyString(),EmptyString(),mtSeparator);}
++void TMenu::Close(){AssertThread();if(parent_)parent_->Close();popup_->Close();session_.reset();owner_=nullptr;ownerLife_.reset();selected_={};}
++void TMenu::Clear(){AssertThread();Close();items_.clear();data_.reset();}
++bool TMenu::Destroy(TMenuItem* item) {
++  AssertThread();auto it=std::find_if(items_.begin(),items_.end(),[&](const auto& value){return value.get()==item;});if(it==items_.end())return false;Close();items_.erase(it);return true;
++}
++TMenuItem* TMenu::FindItemByPosition(size_t i)const {AssertThread();if(i>=items_.size())throw std::out_of_range("Menu position");return items_[i].get();}
++TMenuItem* TMenu::FindItem(int id)const {AssertThread();for(const auto& item:items_){if(item->id_==id&&!item->IsSeparator())return item.get();if(item->submenu_)if(auto* found=item->submenu_->FindItem(id))return found;}return nullptr;}
++TMenu* TMenu::CopyMenu(const TMenu& source) {
++  source.AssertThread();auto out=std::make_unique<TMenu>(source.name_);
++  for(const auto& item:source.items_){std::unique_ptr<TMenu> child;if(item->submenu_)child.reset(CopyMenu(*item->submenu_));TMenuItem* copy=child?out->Append(item->id_,item->label_,child.get(),item->help_):out->Append(item->id_,item->label_,item->help_,item->kind_);if(child)child.release();copy->enabled_=item->enabled_;copy->checked_=item->checked_;copy->Command=item->Command;}
++  if(source.data_){auto data=std::make_unique<MenuData>();data->macros=source.data_->macros;out->data_=std::move(data);}return out.release();
++}
++TMenu* TMenu::CreateMenu(const olxstr& definition,int first_id,TMenu* menu) {
++  TStrList tokens(definition,';');if(tokens.IsEmpty())return nullptr;
++  if(tokens.Count()>static_cast<size_t>(std::numeric_limits<int>::max())||first_id>std::numeric_limits<int>::max()-static_cast<int>(tokens.Count()))throw std::overflow_error("Menu ID range");
++  std::unique_ptr<TMenu> owned;if(!menu){owned=std::make_unique<TMenu>();menu=owned.get();}
++  auto data=std::make_unique<MenuData>();if(menu->data_)data->macros=menu->data_->macros;
++  for(size_t i=0;i<tokens.Count();++i){if(tokens[i]=='#'){menu->AppendSeparator();continue;}auto arrow=tokens[i].IndexOf("<-");if(arrow==InvalidIndex)continue;const int id=first_id+static_cast<int>(i);menu->Append(id,tokens[i].SubStringTo(arrow));data->macros(id,tokens[i].SubStringFrom(arrow+2));}
++  menu->data_=std::move(data);if(owned)return owned.release();return menu;
++}
++void TMenuItem::Check(bool value) {
++  if(!IsCheckable())throw std::invalid_argument("Only check/radio menu items can be checked");
++  if(value&&kind_==mtRadioItem&&parent_){size_t index=0;while(index<parent_->items_.size()&&parent_->items_[index].get()!=this)++index;
++    size_t begin=index,end=index;while(begin>0&&parent_->items_[begin-1]->kind_==mtRadioItem)--begin;while(end<parent_->items_.size()&&parent_->items_[end]->kind_==mtRadioItem)++end;
++    for(size_t i=begin;i<end;++i)parent_->items_[i]->checked_=false;
++  }checked_=value;
++}
++void TMenuItem::SetActionQueue(TActionQueue& queue,const olxstr& dependency,short dependentOn) {
++  if(dependentOn!=ModeDependent&&dependentOn!=StateDependent&&dependentOn!=0)throw std::invalid_argument("Unknown menu dependency");
++  auto separator=dependency.FirstIndexOf(';');olxstr mode=separator==InvalidIndex?dependency:dependency.SubStringTo(separator);olxstr argument=separator==InvalidIndex?EmptyString():dependency.SubStringFrom(separator+1);
++  if(ActionQueue)ActionQueue->Remove(this);ActionQueue=&queue;DependMode=mode;OnModeChangeCmd=argument;DependentOn=dependentOn;queue.Add(this);
++}
++void TMenuItem::ValidateState(){if(!IsCheckable()||DependMode.IsEmpty())return;if(DependentOn==ModeDependent)Check(OriginalButtonModeActive(DependMode));else if(DependentOn==StateDependent)Check(OriginalMenuStateActive(DependMode,OnModeChangeCmd));}
++bool TMenuItem::Execute(const IOlxObject*,const IOlxObject* data,TActionQueue*) {
++  if(data&&(data->Is<TModeChange>()&&DependentOn==ModeDependent||data->Is<TStateChange>()&&DependentOn==StateDependent))ValidateState();return true;
++}
++void TMenu::Popup(Widget* owner,std::function<void(int)> selected) {
++  AssertThread();if(!owner||!owner->IsEventAllowed())throw std::invalid_argument("Menu owner is not interactable");Close();owner_=owner;ownerLife_=owner->ObjectLifetime();selected_=std::move(selected);error_.clear();OpenLevel(this);
++}
++void TMenu::OpenLevel(TMenu* level) {
++  std::vector<MenuRow> rows;rows.reserve(level->items_.size()+1);
++  if(level!=this)rows.push_back({-1,"‹ 返回","",false,true,false,false,false});
++  for(size_t i=0;i<level->items_.size();++i){auto& item=*level->items_[i];item.ValidateState();rows.push_back({static_cast<int>(i),MenuUtf8(item.label_),MenuUtf8(item.help_),item.IsSeparator(),item.enabled_,item.IsCheckable(),item.checked_,bool(item.submenu_)});}
++  session_=std::make_shared<int>(0);std::weak_ptr<int> session=session_;std::weak_ptr<int> weak=life_;popup_->Open(MenuUtf8(level->name_),rows,[weak,session,this,level](int position){if(weak.expired()||session.expired())return;try{Choose(level,position);}catch(const std::exception& e){if(!weak.expired())error_=e.what();}catch(...){if(!weak.expired())error_="Menu activation failed";}});
++}
++void TMenu::Choose(TMenu* level,int position) {
++  AssertThread();if(position==std::numeric_limits<int>::min()){Close();return;}if(!owner_||ownerLife_.expired()||!owner_->IsEventAllowed()){Close();return;}if(position==-1&&level!=this){OpenLevel(level->parent_);return;}
++  if(position<0||static_cast<size_t>(position)>=level->items_.size())return;auto& item=*level->items_[position];if(!item.enabled_||item.IsSeparator())return;
++  if(item.submenu_){OpenLevel(item.submenu_.get());return;}
++  const int id=item.id_;if(item.IsCheckable())item.Check(item.kind_==mtRadioItem||!item.checked_);auto callback=selected_;Close();if(callback)callback(id); // owner/menu may be destroyed by callback
++}
++bool TMenu::Activate(int id) {
++  AssertThread();auto* item=FindItem(id);if(!item||!item->enabled_||item->IsSeparator()||item->submenu_)return false;
++  for(auto* menu=item->parent_;menu&&menu!=this;menu=menu->parent_){auto* parent=menu->parent_;if(!parent)return false;auto found=std::find_if(parent->items_.begin(),parent->items_.end(),[&](const auto& i){return i->submenu_.get()==menu;});if(found==parent->items_.end()||!(*found)->enabled_)return false;}
++  if(owner_&&(ownerLife_.expired()||!owner_->IsEventAllowed()))return false;if(item->IsCheckable())item->Check(item->kind_==mtRadioItem||!item->checked_);auto callback=selected_;Close();if(callback)callback(id);return true;
++}
++
++#else
+ #include "menuext.h"
+ #include "frameext.h"
+ #include "olxstate.h"
+@@ -126,3 +222,5 @@
+   }
+   return true;
+ }
++
++#endif // native ordinary navigation branch
+diff --git a/olex/ctrls/treeviewext.h b/olex/ctrls/treeviewext.h
+--- a/olex/ctrls/treeviewext.h
++++ b/olex/ctrls/treeviewext.h
+@@ -7,6 +7,97 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#ifndef __olx_ctrl_treeview_H
++#define __olx_ctrl_treeview_H
++#include "olxctrlbase.h"
++#include "estrlist.h"
++#include "bitarray.h"
++#include "menuext.h"
++#include <map>
++#include <memory>
++#include <vector>
++namespace ctrl_ext {
++enum {ID_TREE_ExpandAll=1000,ID_TREE_CollapseAll,ID_TREE_LAST};
++constexpr long TreeHideRoot=1,TreeEditLabels=2;
++class TTreeView;
++struct TreeItemId {
++  size_t value=0;
++  const TTreeView* owner=nullptr;
++  bool IsOk()const{return value!=0;}
++  bool operator==(TreeItemId other)const{return value==other.value&&owner==other.owner;}
++  bool operator!=(TreeItemId other)const{return !(*this==other);}
++};
++class TTreeNodeData:public IOlxObject {
++  std::unique_ptr<IOlxObject> Data;
++public:
++  explicit TTreeNodeData(IOlxObject* data):Data(data){}
++  IOlxObject* GetData()const{return Data.get();}
++};
++class TTreeView:public olex2::harmony::ui::Widget,public AOlxCtrl {
++  struct Node {
++    size_t id=0,parent=0;
++    olxstr label;
++    bool expanded=false;
++    std::vector<size_t> children;
++    std::unique_ptr<TTreeNodeData> data;
++  };
++  std::map<size_t,std::unique_ptr<Node>> nodes_;
++  size_t root_=0,selected_=0,next_=1,editing_=0;
++  std::vector<size_t> visible_;
++  olxstr Data;
++  std::unique_ptr<TMenu> contextMenu;
++  Node& Find(TreeItemId)const;
++  std::vector<size_t> All(size_t root)const;
++  void Sync();
++  void SetExpanded(TreeItemId,bool,bool descendants=false);
++  void ContextAction(int);
++protected:
++  void OnNativeEvent(const olex2::harmony::ui::NodeEvent&)override;
++public:
++  TTreeView(olex2::harmony::ui::NodeBackend&,olex2::harmony::ui::Widget*,int id=-1,
++    olex2::harmony::ui::Point={},olex2::harmony::ui::Size={},long flags=0);
++  ~TTreeView()override;
++  DefPropC(olxstr,Data)
++  TreeItemId AddRoot(const olxstr& label);
++  TreeItemId AppendItem(TreeItemId,const olxstr&,TTreeNodeData* data=nullptr);
++  void DeleteAllItems();
++  void Delete(TreeItemId);
++  TreeItemId GetRootItem()const{return {root_,this};}
++  TreeItemId GetSelection()const{return {selected_,this};}
++  TreeItemId GetItemParent(TreeItemId id)const{return {Find(id).parent,this};}
++  const olxstr& GetItemText(TreeItemId id)const{return Find(id).label;}
++  void SetItemText(TreeItemId,const olxstr&);
++  TTreeNodeData* GetItemData(TreeItemId id)const{return Find(id).data.get();}
++  void SetItemData(TreeItemId id,TTreeNodeData* data){AssertThread();auto& stored=Find(id).data;if(stored.get()!=data)stored.reset(data);}
++  bool HasChildren(TreeItemId id)const{return !Find(id).children.empty();}
++  bool IsExpanded(TreeItemId id)const{return Find(id).expanded;}
++  bool IsSelected(TreeItemId id)const{Find(id);return id.value==selected_;}
++  size_t GetChildrenCount(TreeItemId,bool recursive=true)const;
++  std::vector<TreeItemId> Children(TreeItemId)const;
++  void Expand(TreeItemId id){SetExpanded(id,true);}
++  void Collapse(TreeItemId id){SetExpanded(id,false);}
++  void ExpandAllChildren(TreeItemId id){SetExpanded(id,true,true);}
++  void CollapseAllChildren(TreeItemId id){SetExpanded(id,false,true);}
++  void SelectItem(TreeItemId,bool select=true);
++  void SelectByLabel(const olxstr&);
++  void SelectByData(const olxstr&);
++  bool LoadFromStrings(const TStrList&);
++  olxstr SaveState()const;
++  void RestoreState(const olxstr&);
++  void BeginLabelEdit(TreeItemId);
++  void CancelLabelEdit();
++  void SetContextMenu(TMenu*);
++  void ShowContextMenu();
++  static TMenu* CreateDefaultContextMenu();
++  static TMenu* CreateContextMenu(const olxstr&);
++  void SetWindowStyle(long)override;
++  ActionQueue &OnDblClick,&OnSelect,&OnEdit;
++};
++}
++#endif
++
++#else
+ #ifndef __olx_ctrl_treeview_H
+ #define __olx_ctrl_treeview_H
+ #include "olxctrlbase.h"
+@@ -79,3 +170,5 @@
+   };
+ }; // end namespace ctrl_ext
+ #endif
++
++#endif // native ordinary navigation branch
+diff --git a/olex/ctrls/treeviewext.cpp b/olex/ctrls/treeviewext.cpp
+--- a/olex/ctrls/treeviewext.cpp
++++ b/olex/ctrls/treeviewext.cpp
+@@ -7,6 +7,109 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "treeviewext.h"
++#include "original_menu_state.h"
++#include "eutf8.h"
++#include <algorithm>
++#include <cmath>
++#include <limits>
++#include <stdexcept>
++using namespace ctrl_ext;
++using namespace olex2::harmony::ui;
++namespace {
++std::string TreeUtf8(const olxstr& value){auto t=TUtf8::Encode(value);std::string s(t.c_str(),t.Length());if(s.find('\0')!=std::string::npos)throw std::invalid_argument("Tree labels cannot contain NUL");return s;}
++}
++TTreeView::TTreeView(NodeBackend& backend,Widget* parent,int id,Point pos,Size size,long flags)
++ :Widget(backend,NodeKind::Tree,parent,id,pos,size),AOlxCtrl(this),
++ OnDblClick(ActionQueue::New(Actions,evt_on_dbl_click_id)),OnSelect(ActionQueue::New(Actions,evt_on_select_id)),OnEdit(ActionQueue::New(Actions,evt_change_id)) {
++  if(flags&~(TreeHideRoot|TreeEditLabels))throw std::invalid_argument("Unsupported native tree style");RememberWindowStyle(flags);SetNumber(Property::Focusable,1);
++  Listen({EventKind::TreeSelect,EventKind::TreeToggle,EventKind::TreeActivate,EventKind::TreeContext,EventKind::TreeEdit,EventKind::Key});Sync();
++}
++TTreeView::~TTreeView(){contextMenu.reset();}
++TTreeView::Node& TTreeView::Find(TreeItemId id)const {AssertThread();auto it=nodes_.find(id.value);if(id.owner!=this||it==nodes_.end())throw std::out_of_range("Tree item does not belong to this tree");return *it->second;}
++std::vector<size_t> TTreeView::All(size_t root)const {
++  std::vector<size_t> result,pending;if(root)pending.push_back(root);
++  while(!pending.empty()){auto id=pending.back();pending.pop_back();result.push_back(id);const auto& children=nodes_.at(id)->children;pending.insert(pending.end(),children.rbegin(),children.rend());}return result;
++}
++void TTreeView::Sync(){
++  AssertThread();std::vector<TreeRow> rows;std::vector<size_t> visible;std::vector<std::pair<size_t,size_t>> pending;if(root_)pending.emplace_back(root_,0);
++  while(!pending.empty()){auto [id,depth]=pending.back();pending.pop_back();auto& node=*nodes_.at(id);const bool hidden=id==root_&&(GetWindowStyle()&TreeHideRoot);
++    if(!hidden){if(depth>32767||rows.size()>=static_cast<size_t>(std::numeric_limits<int>::max()))throw std::length_error("Tree exceeds native layout limits");visible.push_back(id);rows.push_back({TreeUtf8(node.label),depth, !node.children.empty(),node.expanded,id==selected_,id==editing_});}
++    if(hidden||node.expanded)for(auto it=node.children.rbegin();it!=node.children.rend();++it)pending.emplace_back(*it,hidden?0:depth+1);
++  }
++  Backend().SetTreeRows(Handle(),rows);visible_.swap(visible);
++}
++TreeItemId TTreeView::AddRoot(const olxstr& label){
++  AssertThread();if(root_)throw std::logic_error("Tree already has a root");if(next_==std::numeric_limits<size_t>::max())throw std::overflow_error("Tree ID space");TreeUtf8(label);auto node=std::make_unique<Node>();node->id=next_++;node->label=label;const size_t id=node->id;nodes_.emplace(id,std::move(node));root_=id;
++  try{Sync();}catch(...){root_=0;nodes_.erase(id);throw;}return {id,this};
++}
++TreeItemId TTreeView::AppendItem(TreeItemId parent,const olxstr& label,TTreeNodeData* data){
++  AssertThread();auto& p=Find(parent);TreeUtf8(label);if(next_==std::numeric_limits<size_t>::max())throw std::overflow_error("Tree ID space");p.children.reserve(p.children.size()+1);auto node=std::make_unique<Node>();node->id=next_++;node->parent=parent.value;node->label=label;const auto id=node->id;nodes_.emplace(id,std::move(node));p.children.push_back(id);
++  try{Sync();}catch(...){p.children.pop_back();nodes_.erase(id);throw;}nodes_.at(id)->data.reset(data);return {id,this};
++}
++void TTreeView::DeleteAllItems(){AssertThread();Backend().SetTreeRows(Handle(),{});visible_.clear();nodes_.clear();root_=selected_=editing_=0;}
++void TTreeView::Delete(TreeItemId id){
++  auto& node=Find(id);if(id.value==root_){DeleteAllItems();return;}const auto ids=All(id.value);auto& parent=*nodes_.at(node.parent);auto previous=parent.children;const size_t selected=selected_,editing=editing_;parent.children.erase(std::remove(parent.children.begin(),parent.children.end(),id.value),parent.children.end());if(std::find(ids.begin(),ids.end(),selected_)!=ids.end())selected_=0;if(std::find(ids.begin(),ids.end(),editing_)!=ids.end())editing_=0;
++  try{Sync();}catch(...){parent.children.swap(previous);selected_=selected;editing_=editing;throw;}for(auto child:ids)nodes_.erase(child);
++}
++size_t TTreeView::GetChildrenCount(TreeItemId id,bool recursive)const {const auto& node=Find(id);return recursive?All(id.value).size()-1:node.children.size();}
++std::vector<TreeItemId> TTreeView::Children(TreeItemId id)const{std::vector<TreeItemId> out;for(auto child:Find(id).children)out.push_back({child,this});return out;}
++void TTreeView::SetExpanded(TreeItemId id,bool value,bool descendants){
++  Find(id);auto ids=descendants?All(id.value):std::vector<size_t>{id.value};std::vector<bool> old;for(auto child:ids){old.push_back(nodes_.at(child)->expanded);nodes_.at(child)->expanded=value&&!nodes_.at(child)->children.empty();}
++  try{Sync();}catch(...){for(size_t i=0;i<ids.size();++i)nodes_.at(ids[i])->expanded=old[i];throw;}
++}
++void TTreeView::SelectItem(TreeItemId id,bool select){
++  Find(id);const auto old=selected_;std::vector<std::pair<size_t,bool>> ancestors;selected_=select?id.value:0;
++  if(select)for(size_t parent=nodes_.at(id.value)->parent;parent;parent=nodes_.at(parent)->parent){auto& n=*nodes_.at(parent);ancestors.emplace_back(parent,n.expanded);n.expanded=true;}
++  try{Sync();}catch(...){selected_=old;for(auto [parent,expanded]:ancestors)nodes_.at(parent)->expanded=expanded;throw;}
++  if(old!=selected_)OnSelect.Execute(this); // no member access after an original action
++}
++void TTreeView::SetItemText(TreeItemId id,const olxstr& label){auto& node=Find(id);TreeUtf8(label);auto old=node.label;node.label=label;try{Sync();}catch(...){node.label=old;throw;}}
++void TTreeView::SelectByLabel(const olxstr& label){for(auto id:All(root_))if(nodes_.at(id)->label==label){const bool enabled=OnSelect.IsEnabled();OnSelect.SetEnabled(false);try{SelectItem({id,this});}catch(...){OnSelect.SetEnabled(enabled);throw;}OnSelect.SetEnabled(enabled);return;}}
++void TTreeView::SelectByData(const olxstr& data){for(auto id:All(root_)){const auto& node=*nodes_.at(id);if(node.data&&node.data->GetData()&&data==node.data->GetData()->ToString()){const bool enabled=OnSelect.IsEnabled();OnSelect.SetEnabled(false);try{SelectItem({id,this});}catch(...){OnSelect.SetEnabled(enabled);throw;}OnSelect.SetEnabled(enabled);return;}}}
++bool TTreeView::LoadFromStrings(const TStrList& strings){
++  AssertThread();if(strings.Count()%2)return false;std::map<size_t,std::unique_ptr<Node>> next;size_t id=next_;if(id==std::numeric_limits<size_t>::max())throw std::overflow_error("Tree ID space");auto root=std::make_unique<Node>();root->id=id++;root->label="Root";const size_t newroot=root->id;next.emplace(newroot,std::move(root));std::vector<std::pair<size_t,size_t>> stack;
++  for(size_t i=0;i<strings.Count();i+=2){if(id==std::numeric_limits<size_t>::max())throw std::overflow_error("Tree ID space");const size_t depth=strings[i].LeadingCharCount('\t');while(!stack.empty()&&stack.back().first>=depth)stack.pop_back();const size_t parent=stack.empty()?newroot:stack.back().second;auto node=std::make_unique<Node>();node->id=id++;node->parent=parent;node->label=olxstr(strings[i]).Trim('\t');TreeUtf8(node->label);if(!olxstr(strings[i+1]).Trim('\t').IsEmpty())node->data=std::make_unique<TTreeNodeData>(new olxstr(strings[i+1]));const size_t child=node->id;next.at(parent)->children.push_back(child);next.emplace(child,std::move(node));stack.emplace_back(depth,child);}
++  const size_t oldroot=root_,oldselected=selected_,oldediting=editing_;nodes_.swap(next);root_=newroot;selected_=editing_=0;
++  try{Sync();}catch(...){nodes_.swap(next);root_=oldroot;selected_=oldselected;editing_=oldediting;throw;}next_=id;return true;
++}
++olxstr TTreeView::SaveState()const {
++  AssertThread();const auto ids=All(root_);TEBitArray bits(ids.size());size_t selected=InvalidIndex;for(size_t i=0;i<ids.size();++i){bits.Set(i,nodes_.at(ids[i])->expanded);if(ids[i]==selected_)selected=i;}
++  olxstr value=bits.ToBase64String();return value.stream(';')<<selected<<';'<<static_cast<int>(GetNumber(Property::TreeScrollY))<<';'<<static_cast<int>(GetNumber(Property::TreeScrollX));
++}
++void TTreeView::RestoreState(const olxstr& value){
++  AssertThread();TStrList parts(value,';');if(parts.Count()!=4)return;TEBitArray bits;bits.FromBase64String(parts[0]);const auto ids=All(root_);if(bits.Count()!=ids.size())return;const size_t selected=parts[1].ToSizeT();const int y=parts[2].ToInt(),x=parts[3].ToInt();if((selected!=InvalidIndex&&selected>=ids.size())||x<0||y<0)return;
++  const size_t oldselected=selected_;const double oldx=GetNumber(Property::TreeScrollX),oldy=GetNumber(Property::TreeScrollY);std::vector<bool> previous;for(size_t i=0;i<ids.size();++i){previous.push_back(nodes_.at(ids[i])->expanded);nodes_.at(ids[i])->expanded=bits[i];}selected_=selected==InvalidIndex?0:ids[selected];
++  try{Sync();SetNumber(Property::TreeScrollY,y);SetNumber(Property::TreeScrollX,x);}catch(...){selected_=oldselected;for(size_t i=0;i<ids.size();++i)nodes_.at(ids[i])->expanded=previous[i];try{Sync();SetNumber(Property::TreeScrollX,oldx);SetNumber(Property::TreeScrollY,oldy);}catch(...){throw std::runtime_error("Tree state restore and rollback both failed");}throw;}
++}
++void TTreeView::BeginLabelEdit(TreeItemId id){Find(id);if(!(GetWindowStyle()&TreeEditLabels))throw std::logic_error("Tree label editing is not enabled");std::weak_ptr<void> life=ObjectLifetime();SelectItem(id);if(life.expired())return;auto old=editing_;editing_=id.value;try{Sync();}catch(...){editing_=old;throw;}}
++void TTreeView::CancelLabelEdit(){AssertThread();auto old=editing_;editing_=0;try{Sync();}catch(...){editing_=old;throw;}}
++void TTreeView::SetWindowStyle(long value){AssertThread();if(value&~(TreeHideRoot|TreeEditLabels))throw std::invalid_argument("Unsupported native tree style");const long old=GetWindowStyle();const auto editing=editing_;RememberWindowStyle(value);if(!(value&TreeEditLabels))editing_=0;try{Sync();}catch(...){RememberWindowStyle(old);editing_=editing;throw;}}
++void TTreeView::SetContextMenu(TMenu* menu){AssertThread();if(contextMenu.get()==menu)return;if(contextMenu)contextMenu->Close();contextMenu.reset(menu);}
++TMenu* TTreeView::CreateDefaultContextMenu(){auto menu=std::make_unique<TMenu>();menu->Append(ID_TREE_ExpandAll,"Expand all");menu->Append(ID_TREE_CollapseAll,"Collapse all");return menu.release();}
++TMenu* TTreeView::CreateContextMenu(const olxstr& definition){if(TStrList(definition,';').IsEmpty())return nullptr;std::unique_ptr<TMenu> menu(CreateDefaultContextMenu());TMenu::CreateMenu(definition,ID_TREE_LAST,menu.get());return menu.release();}
++void TTreeView::ShowContextMenu(){AssertThread();if(!contextMenu||!IsEventAllowed())return;std::weak_ptr<void> weak=ObjectLifetime();contextMenu->Popup(this,[weak,this](int id){if(!weak.expired())ContextAction(id);});}
++void TTreeView::ContextAction(int id){
++  if(!IsEventAllowed())return;if(id==ID_TREE_ExpandAll){if(selected_)ExpandAllChildren({selected_,this});return;}if(id==ID_TREE_CollapseAll){if(selected_)CollapseAllChildren({selected_,this});return;}
++  if(contextMenu&&contextMenu->GetClientObject()){const auto command=contextMenu->GetClientObject()->macros.Find(id,EmptyString());if(!command.IsEmpty())OriginalTreeCommand(command);}
++}
++void TTreeView::OnNativeEvent(const NodeEvent& event){
++  if(event.kind==EventKind::Key){if(!event.key||!event.key->down||event.key->control||event.key->alt||event.key->meta)return;auto& key=*event.key;if(editing_&&key.logical!=LogicalKey::Escape)return;auto found=std::find(visible_.begin(),visible_.end(),selected_);size_t index=found==visible_.end()?0:static_cast<size_t>(found-visible_.begin());if(visible_.empty())return;
++    size_t target=selected_;switch(key.logical){case LogicalKey::Up:target=visible_[index?index-1:0];break;case LogicalKey::Down:target=visible_[found==visible_.end()?0:std::min(index+1,visible_.size()-1)];break;case LogicalKey::Home:target=visible_.front();break;case LogicalKey::End:target=visible_.back();break;
++      case LogicalKey::Left:if(selected_&&HasChildren({selected_,this})&&IsExpanded({selected_,this})){key.handled=true;Collapse({selected_,this});return;}if(selected_){target=nodes_.at(selected_)->parent;if((GetWindowStyle()&TreeHideRoot)&&target==root_)target=selected_;}break;
++      case LogicalKey::Right:if(selected_&&!nodes_.at(selected_)->children.empty()){key.handled=true;if(!IsExpanded({selected_,this})){Expand({selected_,this});return;}target=nodes_.at(selected_)->children.front();}break;
++      case LogicalKey::Enter:key.handled=true;OnDblClick.Execute(this);return;case LogicalKey::Space:if(selected_){key.handled=true;SetExpanded({selected_,this},!IsExpanded({selected_,this}));}return;case LogicalKey::Escape:if(editing_){key.handled=true;CancelLabelEdit();}return;default:return;}
++    key.handled=true;if(target&&target!=selected_)SelectItem({target,this});return;
++  }
++  if(!std::isfinite(event.value)||event.value<0||std::floor(event.value)!=event.value||event.value>=visible_.size())return;const size_t id=visible_[static_cast<size_t>(event.value)];
++  if(event.kind==EventKind::TreeToggle){SetExpanded({id,this},!IsExpanded({id,this}));return;}
++  if(event.kind==EventKind::TreeSelect){SelectItem({id,this});return;}
++  if(event.kind==EventKind::TreeActivate||event.kind==EventKind::TreeContext){std::weak_ptr<void> weak=ObjectLifetime();SelectItem({id,this});if(weak.expired())return;if(event.kind==EventKind::TreeActivate)OnDblClick.Execute(this);else ShowContextMenu();return;}
++  if(event.kind==EventKind::TreeEdit&&editing_==id){auto label=TUtf8::Decode(event.text.c_str(),event.text.size());auto old=nodes_.at(id)->label;const size_t edit=editing_;editing_=0;nodes_.at(id)->label=label;try{Sync();}catch(...){nodes_.at(id)->label=old;editing_=edit;throw;}olxstr data=olxstr(OnEdit.data).Replace("~label~",label);OnEdit.Execute(this,&data);}
++}
++
++#else
+ #include "treeviewext.h"
+ #include "frameext.h"
+ #include "bapp.h"
+@@ -323,3 +426,5 @@
+   return TMenu::CreateMenu(def, ID_TREE_LAST, menu.release());
+ }
+ //..............................................................................
++
++#endif // native ordinary navigation branch

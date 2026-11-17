@@ -1,0 +1,131 @@
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1971,6 +1971,13 @@
+     } catch (error) {
+       this.originalSelectionMessage = (error as Error).message || '原版选择命令失败';
+     }
++  }
++
++  private runOriginalDrawingStyle(macro: string, label: string): void {
++    if (!this.originalSelectionEnabled()) return;
++    this.runOriginalSelectionCommand(macro);
++    this.originalSelectionMessage = `原版绘图样式：${label}（${macro}）` + (this.commandPassed ? '已执行' : '未通过');
++    this.readOriginalDocumentStatus();
+   }
+ 
+   private openOriginalGenerateDialog(): void {
+@@ -3393,6 +3400,24 @@
+         Text('原版背景渐变对话框').fontSize(10).fontColor('#758579').layoutWeight(1)
+       }.width('100%')
+       Row({ space: 5 }) {
++        Button('球棍').id('olex2-original-style-pers').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled())
++          .onClick(() => this.runOriginalDrawingStyle('pers', '球棍'))
++        Button('椭球').id('olex2-original-style-telp').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled())
++          .onClick(() => this.runOriginalDrawingStyle('telp', '椭球'))
++        Button('空间填充').id('olex2-original-style-sfil').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled())
++          .onClick(() => this.runOriginalDrawingStyle('sfil', '空间填充'))
++        Button('棍状').id('olex2-original-style-bond').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled())
++          .onClick(() => this.runOriginalDrawingStyle('bond', '棍状'))
++        Button('各向同性').id('olex2-original-style-isot').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled())
++          .onClick(() => this.runOriginalDrawingStyle('isot', '各向同性'))
++        Text('原版绘图样式').fontSize(10).fontColor('#758579').layoutWeight(1)
++      }.width('100%')
++      Row({ space: 5 }) {
+         Button('图元…').id('olex2-original-primitive').height(25).fontSize(10)
+           .enabled(this.originalSelectionEnabled() && this.originalDocument.core.selectedObjectCount !== undefined &&
+             this.originalDocument.core.selectedObjectCount > 0 && !this.primitiveDialogOpen)
+--- a/native/application_runtime.cpp
++++ b/native/application_runtime.cpp
+@@ -25,6 +25,13 @@
+ #include <unistd.h>
+ namespace olex2::harmony {
+ namespace {
++// The desktop main form registers the original drawing-style macros. Harmony has
++// no wx form, so the command library registers the same names here.
++void HarmonyCommandMacroPers(TStrObjList&,const TParamList&,TMacroData&){TGXApp::GetInstance().AtomRad("pers");}
++void HarmonyCommandMacroSfil(TStrObjList&,const TParamList&,TMacroData&){TGXApp::GetInstance().AtomRad("sfil");}
++void HarmonyCommandMacroIsot(TStrObjList&,const TParamList&,TMacroData&){TGXApp::GetInstance().AtomRad("isot");}
++void HarmonyCommandMacroBond(TStrObjList&,const TParamList&,TMacroData&){TGXApp::GetInstance().AtomRad("bond");}
++void HarmonyCommandMacroTelp(TStrObjList&,const TParamList&,TMacroData&){TXAtom::Settings& settings=TXAtom::GetSettings(TGXApp::GetInstance().GetRenderer());settings.SetDS(adsEllipsoid);}
+ std::string Utf8(const olxstr& s){return TUtf8::Encode(s).c_str();}
+ olxstr Text(const std::string& s){return TUtf8::Decode(s.c_str());}
+ std::string Read(const std::string& path){std::ifstream f(path,std::ios::binary);if(!f)throw std::runtime_error("Cannot read application runtime file");return {std::istreambuf_iterator<char>(f),{}};}
+@@ -223,6 +230,20 @@
+     }
+     if(replicated==0)throw std::runtime_error("Original application macro library is empty");
+     library.AttachLibrary(CreateHarmonyMainFormLibrary());
++    // The application library may already provide some of these names; keep the
++    // original registration and only add the missing drawing styles.
++    struct StyleMacro { void (*fn)(TStrObjList&,const TParamList&,TMacroData&); const char* name; const char* description; };
++    const StyleMacro styleMacros[] = {
++      {&HarmonyCommandMacroPers,"pers","Draw atoms with the original default radii (balls and sticks)"},
++      {&HarmonyCommandMacroSfil,"sfil","Draw atoms as space filling spheres"},
++      {&HarmonyCommandMacroIsot,"isot","Draw atoms with isotropic thermal displacement radii"},
++      {&HarmonyCommandMacroBond,"bond","Draw atoms at bond radii"},
++      {&HarmonyCommandMacroTelp,"telp","Draw anisotropic atoms as thermal ellipsoids"},
++    };
++    for(const auto& styleMacro:styleMacros){
++      try{library.Register(new esdl::TStaticMacro(styleMacro.fn,styleMacro.name,EmptyString(),fpNone,styleMacro.description));}
++      catch(const TExceptionBase&){/* the original application macro already exists */}
++    }
+     olxstr text=Text(input);TMacroData error;error.SetQuiet(true);
+     error.SetLocation("HarmonyPC original command");
+     r.passed=processor.processMacroEx(text,error,"HarmonyPC original command",true);
+--- a/upstream/olex/xpprocs.cpp
++++ b/upstream/olex/xpprocs.cpp
+@@ -18,6 +18,8 @@
+ #include "os_util.h"
+ #include "bapp.h"
+ #include "gldefs.h"
++#include "gxapp.h"
++#include "xatom.h"
+ #include <cstdlib>
+ 
+ extern char** environ;
+@@ -45,6 +47,22 @@
+   else {
+     result.SetRetVal(olx_getenv(params[0]));
+   }
++}
++void HarmonyMacPers(TStrObjList&, const TParamList&, TMacroData&) {
++  TGXApp::GetInstance().AtomRad("pers");
++}
++void HarmonyMacSfil(TStrObjList&, const TParamList&, TMacroData&) {
++  TGXApp::GetInstance().AtomRad("sfil");
++}
++void HarmonyMacIsot(TStrObjList&, const TParamList&, TMacroData&) {
++  TGXApp::GetInstance().AtomRad("isot");
++}
++void HarmonyMacBond(TStrObjList&, const TParamList&, TMacroData&) {
++  TGXApp::GetInstance().AtomRad("bond");
++}
++void HarmonyMacTelp(TStrObjList&, const TParamList&, TMacroData&) {
++  TXAtom::Settings& settings = TXAtom::GetSettings(TGXApp::GetInstance().GetRenderer());
++  settings.SetDS(adsEllipsoid);
+ }
+ void HarmonyFunRGB(const TStrObjList& params, TMacroData& result) {
+   if (params.Count() == 3) {
+@@ -68,7 +86,17 @@
+   library.Register(new esdl::TStaticFunction(&HarmonyFunStrcmp, "Strcmp", fpTwo));
+   library.Register(new esdl::TStaticFunction(&HarmonyFunGetEnv, "GetEnv", fpNone | fpOne));
+   library.Register(new esdl::TStaticFunction(&HarmonyFunRGB, "RGB", fpThree | fpFour));
+-  return 6;
++  library.Register(new esdl::TStaticMacro(&HarmonyMacPers, "pers", EmptyString(), fpNone,
++    "Draw atoms with the original default radii (balls and sticks)"));
++  library.Register(new esdl::TStaticMacro(&HarmonyMacSfil, "sfil", EmptyString(), fpNone,
++    "Draw atoms as space filling spheres"));
++  library.Register(new esdl::TStaticMacro(&HarmonyMacIsot, "isot", EmptyString(), fpNone,
++    "Draw atoms with isotropic thermal displacement radii"));
++  library.Register(new esdl::TStaticMacro(&HarmonyMacBond, "bond", EmptyString(), fpNone,
++    "Draw atoms at bond radii"));
++  library.Register(new esdl::TStaticMacro(&HarmonyMacTelp, "telp", EmptyString(), fpNone,
++    "Draw anisotropic atoms as thermal ellipsoids"));
++  return 11;
+ }
+ }
+ #else

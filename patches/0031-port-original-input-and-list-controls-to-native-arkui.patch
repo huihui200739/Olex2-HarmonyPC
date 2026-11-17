@@ -1,0 +1,313 @@
+diff --git a/olex/ctrls/spinctrlext.h b/olex/ctrls/spinctrlext.h
+--- a/olex/ctrls/spinctrlext.h
++++ b/olex/ctrls/spinctrlext.h
+@@ -7,6 +7,27 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#pragma once
++#include "olxctrlbase.h"
++#include "native_editable.h"
++namespace ctrl_ext {
++class TSpinCtrl:public olex2::harmony::ui::NativeSpinControl,public AOlxCtrl {
++  int Value;
++  void NotifyChanged();
++protected:
++  olxstr Data;
++  void OnNativeEvent(const olex2::harmony::ui::NodeEvent&)override;
++public:
++  TSpinCtrl(olex2::harmony::ui::NodeBackend&,olex2::harmony::ui::Widget*,int id=-1,const olxstr& value=EmptyString(),olex2::harmony::ui::Point={},olex2::harmony::ui::Size={},long style=olex2::harmony::ui::SpinArrowKeys|olex2::harmony::ui::InputAlignRight);
++  void SetValue(int value){NativeSpinControl::SetValue(value);Value=GetValue();}
++  void SetRange(int minimum,int maximum){NativeSpinControl::SetRange(minimum,maximum);Value=GetValue();}
++  DefPropC(olxstr,Data)
++  AOlxCtrl::ActionQueue& OnChange;
++};
++}
++
++#else
+ #ifndef __olx_ctrl_spin_H
+ #define __olx_ctrl_spin_H
+ #include "olxctrlbase.h"
+@@ -43,3 +64,5 @@
+   };
+ }; // end namespace ctrl_ext
+ #endif
++
++#endif // native inputs / original wx
+diff --git a/olex/ctrls/spinctrlext.cpp b/olex/ctrls/spinctrlext.cpp
+--- a/olex/ctrls/spinctrlext.cpp
++++ b/olex/ctrls/spinctrlext.cpp
+@@ -7,6 +7,23 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "spinctrlext.h"
++using namespace ctrl_ext;
++using namespace olex2::harmony::ui;
++TSpinCtrl::TSpinCtrl(NodeBackend& backend,Widget* parent,int id,const olxstr& value,Point pos,Size size,long style)
++ :NativeSpinControl(backend,parent,id,value,pos,size,style),AOlxCtrl(this),Value(GetValue()),OnChange(AOlxCtrl::ActionQueue::New(Actions,evt_change_id)){}
++void TSpinCtrl::NotifyChanged(){int next=GetValue();if(next==Value)return;Value=next;OnChange.Execute(this);}
++void TSpinCtrl::OnNativeEvent(const NodeEvent& event){
++  if(event.kind==EventKind::TextChange){if(ApplyTextEvent(event))NotifyChanged();}
++  else if(event.kind==EventKind::Submit||event.kind==EventKind::Blur){CommitText();NotifyChanged();}
++  else if(event.kind==EventKind::SpinStep){Step(event.value>0?1:-1);NotifyChanged();}
++  else if(event.kind==EventKind::Key&&event.key&&event.key->down&&(GetWindowStyle()&SpinArrowKeys)&&!event.key->control&&!event.key->alt&&!event.key->meta&&!event.key->shift){
++    if(event.key->logical==LogicalKey::Up||event.key->logical==LogicalKey::Down){event.key->handled=true;Step(event.key->logical==LogicalKey::Up?1:-1);NotifyChanged();}
++  }
++}
++
++#else
+ #include "spinctrlext.h"
+ #include "frameext.h"
+ #include "olxvar.h"
+@@ -68,3 +85,5 @@
+   event.Skip(true);
+ }
+ //..............................................................................
++
++#endif // native inputs / original wx
+diff --git a/olex/ctrls/listboxext.h b/olex/ctrls/listboxext.h
+--- a/olex/ctrls/listboxext.h
++++ b/olex/ctrls/listboxext.h
+@@ -7,6 +7,30 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#pragma once
++#include "olxctrlbase.h"
++#include "itemlist.h"
++#include "native_choice.h"
++namespace ctrl_ext {
++class TListBox:public TItemList<olex2::harmony::ui::NativeChoiceList>,public AOlxCtrl {
++  olxstr Data;
++protected:
++  void OnNativeEvent(const olex2::harmony::ui::NodeEvent&)override;
++public:
++  TListBox(olex2::harmony::ui::NodeBackend&,olex2::harmony::ui::Widget*,int id=-1,olex2::harmony::ui::Point={},olex2::harmony::ui::Size={},long style=0);
++  ~TListBox(){_Clear();}
++  DefPropC(olxstr,Data)
++  void Clear(){_Clear();NativeChoiceList::Clear();}
++  olxstr GetValue(size_t i)const{auto value=_GetText(i);return value.a?value.b:GetItem(i);}
++  bool SetValue(const olxstr& value){auto found=_SetText(value);SetSelection(found.a==InvalidIndex?-1:static_cast<int>(found.a));return found.a!=InvalidIndex;}
++  olxstr GetValue()const{int i=GetSelection();return i<0?EmptyString():_GetText(static_cast<size_t>(i)).b;}
++  AOlxCtrl::ActionQueue& OnDblClick;
++  AOlxCtrl::ActionQueue& OnSelect;
++};
++}
++
++#else
+ #ifndef __olx_ctrl_listbox_H
+ #define __olx_ctrl_listbox_H
+ #include "olxctrlbase.h"
+@@ -62,3 +86,5 @@
+   };
+ }; // end namespace ctrl_ext
+ #endif
++
++#endif // native inputs / original wx
+diff --git a/olex/ctrls/listboxext.cpp b/olex/ctrls/listboxext.cpp
+--- a/olex/ctrls/listboxext.cpp
++++ b/olex/ctrls/listboxext.cpp
+@@ -7,6 +7,29 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "listboxext.h"
++#include "olxvar.h"
++using namespace ctrl_ext;
++using namespace olex2::harmony::ui;
++TListBox::TListBox(NodeBackend& backend,Widget* parent,int id,Point pos,Size size,long style)
++ :TItemList<NativeChoiceList>(backend,parent,id,pos,Size{size.width<0?240:size.width,size.height<0?160:size.height},style,NodeKind::ListBox),AOlxCtrl(this),OnDblClick(AOlxCtrl::ActionQueue::New(Actions,evt_on_dbl_click_id)),OnSelect(AOlxCtrl::ActionQueue::New(Actions,evt_on_select_id)){
++  Listen({EventKind::ChoiceChange,EventKind::DoubleClick,EventKind::Key});
++}
++void TListBox::OnNativeEvent(const NodeEvent& event){
++  if(event.kind==EventKind::ChoiceChange||event.kind==EventKind::DoubleClick){
++    if(!ApplyUserSelection(event.value))return;SetSelection(GetSelection());
++    if(event.kind==EventKind::DoubleClick){OnDblClick.Execute(this);return;}
++    if(!Data.IsEmpty())TOlxVars::SetVar(Data,GetValue());OnSelect.Execute(this);
++  }else if(event.kind==EventKind::Key&&event.key&&event.key->down&&!event.key->control&&!event.key->alt&&!event.key->meta&&!event.key->shift){
++    int next=GetSelection(),last=static_cast<int>(GetCount())-1;
++    switch(event.key->logical){case LogicalKey::Up:next=next<0?0:next-1;break;case LogicalKey::Down:next=next<0?0:next+1;break;case LogicalKey::Home:next=0;break;case LogicalKey::End:next=last;break;default:return;}
++    event.key->handled=true;if(last<0)return;if(next<0)next=0;if(next>last)next=last;if(next==GetSelection())return;
++    OnNativeEvent(NodeEvent{EventKind::ChoiceChange,static_cast<double>(next)});
++  }
++}
++
++#else
+ #include "listboxext.h"
+ #include "frameext.h"
+ #include "olxvar.h"
+@@ -36,3 +59,5 @@
+ }
+ //..............................................................................
+ 
++
++#endif // native inputs / original wx
+diff --git a/olex/ctrls/comboext.h b/olex/ctrls/comboext.h
+--- a/olex/ctrls/comboext.h
++++ b/olex/ctrls/comboext.h
+@@ -7,6 +7,35 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#pragma once
++#include "olxctrlbase.h"
++#include "itemlist.h"
++#include "native_editable.h"
++namespace ctrl_ext {
++class TComboBox:public TItemList<olex2::harmony::ui::NativeComboList>,public AOlxCtrl {
++  olxstr Data,StrValue;
++  int entered_counter=0;
++  bool OnChangeAlways=false;
++protected:
++  void OnNativeEvent(const olex2::harmony::ui::NodeEvent&)override;
++public:
++  TComboBox(olex2::harmony::ui::NodeBackend&,olex2::harmony::ui::Widget*,int id=-1,const olxstr& value=EmptyString(),olex2::harmony::ui::Point={},olex2::harmony::ui::Size={},long style=0);
++  ~TComboBox(){_Clear();}
++  void Clear();
++  bool HasValue()const{return !(IsReadOnly()&&GetSelection()==-1);}
++  olxstr GetValue()const{return HasValue()?NativeComboList::GetValue():EmptyString();}
++  olxstr GetText()const;
++  void SetText(const olxstr&);
++  DefPropC(olxstr,Data)
++  DefPropBIsSet(OnChangeAlways)
++  void HandleOnLeave();
++  void HandleOnEnter();
++  AOlxCtrl::ActionQueue &OnChange,&OnLeave,&OnEnter,&OnReturn;
++};
++}
++
++#else
+ #ifndef __olx_ctrl_combo_H
+ #define __olx_ctrl_combo_H
+ #include "olxctrlbase.h"
+@@ -60,3 +89,5 @@
+   };
+ };  // end namespace ctrl_ext
+ #endif
++
++#endif // native inputs / original wx
+diff --git a/olex/ctrls/comboext.cpp b/olex/ctrls/comboext.cpp
+--- a/olex/ctrls/comboext.cpp
++++ b/olex/ctrls/comboext.cpp
+@@ -7,6 +7,42 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "comboext.h"
++#include "olxvar.h"
++using namespace ctrl_ext;
++using namespace olex2::harmony::ui;
++TComboBox::TComboBox(NodeBackend& backend,Widget* parent,int id,const olxstr& value,Point pos,Size size,long style)
++ :TItemList<NativeComboList>(backend,parent,id,value,pos,size,style),AOlxCtrl(this),StrValue(value),OnChange(AOlxCtrl::ActionQueue::New(Actions,evt_change_id)),OnLeave(AOlxCtrl::ActionQueue::New(Actions,evt_on_mouse_leave_id)),OnEnter(AOlxCtrl::ActionQueue::New(Actions,evt_on_mouse_enter_id)),OnReturn(AOlxCtrl::ActionQueue::New(Actions,evt_on_return_id)){OnLeave.SetEnabled(false);}
++void TComboBox::SetText(const olxstr& text){
++  auto found=_SetText(text);
++  if(!IsReadOnly()||found.a!=InvalidIndex){StrValue=found.b;if(found.a!=InvalidIndex)SetSelection(static_cast<int>(found.a));else{NativeChoiceList::SetSelection(-1);SetValue(found.b);}}
++  else if(!text.IsEmpty()){StrValue=EmptyString();SetSelection(-1);}
++}
++void TComboBox::Clear(){StrValue=EmptyString();_Clear();NativeComboList::Clear();}
++olxstr TComboBox::GetText()const{int selected=GetSelection();if(selected<0)return IsReadOnly()?EmptyString():NativeComboList::GetValue();auto value=_GetText(static_cast<size_t>(selected));return value.a?value.b:GetValue();}
++void TComboBox::HandleOnLeave(){
++  if(!OnLeave.IsEnabled())return;
++  auto value=GetValue();if(value!=StrValue){StrValue=value;OnChange.Execute(this);}OnLeave.Execute(this);OnLeave.SetEnabled(false);OnEnter.SetEnabled(true);
++}
++void TComboBox::HandleOnEnter(){if(OnEnter.IsEnabled()){OnEnter.Execute(this);OnEnter.SetEnabled(false);OnLeave.SetEnabled(true);}}
++void TComboBox::OnNativeEvent(const NodeEvent& event){
++  if(event.kind==EventKind::TextChange){ApplyTextEvent(event);}
++  else if(event.kind==EventKind::ChoiceChange){
++    if(!ApplySelectionEvent(event.value))return;auto value=GetValue();bool changed=IsOnChangeAlways()||value!=StrValue;StrValue=value;
++    Backend().CloseOptions(PopupHandle());if(changed){if(!Data.IsEmpty())TOlxVars::SetVar(Data,GetText());OnChange.Execute(this);}
++  }else if(event.kind==EventKind::Submit){if(!Data.IsEmpty())TOlxVars::SetVar(Data,GetText());OnReturn.Execute(this);}
++  else if(event.kind==EventKind::Focus){if(++entered_counter==1)HandleOnEnter();}
++  else if(event.kind==EventKind::Blur){if(entered_counter>0&&--entered_counter==0)HandleOnLeave();}
++  else if(event.kind==EventKind::Key&&event.key&&event.key->down){
++    if(event.key->logical==LogicalKey::Down&&event.key->alt&&!event.key->control&&!event.key->meta){event.key->handled=true;Backend().OpenOptions(PopupHandle());}
++    else if(IsReadOnly()&&!event.key->control&&!event.key->alt&&!event.key->meta&&!event.key->shift&&(event.key->logical==LogicalKey::Up||event.key->logical==LogicalKey::Down)){
++      event.key->handled=true;if(IsEmpty())return;int next=GetSelection();if(next<0)next=0;else next+=event.key->logical==LogicalKey::Up?-1:1;if(next<0)next=0;if(next>=static_cast<int>(GetCount()))next=static_cast<int>(GetCount())-1;if(next!=GetSelection())OnNativeEvent(NodeEvent{EventKind::ChoiceChange,static_cast<double>(next)});
++    }
++  }
++}
++
++#else
+ #include "comboext.h"
+ #include "frameext.h"
+ #include "olxvar.h"
+@@ -125,3 +161,5 @@
+   }
+ }
+ //..............................................................................
++
++#endif // native inputs / original wx
+diff --git a/olex/ctrls/texteditext.h b/olex/ctrls/texteditext.h
+--- a/olex/ctrls/texteditext.h
++++ b/olex/ctrls/texteditext.h
+@@ -7,6 +7,25 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#pragma once
++#include "olxctrlbase.h"
++#include "native_editable.h"
++namespace ctrl_ext {
++class TTextEdit:public olex2::harmony::ui::NativeTextControl,public AOlxCtrl {
++protected:
++  olxstr Data,StrValue;
++  void OnNativeEvent(const olex2::harmony::ui::NodeEvent&)override;
++public:
++  TTextEdit(olex2::harmony::ui::NodeBackend&,olex2::harmony::ui::Widget*,int id=-1,const olxstr& value=EmptyString(),olex2::harmony::ui::Point={},olex2::harmony::ui::Size={},long style=0);
++  olxstr GetText()const{return GetValue();}
++  void SetText(const olxstr& value){NativeTextControl::SetValue(value);StrValue=value;}
++  DefPropC(olxstr,Data)
++  AOlxCtrl::ActionQueue &OnChange,&OnReturn,&OnLeave,&OnEnter,&OnClick,&OnChar,&OnKeyDown;
++};
++}
++
++#else
+ #ifndef __olx_ctrl_textedit_H
+ #define __olx_ctrl_textedit_H
+ #include "olxctrlbase.h"
+@@ -47,3 +66,5 @@
+   };
+ }; // end namespace ctrl_ext
+ #endif
++
++#endif // native inputs / original wx
+diff --git a/olex/ctrls/texteditext.cpp b/olex/ctrls/texteditext.cpp
+--- a/olex/ctrls/texteditext.cpp
++++ b/olex/ctrls/texteditext.cpp
+@@ -7,6 +7,22 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "texteditext.h"
++using namespace ctrl_ext;
++using namespace olex2::harmony::ui;
++TTextEdit::TTextEdit(NodeBackend& backend,Widget* parent,int id,const olxstr& value,Point pos,Size size,long style)
++ :NativeTextControl(backend,parent,id,value,pos,size,style),AOlxCtrl(this),StrValue(value),OnChange(AOlxCtrl::ActionQueue::New(Actions,evt_change_id)),OnReturn(AOlxCtrl::ActionQueue::New(Actions,evt_on_return_id)),OnLeave(AOlxCtrl::ActionQueue::New(Actions,evt_on_mouse_leave_id)),OnEnter(AOlxCtrl::ActionQueue::New(Actions,evt_on_mouse_enter_id)),OnClick(AOlxCtrl::ActionQueue::New(Actions,evt_on_click_id)),OnChar(AOlxCtrl::ActionQueue::New(Actions,evt_on_char_id)),OnKeyDown(AOlxCtrl::ActionQueue::New(Actions,evt_on_key_down_id)){}
++void TTextEdit::OnNativeEvent(const NodeEvent& event){
++  if(event.kind==EventKind::TextChange){if(ApplyTextEvent(event))OnChange.Execute(this);}
++  else if(event.kind==EventKind::Submit){if(!IsMultiLine())OnReturn.Execute(this);}
++  else if(event.kind==EventKind::DoubleClick){OnClick.Execute(this);}
++  else if(event.kind==EventKind::Focus){OnEnter.Execute(this);}
++  else if(event.kind==EventKind::Blur){auto value=GetText();if(value!=StrValue){StrValue=value;OnChange.Execute(this);}OnLeave.Execute(this);}
++  else if(event.kind==EventKind::Key&&event.key&&event.key->down){TKeyEvent payload(*event.key);OnKeyDown.Execute(this,&payload);if(!event.key->handled&&event.key->unicode&&!event.key->control&&!event.key->alt&&!event.key->meta)OnChar.Execute(this,&payload);}
++}
++
++#else
+ #include "texteditext.h"
+ #include "frameext.h"
+ #include "olxvar.h"
+@@ -81,3 +97,5 @@
+   OnEnter.Execute(this);
+ }
+ //..............................................................................
++
++#endif // native inputs / original wx

@@ -1,0 +1,32 @@
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -230,6 +230,7 @@
+   private materialDialogOpen: boolean = false;
+   private sceneDialogTimer: number = -1;
+   private sceneDialogOpen: boolean = false;
++  private originalTextApplyRebindPending: boolean = false;
+   private gradientDialogTimer: number = -1;
+   private gradientDialogOpen: boolean = false;
+   private primitiveDialogTimer: number = -1;
+@@ -1509,6 +1510,7 @@
+       this.originalTextEditorMessage = '修改已由原版载入器应用到当前文档，尚未保存；另存为时格式可能归一化。';
+       this.originalDocumentMessage = this.originalTextEditorMessage;
+       this.originalDocumentSessionOperation.state = 'passed';
++      this.originalTextApplyRebindPending = true;
+     } catch (error) {
+       this.failOriginalSessionOperation(error as Error);
+       this.originalTextEditorMessage = (error as Error).message || '修改未确认应用；草稿保留。';
+@@ -1520,6 +1522,13 @@
+       this.updateOriginalTextEditorState(); this.originalDocumentBusy = false;
+       this.applicationRuntime = nativeBridge.getApplicationRuntimeStatus();
+       this.originalLog = nativeBridge.getOriginalLogs(); this.refreshGraphics(); this.syncOriginalViewportInput();
++      if (this.originalTextApplyRebindPending) {
++        // The native revision advanced after the apply; rebind the presented
++        // identity so the document toolbar is not left disabled.
++        this.originalTextApplyRebindPending = false;
++        this.rebindPresentedSessionAfterModelChange();
++        this.readOriginalDocumentStatus();
++      }
+     }
+   }
+ 

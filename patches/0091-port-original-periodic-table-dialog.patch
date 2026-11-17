@@ -1,0 +1,230 @@
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -328,6 +328,51 @@
+   Property(env,out,"error",String(env,readError));
+   return out;
+ }
++struct PeriodicTableState {
++  std::mutex mutex;void* handle=nullptr;bool done=false;int result=0;std::string symbol;
++};
++PeriodicTableState& PeriodicTable(){static auto* state=new PeriodicTableState;return *state;}
++int PeriodicTableCompleted(void*,int result,const char*){
++  auto& state=PeriodicTable();std::lock_guard<std::mutex> lock(state.mutex);
++  state.done=true;state.result=result;return 0;
++}
++napi_value OpenOriginalPeriodicTable(napi_env env,napi_callback_info){
++  napi_value out;napi_create_object(env,&out);
++  auto& owner=Runtime();std::lock_guard<std::mutex> ownerLock(owner.mutex);
++  auto& state=PeriodicTable();
++  {
++    std::lock_guard<std::mutex> lock(state.mutex);
++    if(!owner.runtime){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,"Original application runtime is not initialized"));return out;}
++    if(state.handle){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,"A periodic table is already open"));return out;}
++    char error[512]={};
++    void* handle=olex2_native_periodic_table_create(env,PeriodicTableCompleted,nullptr,error,sizeof(error));
++    if(!handle){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,error[0]?error:"Original periodic table could not be created"));return out;}
++    state.handle=handle;state.done=false;state.result=0;state.symbol.clear();
++  }
++  char error[512]={};
++  if(olex2_native_dialog_show(state.handle,true,error,sizeof(error))!=0){
++    std::lock_guard<std::mutex> lock(state.mutex);
++    char releaseError[512]={};olex2_native_dialog_release(state.handle,releaseError,sizeof(releaseError));state.handle=nullptr;
++    Boolean(env,out,"opened",false);Property(env,out,"error",String(env,error[0]?error:"Original periodic table could not be shown"));return out;
++  }
++  Boolean(env,out,"opened",true);Property(env,out,"error",String(env,""));return out;
++}
++napi_value PollOriginalPeriodicTable(napi_env env,napi_callback_info){
++  napi_value out;napi_create_object(env,&out);
++  auto& state=PeriodicTable();std::lock_guard<std::mutex> lock(state.mutex);
++  if(!state.handle){Property(env,out,"state",String(env,"none"));Property(env,out,"symbol",String(env,""));Property(env,out,"error",String(env,""));return out;}
++  if(!state.done){Property(env,out,"state",String(env,"open"));Property(env,out,"symbol",String(env,""));Property(env,out,"error",String(env,""));return out;}
++  char symbol[32]={};char error[512]={};
++  const int rc=olex2_native_periodic_table_symbol(state.handle,symbol,sizeof(symbol),error,sizeof(error));
++  std::string readError=rc!=0?(error[0]?error:"Original periodic table selection could not be read"):"";
++  char releaseError[512]={};olex2_native_dialog_release(state.handle,releaseError,sizeof(releaseError));
++  state.handle=nullptr;state.done=false;
++  Property(env,out,"state",String(env,"done"));
++  Property(env,out,"symbol",String(env,rc==0?symbol:""));
++  Boolean(env,out,"accepted",rc==0&&symbol[0]!='\0');
++  Property(env,out,"error",String(env,readError));
++  return out;
++}
+ napi_value OriginalLogsObject(napi_env env,const olex2::harmony::OriginalLogSnapshot& s,const std::string& error){
+   napi_value out,entries;napi_create_object(env,&out);napi_create_array_with_length(env,s.entries.size(),&entries);
+   Boolean(env,out,"attached",s.attached);Number(env,out,"posted",s.posted);Number(env,out,"dropped",s.dropped);Number(env,out,"truncated",s.truncated);Number(env,out,"captureFailures",s.captureFailures);Number(env,out,"clearCount",s.clearCount);Number(env,out,"clearedEntries",s.clearedEntries);Number(env,out,"entryCount",s.entries.size());Number(env,out,"retainedBytes",s.retainedBytes);
+@@ -624,6 +669,8 @@
+     {"executeOriginalCommand",nullptr,ExecuteOriginalCommand,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"openOriginalGenerateDialog",nullptr,OpenOriginalGenerateDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"pollOriginalGenerateDialog",nullptr,PollOriginalGenerateDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
++    {"openOriginalPeriodicTable",nullptr,OpenOriginalPeriodicTable,nullptr,nullptr,nullptr,napi_default,nullptr},
++    {"pollOriginalPeriodicTable",nullptr,PollOriginalPeriodicTable,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"getOriginalLogs",nullptr,GetOriginalLogs,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"clearOriginalLogs",nullptr,ClearOriginalLogs,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"runCoreCatalog",nullptr,RunCoreCatalog,nullptr,nullptr,nullptr,napi_default,nullptr},
+--- a/app/entry/src/main/cpp/types/libolex2native/index.d.ts
++++ b/app/entry/src/main/cpp/types/libolex2native/index.d.ts
+@@ -77,6 +77,16 @@
+ // command with the returned A/B/C ranges.
+ export const openOriginalGenerateDialog: () => { opened: boolean; error: string };
+ export const pollOriginalGenerateDialog: () => OriginalGenerateDialogReport;
++export interface OriginalPeriodicTableReport {
++  state: 'none' | 'open' | 'done';
++  accepted?: boolean;
++  symbol?: string;
++  error: string;
++}
++// Original periodic table (atom type "More..."): selecting an element ends the
++// dialog and returns its symbol.
++export const openOriginalPeriodicTable: () => { opened: boolean; error: string };
++export const pollOriginalPeriodicTable: () => OriginalPeriodicTableReport;
+ 
+ export interface ApplicationOptionsTransferReport {
+   passed: boolean; optionsChanged: boolean; importedOptions: number;
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1,4 +1,4 @@
+-import nativeBridge, { GraphicsStatus, UtilityReport, CheckResult, ApplicationRuntimeStatus, OriginalLogSnapshot, CoreCatalogReport, PythonRuntimeStatus, OriginalLinePathGpuProbe, PythonExecutionReport, ApplicationFunctionReport, OriginalCommandReport, OriginalGenerateDialogReport, DesktopCommandReport } from 'libolex2native.so';
++import nativeBridge, { GraphicsStatus, UtilityReport, CheckResult, ApplicationRuntimeStatus, OriginalLogSnapshot, CoreCatalogReport, PythonRuntimeStatus, OriginalLinePathGpuProbe, PythonExecutionReport, ApplicationFunctionReport, OriginalCommandReport, OriginalGenerateDialogReport, OriginalPeriodicTableReport, DesktopCommandReport } from 'libolex2native.so';
+ import { fileIo } from '@kit.CoreFileKit';
+ import { common } from '@kit.AbilityKit';
+ import { OptionsDocumentTransfer, OptionsDocumentStatus, OptionsDocumentBackend, emptyOptionsDocumentStatus } from '../model/OptionsDocumentTransfer';
+@@ -224,6 +224,8 @@
+   @State private commandText: string = 'pc.help';
+   private generateDialogTimer: number = -1;
+   private generateDialogOpen: boolean = false;
++  private periodicTableTimer: number = -1;
++  private periodicTableOpen: boolean = false;
+   @State private commandMessage: string = '原版解析器已接入视图命令；完整命令库未接通';
+   @State private commandError: string = '';
+   @State private commandPassed: boolean = false;
+@@ -395,6 +397,8 @@
+     this.timer = -1;
+     if (this.generateDialogTimer >= 0) clearInterval(this.generateDialogTimer);
+     this.generateDialogTimer = -1;
++    if (this.periodicTableTimer >= 0) clearInterval(this.periodicTableTimer);
++    this.periodicTableTimer = -1;
+   }
+ 
+   private submitCommand(): void {
+@@ -1911,9 +1915,49 @@
+       this.refreshGraphics();
+     } catch (error) {
+       this.originalSelectionMessage = (error as Error).message || '原版生成选项轮询失败';
++    }
++  }
++
++  private openOriginalPeriodicTable(): void {
++    if (this.periodicTableOpen || !this.originalDocumentActive()) return;
++    try {
++      const opened = nativeBridge.openOriginalPeriodicTable();
++      if (!opened.opened) {
++        this.originalSelectionMessage = opened.error || '原版周期表未打开';
++        return;
++      }
++      this.periodicTableOpen = true;
++      this.originalSelectionMessage = '已打开原版周期表；点击元素完成选择';
++      if (this.periodicTableTimer < 0) {
++        this.periodicTableTimer = setInterval(() => { this.pollOriginalPeriodicTable(); }, 400);
++      }
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版周期表调用失败';
+     }
+   }
+ 
++  private pollOriginalPeriodicTable(): void {
++    if (!this.periodicTableOpen) return;
++    try {
++      const report: OriginalPeriodicTableReport = nativeBridge.pollOriginalPeriodicTable();
++      if (report.state === 'open') return;
++      if (this.periodicTableTimer >= 0) clearInterval(this.periodicTableTimer);
++      this.periodicTableTimer = -1;
++      this.periodicTableOpen = false;
++      if (report.state !== 'done') return;
++      const symbol: string = report.symbol === undefined ? '' : report.symbol;
++      if (!report.accepted || symbol.length === 0) {
++        this.originalSelectionMessage = '已取消原版周期表选择';
++        return;
++      }
++      // The original table ends on the element click; apply the same Name
++      // command the quick element menu uses.
++      this.runOriginalSelectionCommand(`name sel ${symbol}`);
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版周期表轮询失败';
++    }
++  }
++
+   private executeDesktopCommand(): void {
+     const input: string = this.commandText;
+     const sequence: number = this.commandStatus.sequence + 1;
+@@ -2944,7 +2988,8 @@
+             { value: 'O', action: () => this.runOriginalSelectionCommand('name sel O') },
+             { value: 'F', action: () => this.runOriginalSelectionCommand('name sel F') },
+             { value: 'H', action: () => this.runOriginalSelectionCommand('name sel H') },
+-            { value: 'S', action: () => this.runOriginalSelectionCommand('name sel S') }
++            { value: 'S', action: () => this.runOriginalSelectionCommand('name sel S') },
++            { value: '更多…', action: () => this.openOriginalPeriodicTable() }
+           ])
+         Text('原版 Name 命令 · 修改当前选择的元素类型').fontSize(10).fontColor('#758579').layoutWeight(1)
+       }.width('100%')
+--- a/cmake/original_renderer.exports
++++ b/cmake/original_renderer.exports
+@@ -6,6 +6,8 @@
+   olex2_native_update_options_create;
+   olex2_native_generate_create;
+   olex2_native_generate_values;
++  olex2_native_periodic_table_create;
++  olex2_native_periodic_table_symbol;
+   olex2_native_options_mount;
+   olex2_native_options_update;
+   olex2_native_options_unmount;
+--- a/native/native_dialog_factory.cpp
++++ b/native/native_dialog_factory.cpp
+@@ -1,5 +1,6 @@
+ #include "updateoptions.h"
+ #include "dgenopt.h"
++#include "ptable.h"
+ #include "native_dialog_factory.h"
+ #include "ctrls.h"
+ #include "msgbox.h"
+@@ -69,6 +70,28 @@
+   }catch(const std::exception& e){Error(error,capacity,e.what());}catch(...){Error(error,capacity,"Generate values read failed");}
+   return -1;
+ }
++extern "C" void* olex2_native_periodic_table_create(void* environment,Olex2NativeDialogCompleted completed,void* context,char* error,std::size_t capacity){
++  try{
++    Error(error,capacity,"");if(!environment)throw std::invalid_argument("Periodic table requires its UI environment");
++    auto owner=std::make_shared<Owner>();owner->scheduler=CreateNapiUiScheduler(environment);owner->backend=CreateArkUiDialogBackend(owner->scheduler);owner->completed=completed;owner->context=context;
++    owner->dialog=std::make_unique<TPTableDlg>(ArkUiBackend(),owner->backend,owner->scheduler,nullptr,Positions());
++    auto& registry=Owners();std::lock_guard<std::mutex> lock(registry.mutex);
++    if(registry.next==std::numeric_limits<uintptr_t>::max())throw std::overflow_error("Native dialog handles exhausted");
++    auto key=reinterpret_cast<void*>(++registry.next);registry.owners.emplace(key,std::move(owner));return key;
++  }catch(const std::exception& e){Error(error,capacity,e.what());}catch(...){Error(error,capacity,"Original periodic table failed");}
++  return nullptr;
++}
++extern "C" int olex2_native_periodic_table_symbol(void* key,char* symbol,std::size_t capacity,char* error,std::size_t errorCapacity){
++  try{
++    Error(error,errorCapacity,"");if(!symbol||capacity==0)throw std::invalid_argument("Periodic table symbol destination is absent");
++    symbol[0]='\0';auto owner=Find(key);auto* dialog=dynamic_cast<TPTableDlg*>(owner->dialog.get());
++    if(!dialog)throw std::invalid_argument("Native dialog is not a periodic table");
++    cm_Element* element=dialog->GetSelected();if(!element)return 0;
++    const std::string text(element->symbol.c_str());const auto length=std::min(capacity-1,text.size());
++    std::memcpy(symbol,text.data(),length);symbol[length]='\0';return 0;
++  }catch(const std::exception& e){Error(error,errorCapacity,e.what());}catch(...){Error(error,errorCapacity,"Periodic table symbol read failed");}
++  return -1;
++}
+ extern "C" void* olex2_native_update_options_create(void* environment,Olex2NativeDialogCompleted completed,void* context,char* error,std::size_t capacity){
+   try{
+     Error(error,capacity,"");if(!environment)throw std::invalid_argument("Update options require their UI environment");
+--- a/native/native_dialog_factory.h
++++ b/native/native_dialog_factory.h
+@@ -21,6 +21,10 @@
+ // by the caller before release: [accepted, AFrom, ATo, BFrom, BTo, CFrom, CTo].
+ void* olex2_native_generate_create(void* napiEnvironment,Olex2NativeDialogCompleted,void* context,char* error,std::size_t);
+ int olex2_native_generate_values(void* owner,double* values,char* error,std::size_t);
++// Original periodic-table dialog (atom type "More..."). Selecting an element
++// ends the modal dialog; its symbol is read before release.
++void* olex2_native_periodic_table_create(void* napiEnvironment,Olex2NativeDialogCompleted,void* context,char* error,std::size_t);
++int olex2_native_periodic_table_symbol(void* owner,char* symbol,std::size_t symbolCapacity,char* error,std::size_t);
+ void* olex2_native_dialog_create(void* napiEnvironment,const Olex2NativeDialogValues*,Olex2NativeDialogCompleted,void* context,char* error,std::size_t);
+ int olex2_native_dialog_show(void* owner,bool modal,char* error,std::size_t);
+ int olex2_native_dialog_update(void* owner,const Olex2NativeDialogLayout*,char* error,std::size_t);

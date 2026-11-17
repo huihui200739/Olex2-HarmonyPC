@@ -1,0 +1,107 @@
+--- a/cmake/Olex2NativeWidgets.cmake
++++ b/cmake/Olex2NativeWidgets.cmake
+@@ -11,6 +11,7 @@
+     "${project_root}/upstream/olex/dgenopt.cpp"
+     "${project_root}/upstream/olex/ptable.cpp"
+     "${project_root}/upstream/olex/nui/nui.cpp"
++    "${project_root}/upstream/olex/tasks.cpp"
+     "${project_root}/upstream/olex/edit.cpp"
+     "${project_root}/upstream/olex/updateth.cpp"
+     "${project_root}/upstream/olex/scenep.cpp"
+--- a/upstream/olex/tasks.cpp
++++ b/upstream/olex/tasks.cpp
+@@ -7,6 +7,89 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ #include "tasks.h"
++#if defined(__OHOS__) && !defined(__WXWIDGETS__)
++#include "xapp.h"
++#include "bapp.h"
++#include "integration.h"
++#include "ins.h"
++#include "efile.h"
++#include "log.h"
++
++void P4PTask::Run() {
++  if (!file_id.Contains("Rigaku")) return;
++  olex2::IOlex2Processor* processor = olex2::IOlex2Processor::GetInstance();
++  if (processor == nullptr) return;
++  olxstr exists = "spy.xplain.exists()";
++  processor->processFunction(exists, __OlxSrcInfo);
++  if (!exists.IsBool() || !exists.ToBool()) return;
++
++  const olxstr option = TBasicApp::GetInstance().GetOptions().FindValue("run_rigaku_xplain");
++  // Harmony task execution is non-blocking on the ArkUI thread. Never open a
++  // modal wx dialog here; without an explicit stored choice the optional XPlain
++  // action remains disabled.
++  if (option.IsEmpty()) {
++    TBasicApp::NewLogEntry() << "Rigaku XPlain was not started because no Harmony preference was set";
++    return;
++  }
++  if (!option.ToBool()) return;
++
++  olxstr loaded = TXApp::GetInstance().XFile().GetFileName();
++  const olxstr exts[] = {"ins", "res", "cif"};
++  bool cellSourceExists = false;
++  for (const auto& ext : exts) {
++    if (TEFile::Exists(TEFile::ChangeFileExt(loaded, ext))) {
++      cellSourceExists = true;
++      break;
++    }
++  }
++  if (!cellSourceExists) {
++    TIns ins;
++    ins.Adopt(TXApp::GetInstance().XFile(), 0);
++    ins.SaveForSolution(TEFile::ChangeFileExt(loaded, "ins"), "TREF", "Imported by Olex2");
++  }
++  olxstr run = "spy.xplain.run(false, true)";
++  processor->processFunction(run);
++  if (run.IsBool() && run.ToBool()) processor->processMacro("reap", __OlxSrcInfo);
++  else TBasicApp::NewLogEntry(logError) << "Failed to run XPlain";
++}
++
++void CellChangeTask::Run() {
++  TXApp& app = TXApp::GetInstance();
++  TXFile& file = app.XFile();
++  if (hklsrc != file.GetRM().GetHKLSource() || !file.GetRM().GetHKLF_mat().IsI()) return;
++
++  TAsymmUnit& current = file.GetAsymmUnit();
++  olxstr oldCell, newCell;
++  double axisDifference = 0;
++  for (size_t i = 0; i < 3; ++i) {
++    oldCell << " " << TEValueD(current.GetAxes()[i], current.GetAxisEsds()[i]).ToString()
++      << " " << TEValueD(current.GetAngles()[i], current.GetAngleEsds()[i]).ToString();
++    newCell << " " << TEValueD(axes[i], axis_esd[i]).ToString()
++      << " " << TEValueD(angles[i], angle_esd[i]).ToString();
++    axisDifference += olx_abs(current.GetAxes()[i] - axes[i]);
++  }
++  if (axisDifference / 3 > 1) {
++    TBasicApp::NewLogEntry(logError) << "There is a new cell in the HKL file but it differs significantly from the current one - please update manually";
++    return;
++  }
++
++  if (!file.HasLastLoader()) return;
++  const bool useNewCell = TBasicApp::GetInstance().GetOptions()
++    .FindValue("use_hkl_cell", TrueString()).ToBool();
++  if (!useNewCell && oldCell != newCell) {
++    TBasicApp::NewLogEntry(logInfo) << "HKL cell parameters differ; keeping the saved Harmony preference";
++    return;
++  }
++  if (!useNewCell) return;
++
++  TAsymmUnit& loaded = file.LastLoader()->GetAsymmUnit();
++  loaded.GetAxes() = current.GetAxes() = axes;
++  loaded.GetAngles() = current.GetAngles() = angles;
++  loaded.GetAxisEsds() = current.GetAxisEsds() = axis_esd;
++  loaded.GetAngleEsds() = current.GetAngleEsds() = angle_esd;
++  TBasicApp::NewLogEntry() << "Updating cell parameters with value from HKL file";
++}
++#else
+ #include "xglapp.h"
+ #include "mainform.h"
+ #include "msgbox.h"
+@@ -115,3 +198,4 @@
+       "Updating cell parameters with value from HKL file";
+   }
+ }
++#endif // Harmony task runner / original desktop tasks

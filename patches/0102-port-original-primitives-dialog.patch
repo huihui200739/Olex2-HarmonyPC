@@ -1,0 +1,252 @@
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -509,6 +509,52 @@
+   Boolean(env,out,"accepted",state.result==1);
+   Boolean(env,out,"applied",applied!=0);
+   Boolean(env,out,"uncertain",uncertain!=0);
++  Property(env,out,"error",String(env,readError));
++  return out;
++}
++struct PrimitiveDialogState {
++  std::mutex mutex;void* handle=nullptr;bool done=false;int result=0;
++};
++PrimitiveDialogState& PrimitiveDialog(){static auto* state=new PrimitiveDialogState;return *state;}
++int PrimitiveDialogCompleted(void*,int result,const char*){
++  auto& state=PrimitiveDialog();std::lock_guard<std::mutex> lock(state.mutex);
++  state.done=true;state.result=result;return 0;
++}
++napi_value OpenOriginalPrimitiveDialog(napi_env env,napi_callback_info){
++  napi_value out;napi_create_object(env,&out);
++  auto& owner=Runtime();std::lock_guard<std::mutex> ownerLock(owner.mutex);
++  auto& state=PrimitiveDialog();
++  {
++    std::lock_guard<std::mutex> lock(state.mutex);
++    if(!owner.runtime){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,"Original application runtime is not initialized"));return out;}
++    if(state.handle){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,"A primitives dialog is already open"));return out;}
++    char error[512]={};
++    void* handle=olex2_native_primitive_create(env,PrimitiveDialogCompleted,nullptr,error,sizeof(error));
++    if(!handle){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,error[0]?error:"Original primitives dialog could not be created"));return out;}
++    state.handle=handle;state.done=false;state.result=0;
++  }
++  char error[512]={};
++  if(olex2_native_dialog_show(state.handle,true,error,sizeof(error))!=0){
++    std::lock_guard<std::mutex> lock(state.mutex);
++    char releaseError[512]={};olex2_native_dialog_release(state.handle,releaseError,sizeof(releaseError));state.handle=nullptr;
++    Boolean(env,out,"opened",false);Property(env,out,"error",String(env,error[0]?error:"Original primitives dialog could not be shown"));return out;
++  }
++  Boolean(env,out,"opened",true);Property(env,out,"error",String(env,""));return out;
++}
++napi_value PollOriginalPrimitiveDialog(napi_env env,napi_callback_info){
++  napi_value out;napi_create_object(env,&out);
++  auto& state=PrimitiveDialog();std::lock_guard<std::mutex> lock(state.mutex);
++  if(!state.handle){Property(env,out,"state",String(env,"none"));Property(env,out,"error",String(env,""));return out;}
++  if(!state.done){Property(env,out,"state",String(env,"open"));Property(env,out,"error",String(env,""));return out;}
++  int mask=0,level=0,applied=0;char error[512]={};
++  const int rc=olex2_native_primitive_result(state.handle,&mask,&level,&applied,error,sizeof(error));
++  std::string readError=rc!=0?(error[0]?error:"Original primitive result could not be read"):"";
++  char releaseError[512]={};olex2_native_dialog_release(state.handle,releaseError,sizeof(releaseError));
++  state.handle=nullptr;state.done=false;
++  Property(env,out,"state",String(env,"done"));
++  Boolean(env,out,"accepted",state.result==1);
++  Boolean(env,out,"applied",applied!=0);
++  Number(env,out,"mask",mask);Number(env,out,"level",level);
+   Property(env,out,"error",String(env,readError));
+   return out;
+ }
+@@ -816,6 +862,8 @@
+     {"pollOriginalSceneDialog",nullptr,PollOriginalSceneDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"openOriginalGradientDialog",nullptr,OpenOriginalGradientDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"pollOriginalGradientDialog",nullptr,PollOriginalGradientDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
++    {"openOriginalPrimitiveDialog",nullptr,OpenOriginalPrimitiveDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
++    {"pollOriginalPrimitiveDialog",nullptr,PollOriginalPrimitiveDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"getOriginalLogs",nullptr,GetOriginalLogs,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"clearOriginalLogs",nullptr,ClearOriginalLogs,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"runCoreCatalog",nullptr,RunCoreCatalog,nullptr,nullptr,nullptr,napi_default,nullptr},
+--- a/app/entry/src/main/cpp/types/libolex2native/index.d.ts
++++ b/app/entry/src/main/cpp/types/libolex2native/index.d.ts
+@@ -120,6 +120,17 @@
+ // Original background gradient dialog. OK applies the corner colours and closes.
+ export const openOriginalGradientDialog: () => { opened: boolean; error: string };
+ export const pollOriginalGradientDialog: () => OriginalGradientDialogReport;
++export interface OriginalPrimitiveDialogReport {
++  state: 'none' | 'open' | 'done';
++  accepted?: boolean;
++  applied?: boolean;
++  mask?: number;
++  level?: number;
++  error: string;
++}
++// Original primitives dialog for the current selection; OK applies the mask.
++export const openOriginalPrimitiveDialog: () => { opened: boolean; error: string };
++export const pollOriginalPrimitiveDialog: () => OriginalPrimitiveDialogReport;
+ 
+ export interface ApplicationOptionsTransferReport {
+   passed: boolean; optionsChanged: boolean; importedOptions: number;
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1,4 +1,4 @@
+-import nativeBridge, { GraphicsStatus, UtilityReport, CheckResult, ApplicationRuntimeStatus, OriginalLogSnapshot, CoreCatalogReport, PythonRuntimeStatus, OriginalLinePathGpuProbe, PythonExecutionReport, ApplicationFunctionReport, OriginalCommandReport, OriginalGenerateDialogReport, OriginalPeriodicTableReport, OriginalMaterialDialogReport, OriginalSceneDialogReport, OriginalGradientDialogReport, DesktopCommandReport } from 'libolex2native.so';
++import nativeBridge, { GraphicsStatus, UtilityReport, CheckResult, ApplicationRuntimeStatus, OriginalLogSnapshot, CoreCatalogReport, PythonRuntimeStatus, OriginalLinePathGpuProbe, PythonExecutionReport, ApplicationFunctionReport, OriginalCommandReport, OriginalGenerateDialogReport, OriginalPeriodicTableReport, OriginalMaterialDialogReport, OriginalSceneDialogReport, OriginalGradientDialogReport, OriginalPrimitiveDialogReport, DesktopCommandReport } from 'libolex2native.so';
+ import { fileIo } from '@kit.CoreFileKit';
+ import { common } from '@kit.AbilityKit';
+ import { OptionsDocumentTransfer, OptionsDocumentStatus, OptionsDocumentBackend, emptyOptionsDocumentStatus } from '../model/OptionsDocumentTransfer';
+@@ -232,6 +232,8 @@
+   private sceneDialogOpen: boolean = false;
+   private gradientDialogTimer: number = -1;
+   private gradientDialogOpen: boolean = false;
++  private primitiveDialogTimer: number = -1;
++  private primitiveDialogOpen: boolean = false;
+   @State private commandMessage: string = '原版解析器已接入视图命令；完整命令库未接通';
+   @State private commandError: string = '';
+   @State private commandPassed: boolean = false;
+@@ -411,6 +413,8 @@
+     this.sceneDialogTimer = -1;
+     if (this.gradientDialogTimer >= 0) clearInterval(this.gradientDialogTimer);
+     this.gradientDialogTimer = -1;
++    if (this.primitiveDialogTimer >= 0) clearInterval(this.primitiveDialogTimer);
++    this.primitiveDialogTimer = -1;
+   }
+ 
+   private submitCommand(): void {
+@@ -2175,6 +2179,49 @@
+       this.refreshGraphics();
+     } catch (error) {
+       this.originalSelectionMessage = (error as Error).message || '原版背景设置轮询失败';
++    }
++  }
++
++  private openOriginalPrimitiveDialog(): void {
++    if (this.primitiveDialogOpen || !this.originalSelectionEnabled()) return;
++    try {
++      const opened = nativeBridge.openOriginalPrimitiveDialog();
++      if (!opened.opened) {
++        this.originalSelectionMessage = opened.error || '原版图元对话框未打开';
++        return;
++      }
++      this.primitiveDialogOpen = true;
++      this.originalSelectionMessage = '已打开原版图元对话框…';
++      if (this.primitiveDialogTimer < 0) {
++        this.primitiveDialogTimer = setInterval(() => { this.pollOriginalPrimitiveDialog(); }, 400);
++      }
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版图元对话框调用失败';
++    }
++  }
++
++  private pollOriginalPrimitiveDialog(): void {
++    if (!this.primitiveDialogOpen) return;
++    try {
++      const report: OriginalPrimitiveDialogReport = nativeBridge.pollOriginalPrimitiveDialog();
++      if (report.state === 'open') return;
++      if (this.primitiveDialogTimer >= 0) clearInterval(this.primitiveDialogTimer);
++      this.primitiveDialogTimer = -1;
++      this.primitiveDialogOpen = false;
++      if (report.state !== 'done') return;
++      if (!report.accepted) {
++        this.originalSelectionMessage = '已取消原版图元对话框';
++        return;
++      }
++      const applied: boolean = report.applied === true;
++      const mask: number = report.mask === undefined ? -1 : report.mask;
++      this.originalSelectionMessage = `图元已应用：mask=${mask}，已应用=${applied ? '是' : '否'}`;
++      try { nativeBridge.redrawOriginalDocument(); } catch (redrawError) { this.originalLog = nativeBridge.getOriginalLogs(); }
++      this.rebindPresentedSessionAfterModelChange();
++      this.readOriginalDocumentStatus();
++      this.refreshGraphics();
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版图元对话框轮询失败';
+     }
+   }
+ 
+@@ -3301,6 +3348,13 @@
+         Text('原版背景渐变对话框').fontSize(10).fontColor('#758579').layoutWeight(1)
+       }.width('100%')
+       Row({ space: 5 }) {
++        Button('图元…').id('olex2-original-primitive').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled() && this.originalDocument.core.selectedObjectCount !== undefined &&
++            this.originalDocument.core.selectedObjectCount > 0 && !this.primitiveDialogOpen)
++          .onClick(() => this.openOriginalPrimitiveDialog())
++        Text('原版图元显示对话框 · 应用于当前选择').fontSize(10).fontColor('#758579').layoutWeight(1)
++      }.width('100%')
++      Row({ space: 5 }) {
+         Button('切换网格').id('olex2-original-toggle-grid').height(25).fontSize(10)
+           .enabled(this.originalSelectionEnabled()).onClick(() => this.selectOriginalDocument('toggle-grid'))
+         Text('需先载入晶体学网格数据').fontSize(10).fontColor('#758579').layoutWeight(1)
+--- a/cmake/original_renderer.exports
++++ b/cmake/original_renderer.exports
+@@ -14,6 +14,8 @@
+   olex2_native_scene_result;
+   olex2_native_gradient_create;
+   olex2_native_gradient_result;
++  olex2_native_primitive_create;
++  olex2_native_primitive_result;
+   olex2_native_options_mount;
+   olex2_native_options_update;
+   olex2_native_options_unmount;
+--- a/native/native_dialog_factory.cpp
++++ b/native/native_dialog_factory.cpp
+@@ -4,6 +4,9 @@
+ #include "matprop.h"
+ #include "scenep.h"
+ #include "dgrad.h"
++#include "primtvs.h"
++#include "xatom.h"
++#include "xbond.h"
+ #include "gxapp.h"
+ #include "glgroup.h"
+ #include "native_dialog_factory.h"
+@@ -194,6 +197,41 @@
+   }catch(const std::exception& e){Error(error,errorCapacity,e.what());}catch(...){Error(error,errorCapacity,"Gradient result read failed");}
+   return -1;
+ }
++extern "C" void* olex2_native_primitive_create(void* environment,Olex2NativeDialogCompleted completed,void* context,char* error,std::size_t capacity){
++  try{
++    Error(error,capacity,"");if(!environment)throw std::invalid_argument("Primitives dialog requires its UI environment");
++    auto& selection=TGXApp::GetInstance().GetRenderer().GetSelection();
++    if(selection.Count()==0)throw std::invalid_argument("Select an original graphics object first");
++    auto owner=std::make_shared<Owner>();owner->scheduler=CreateNapiUiScheduler(environment);owner->backend=CreateArkUiDialogBackend(owner->scheduler);owner->completed=completed;owner->context=context;
++    owner->dialog=std::make_unique<TdlgPrimitive>(ArkUiBackend(),owner->backend,owner->scheduler,nullptr,selection[0],Positions());
++    owner->dialog->SetPosition(Point{0,0},true);owner->dialog->SetSize(Size{560,620});
++    auto& registry=Owners();std::lock_guard<std::mutex> lock(registry.mutex);
++    if(registry.next==std::numeric_limits<uintptr_t>::max())throw std::overflow_error("Native dialog handles exhausted");
++    auto key=reinterpret_cast<void*>(++registry.next);registry.owners.emplace(key,std::move(owner));return key;
++  }catch(const std::exception& e){Error(error,capacity,e.what());}catch(...){Error(error,capacity,"Original primitives dialog failed");}
++  return nullptr;
++}
++extern "C" int olex2_native_primitive_result(void* key,int* mask,int* level,int* applied,char* error,std::size_t errorCapacity){
++  try{
++    Error(error,errorCapacity,"");auto owner=Find(key);auto* dialog=dynamic_cast<TdlgPrimitive*>(owner->dialog.get());
++    if(!dialog)throw std::invalid_argument("Native dialog is not a primitives dialog");
++    if(mask)*mask=dialog->Mask;
++    if(level)*level=dialog->Level;
++    if(!dialog->ResultAccepted()){if(applied)*applied=0;return 0;}
++    auto& app=TGXApp::GetInstance();auto& selection=app.GetRenderer().GetSelection();
++    TXAtomPList atoms;TXBondPList bonds;
++    for(size_t i=0;i<selection.Count();++i){
++      if(selection[i].Is<TXAtom>())atoms.Add(static_cast<TXAtom&>(selection[i]));
++      else if(selection[i].Is<TXBond>())bonds.Add(static_cast<TXBond&>(selection[i]));
++    }
++    if(!atoms.IsEmpty())app.Individualise(atoms,dialog->Level,dialog->Mask);
++    else if(!bonds.IsEmpty())app.Individualise(bonds,dialog->Level,dialog->Mask);
++    else throw std::invalid_argument("Selection has no atom or bond for primitive application");
++    if(applied)*applied=1;
++    return 0;
++  }catch(const std::exception& e){Error(error,errorCapacity,e.what());}catch(...){Error(error,errorCapacity,"Primitive result read failed");}
++  return -1;
++}
+ extern "C" void* olex2_native_update_options_create(void* environment,Olex2NativeDialogCompleted completed,void* context,char* error,std::size_t capacity){
+   try{
+     Error(error,capacity,"");if(!environment)throw std::invalid_argument("Update options require their UI environment");
+--- a/native/native_dialog_factory.h
++++ b/native/native_dialog_factory.h
+@@ -38,6 +38,10 @@
+ // the runtime and the window closes.
+ void* olex2_native_gradient_create(void* napiEnvironment,void* runtime,Olex2NativeDialogCompleted,void* context,char* error,std::size_t);
+ int olex2_native_gradient_result(void* owner,int* applied,int* uncertain,char* error,std::size_t);
++// Original primitives dialog for the current selection. OK returns the mask
++// and apply scope; the result call applies them through TGXApp::Individualise.
++void* olex2_native_primitive_create(void* napiEnvironment,Olex2NativeDialogCompleted,void* context,char* error,std::size_t);
++int olex2_native_primitive_result(void* owner,int* mask,int* level,int* applied,char* error,std::size_t);
+ void* olex2_native_dialog_create(void* napiEnvironment,const Olex2NativeDialogValues*,Olex2NativeDialogCompleted,void* context,char* error,std::size_t);
+ int olex2_native_dialog_show(void* owner,bool modal,char* error,std::size_t);
+ int olex2_native_dialog_update(void* owner,const Olex2NativeDialogLayout*,char* error,std::size_t);

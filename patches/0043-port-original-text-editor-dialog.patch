@@ -1,0 +1,172 @@
+--- a/upstream/olex/edit.h
++++ b/upstream/olex/edit.h
+@@ -6,6 +6,56 @@
+ * This source file is distributed under the terms of the licence located in   *
+ * the root folder.                                                            *
+ ******************************************************************************/
++
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#pragma once
++#include "ctrls.h"
++#include "native_editable.h"
++#include "ctrls/texteditext.h"
++#include <memory>
++#include <vector>
++namespace olex2::harmony::ui { class ApplicationRuntime; }
++class TdlgEdit: public ctrl_ext::TDialog {
++  struct Alive;
++  std::shared_ptr<Alive> alive_;
++  std::shared_ptr<ctrl_ext::TTextEdit> Text;
++  std::shared_ptr<olex2::harmony::ui::Widget> Buttons;
++  std::vector<std::shared_ptr<olex2::harmony::ui::EventWidget>> ActionButtons;
++  bool accepted_=false;
++  bool multiline_=false;
++  void Accept();
++  void Cancel();
++public:
++protected:
++  std::shared_ptr<olex2::harmony::ui::Widget> Status;
++  void Layout();
++public:
++  TdlgEdit(olex2::harmony::ui::NodeBackend&,
++    std::shared_ptr<olex2::harmony::ui::DialogBackend>,
++    std::shared_ptr<olex2::harmony::ui::UiScheduler>,
++    olex2::harmony::ui::Widget* parent, bool MultiLine,
++    std::shared_ptr<olex2::harmony::ui::DialogPositionStore> positions={});
++  ~TdlgEdit() override;
++  void SetText(const olxstr& text);
++  olxstr GetText() const;
++  void SetTitle(const olxstr& title);
++  bool ResultAccepted() const { return accepted_; }
++  bool IsMultiLine() const { return multiline_; }
++};
++
++// Harmony provides the original plain-text editing workflow. The legacy lexer
++// identifier is retained for callers, but ArkUI TextArea has no token-color
++// interface in this adapter; SetLexer displays that capability limitation.
++class TdlgStyledEdit: public TdlgEdit {
++  int LexerStyle=0;
++public:
++  using TdlgEdit::TdlgEdit;
++  void SetLexer(int style);
++  int GetLexer() const { return LexerStyle; }
++  bool SyntaxHighlightingAvailable() const { return false; }
++};
++#else
++
+ 
+ #ifndef __olx_editdlg_H
+ #define __olx_editdlg_H
+@@ -36,3 +86,5 @@
+   TWindowInterface WI;
+ };
+ #endif
++
++#endif // native editor / original wx
+--- a/upstream/olex/edit.cpp
++++ b/upstream/olex/edit.cpp
+@@ -5,7 +5,87 @@
+ *                                                                             *
+ * This source file is distributed under the terms of the licence located in   *
+ * the root folder.                                                            *
+-******************************************************************************/
++******************************************************************************/
++
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "edit.h"
++#include "eutf8.h"
++#include <algorithm>
++#include <stdexcept>
++using namespace olex2::harmony::ui;
++using namespace ctrl_ext;
++
++struct TdlgEdit::Alive { TdlgEdit* owner=nullptr; };
++namespace {
++std::string EditorUtf8(const olxstr& value) {
++  const auto bytes=TUtf8::Encode(value);
++  std::string result(bytes.c_str(),bytes.Length());
++  if(result.find('\0')!=std::string::npos) throw std::invalid_argument("Editor title contains an embedded NUL");
++  return result;
++}
++}
++TdlgEdit::TdlgEdit(NodeBackend& nodes,
++  std::shared_ptr<DialogBackend> dialogs,
++  std::shared_ptr<UiScheduler> scheduler, Widget* parent, bool MultiLine,
++  std::shared_ptr<DialogPositionStore> positions)
++  : TDialog(nodes,std::move(dialogs),std::move(scheduler),parent,"Edit","dlgEdit",
++      DialogGeometry{Point{0,0},Size{720,MultiLine?460:210},true},std::move(positions)),
++    alive_(std::make_shared<Alive>()), multiline_(MultiLine)
++{
++  alive_->owner=this;
++  Text=std::make_shared<TTextEdit>(nodes,&Body(),-1,EmptyString(),Point{0,0},
++    Size{680,MultiLine?350:44},MultiLine?InputMultiline:0);
++  Retain(Text);
++  Text->SetNumber(Property::Focusable,1);
++  Status=std::make_shared<Widget>(nodes,NodeKind::Text,&Body());
++  Retain(Status);
++  Status->SetText(TextProperty::Accessibility,"Editor capability status");
++  Status->SetHeight(28);
++  Status->Hide();
++  Buttons=std::make_shared<Widget>(nodes,NodeKind::Row,&Body());
++  Retain(Buttons);
++  Buttons->SetNumber(Property::RowSpacing,8);
++  Buttons->SetHeight(46);
++  std::weak_ptr<Alive> weak=alive_;
++  for(int action=0;action<2;++action) {
++    auto button=std::make_shared<EventWidget>(nodes,NodeKind::Button,Buttons.get(),
++      std::vector<EventKind>{EventKind::Click},[weak,action](const NodeEvent&) {
++        if(auto life=weak.lock();life&&life->owner) {
++          if(action==0) life->owner->Accept(); else life->owner->Cancel();
++        }
++      });
++    Retain(button);
++    button->SetText(TextProperty::Content,action==0?"OK":"Cancel");
++    button->SetNumber(Property::Focusable,1);
++    ActionButtons.push_back(std::move(button));
++  }
++  SetResizeReceiver([weak]() { if(auto life=weak.lock();life&&life->owner) life->owner->Layout(); });
++  Layout();
++}
++TdlgEdit::~TdlgEdit() { alive_->owner=nullptr; SetResizeReceiver({}); }
++void TdlgEdit::Layout() {
++  const int width=std::max(180,GetWidth()-24);
++  const int statusHeight=Status->IsShown()?32:0;
++  const int editorHeight=std::max(40,GetHeight()-92-statusHeight);
++  Text->SetWidth(width); Text->SetHeight(editorHeight);
++  Status->SetWidth(width);
++  Buttons->SetWidth(width);
++  for(auto& button:ActionButtons) button->SetWidth(std::max(40,(width-8)/2));
++}
++void TdlgEdit::Accept() { accepted_=true; EndModal(1); }
++void TdlgEdit::Cancel() { accepted_=false; EndModal(DialogCancelled); }
++void TdlgEdit::SetText(const olxstr& text) { Text->SetText(text); }
++olxstr TdlgEdit::GetText() const { return Text->GetText(); }
++void TdlgEdit::SetTitle(const olxstr& title) { DialogWindow::SetTitle(EditorUtf8(title)); }
++void TdlgStyledEdit::SetLexer(int style) {
++  LexerStyle=style;
++  Status->SetText(TextProperty::Content,
++    "Plain-text editing is available; syntax highlighting is not provided by this native editor.");
++  Status->Show(true);
++  Layout();
++}
++#else
++
+ 
+ #include "edit.h"
+ #include <wx/font.h>
+@@ -146,3 +226,5 @@
+ //..............................................................................
+ olxstr TdlgStyledEdit::GetText()  {  return Text->GetValue();  }
+ //..............................................................................
++
++#endif // native editor / original wx
+--- a/cmake/Olex2NativeWidgets.cmake
++++ b/cmake/Olex2NativeWidgets.cmake
+@@ -8,6 +8,7 @@
+     "${project_root}/upstream/olex/dgenopt.cpp"
+     "${project_root}/upstream/olex/ptable.cpp"
+     "${project_root}/upstream/olex/nui/nui.cpp"
++    "${project_root}/upstream/olex/edit.cpp"
+     "${project_root}/native/generation_options.cpp"
+     "${project_root}/upstream/olex/dgrad.cpp"
+     "${project_root}/upstream/olex/primtvs.cpp"

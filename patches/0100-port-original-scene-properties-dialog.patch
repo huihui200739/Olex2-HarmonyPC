@@ -1,0 +1,300 @@
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -415,6 +415,52 @@
+   Property(env,out,"state",String(env,"done"));
+   Boolean(env,out,"accepted",state.result==1);
+   Boolean(env,out,"applied",applied!=0);
++  Boolean(env,out,"sceneChanged",sceneChanged!=0);
++  Property(env,out,"signature",String(env,rc==0?signature:""));
++  Property(env,out,"error",String(env,readError));
++  return out;
++}
++struct SceneDialogState {
++  std::mutex mutex;void* handle=nullptr;bool done=false;int result=0;
++};
++SceneDialogState& SceneDialog(){static auto* state=new SceneDialogState;return *state;}
++int SceneDialogCompleted(void*,int result,const char*){
++  auto& state=SceneDialog();std::lock_guard<std::mutex> lock(state.mutex);
++  state.done=true;state.result=result;return 0;
++}
++napi_value OpenOriginalSceneDialog(napi_env env,napi_callback_info){
++  napi_value out;napi_create_object(env,&out);
++  auto& owner=Runtime();std::lock_guard<std::mutex> ownerLock(owner.mutex);
++  auto& state=SceneDialog();
++  {
++    std::lock_guard<std::mutex> lock(state.mutex);
++    if(!owner.runtime){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,"Original application runtime is not initialized"));return out;}
++    if(state.handle){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,"A scene settings dialog is already open"));return out;}
++    char error[512]={};
++    void* handle=olex2_native_scene_create(env,SceneDialogCompleted,nullptr,error,sizeof(error));
++    if(!handle){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,error[0]?error:"Original scene settings could not be created"));return out;}
++    state.handle=handle;state.done=false;state.result=0;
++  }
++  char error[512]={};
++  if(olex2_native_dialog_show(state.handle,true,error,sizeof(error))!=0){
++    std::lock_guard<std::mutex> lock(state.mutex);
++    char releaseError[512]={};olex2_native_dialog_release(state.handle,releaseError,sizeof(releaseError));state.handle=nullptr;
++    Boolean(env,out,"opened",false);Property(env,out,"error",String(env,error[0]?error:"Original scene settings could not be shown"));return out;
++  }
++  Boolean(env,out,"opened",true);Property(env,out,"error",String(env,""));return out;
++}
++napi_value PollOriginalSceneDialog(napi_env env,napi_callback_info){
++  napi_value out;napi_create_object(env,&out);
++  auto& state=SceneDialog();std::lock_guard<std::mutex> lock(state.mutex);
++  if(!state.handle){Property(env,out,"state",String(env,"none"));Property(env,out,"error",String(env,""));return out;}
++  if(!state.done){Property(env,out,"state",String(env,"open"));Property(env,out,"error",String(env,""));return out;}
++  char signature[1024]={};int sceneChanged=0;char error[512]={};
++  const int rc=olex2_native_scene_result(state.handle,signature,sizeof(signature),&sceneChanged,error,sizeof(error));
++  std::string readError=rc!=0?(error[0]?error:"Original scene result could not be read"):"";
++  char releaseError[512]={};olex2_native_dialog_release(state.handle,releaseError,sizeof(releaseError));
++  state.handle=nullptr;state.done=false;
++  Property(env,out,"state",String(env,"done"));
++  Boolean(env,out,"accepted",state.result==1);
+   Boolean(env,out,"sceneChanged",sceneChanged!=0);
+   Property(env,out,"signature",String(env,rc==0?signature:""));
+   Property(env,out,"error",String(env,readError));
+@@ -720,6 +766,8 @@
+     {"pollOriginalPeriodicTable",nullptr,PollOriginalPeriodicTable,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"openOriginalMaterialDialog",nullptr,OpenOriginalMaterialDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"pollOriginalMaterialDialog",nullptr,PollOriginalMaterialDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
++    {"openOriginalSceneDialog",nullptr,OpenOriginalSceneDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
++    {"pollOriginalSceneDialog",nullptr,PollOriginalSceneDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"getOriginalLogs",nullptr,GetOriginalLogs,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"clearOriginalLogs",nullptr,ClearOriginalLogs,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"runCoreCatalog",nullptr,RunCoreCatalog,nullptr,nullptr,nullptr,napi_default,nullptr},
+--- a/app/entry/src/main/cpp/types/libolex2native/index.d.ts
++++ b/app/entry/src/main/cpp/types/libolex2native/index.d.ts
+@@ -99,6 +99,17 @@
+ // applied to the current selection by the native dialog itself.
+ export const openOriginalMaterialDialog: () => { opened: boolean; error: string };
+ export const pollOriginalMaterialDialog: () => OriginalMaterialDialogReport;
++export interface OriginalSceneDialogReport {
++  state: 'none' | 'open' | 'done';
++  accepted?: boolean;
++  sceneChanged?: boolean;
++  signature?: string;
++  error: string;
++}
++// Original scene-properties dialog (Draw style settings). OK applies the light
++// model and closes the dialog.
++export const openOriginalSceneDialog: () => { opened: boolean; error: string };
++export const pollOriginalSceneDialog: () => OriginalSceneDialogReport;
+ 
+ export interface ApplicationOptionsTransferReport {
+   passed: boolean; optionsChanged: boolean; importedOptions: number;
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1,4 +1,4 @@
+-import nativeBridge, { GraphicsStatus, UtilityReport, CheckResult, ApplicationRuntimeStatus, OriginalLogSnapshot, CoreCatalogReport, PythonRuntimeStatus, OriginalLinePathGpuProbe, PythonExecutionReport, ApplicationFunctionReport, OriginalCommandReport, OriginalGenerateDialogReport, OriginalPeriodicTableReport, OriginalMaterialDialogReport, DesktopCommandReport } from 'libolex2native.so';
++import nativeBridge, { GraphicsStatus, UtilityReport, CheckResult, ApplicationRuntimeStatus, OriginalLogSnapshot, CoreCatalogReport, PythonRuntimeStatus, OriginalLinePathGpuProbe, PythonExecutionReport, ApplicationFunctionReport, OriginalCommandReport, OriginalGenerateDialogReport, OriginalPeriodicTableReport, OriginalMaterialDialogReport, OriginalSceneDialogReport, DesktopCommandReport } from 'libolex2native.so';
+ import { fileIo } from '@kit.CoreFileKit';
+ import { common } from '@kit.AbilityKit';
+ import { OptionsDocumentTransfer, OptionsDocumentStatus, OptionsDocumentBackend, emptyOptionsDocumentStatus } from '../model/OptionsDocumentTransfer';
+@@ -228,6 +228,8 @@
+   private periodicTableOpen: boolean = false;
+   private materialDialogTimer: number = -1;
+   private materialDialogOpen: boolean = false;
++  private sceneDialogTimer: number = -1;
++  private sceneDialogOpen: boolean = false;
+   @State private commandMessage: string = '原版解析器已接入视图命令；完整命令库未接通';
+   @State private commandError: string = '';
+   @State private commandPassed: boolean = false;
+@@ -403,6 +405,8 @@
+     this.periodicTableTimer = -1;
+     if (this.materialDialogTimer >= 0) clearInterval(this.materialDialogTimer);
+     this.materialDialogTimer = -1;
++    if (this.sceneDialogTimer >= 0) clearInterval(this.sceneDialogTimer);
++    this.sceneDialogTimer = -1;
+   }
+ 
+   private submitCommand(): void {
+@@ -2080,6 +2084,48 @@
+       this.refreshGraphics();
+     } catch (error) {
+       this.originalSelectionMessage = (error as Error).message || '原版 Part 命令失败';
++    }
++  }
++
++  private openOriginalSceneDialog(): void {
++    if (this.sceneDialogOpen || !this.originalDocumentActive()) return;
++    try {
++      const opened = nativeBridge.openOriginalSceneDialog();
++      if (!opened.opened) {
++        this.originalSelectionMessage = opened.error || '原版场景设置未打开';
++        return;
++      }
++      this.sceneDialogOpen = true;
++      this.originalSelectionMessage = '已打开原版场景设置…';
++      if (this.sceneDialogTimer < 0) {
++        this.sceneDialogTimer = setInterval(() => { this.pollOriginalSceneDialog(); }, 400);
++      }
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版场景设置调用失败';
++    }
++  }
++
++  private pollOriginalSceneDialog(): void {
++    if (!this.sceneDialogOpen) return;
++    try {
++      const report: OriginalSceneDialogReport = nativeBridge.pollOriginalSceneDialog();
++      if (report.state === 'open') return;
++      if (this.sceneDialogTimer >= 0) clearInterval(this.sceneDialogTimer);
++      this.sceneDialogTimer = -1;
++      this.sceneDialogOpen = false;
++      if (report.state !== 'done') return;
++      if (!report.accepted) {
++        this.originalSelectionMessage = '已取消原版场景设置';
++        return;
++      }
++      const changed: boolean = report.sceneChanged === true;
++      this.originalSelectionMessage = `场景已应用：场景已更新=${changed ? '是' : '否'}`;
++      try { nativeBridge.redrawOriginalDocument(); } catch (redrawError) { this.originalLog = nativeBridge.getOriginalLogs(); }
++      this.rebindPresentedSessionAfterModelChange();
++      this.readOriginalDocumentStatus();
++      this.refreshGraphics();
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版场景设置轮询失败';
+     }
+   }
+ 
+@@ -3192,6 +3238,12 @@
+             { value: '4', action: () => this.runOriginalPartCommand(4) }
+           ])
+         Text('原版 Part · 设置当前选择的 part 编号').fontSize(10).fontColor('#758579').layoutWeight(1)
++      }.width('100%')
++      Row({ space: 5 }) {
++        Button('场景…').id('olex2-original-scene').height(25).fontSize(10)
++          .enabled(this.originalDocumentViewPresented() && !this.originalDocumentOperationBusy() && !this.sceneDialogOpen)
++          .onClick(() => this.openOriginalSceneDialog())
++        Text('原版场景设置对话框（光照/背景）').fontSize(10).fontColor('#758579').layoutWeight(1)
+       }.width('100%')
+       Row({ space: 5 }) {
+         Button('切换网格').id('olex2-original-toggle-grid').height(25).fontSize(10)
+--- a/cmake/original_renderer.exports
++++ b/cmake/original_renderer.exports
+@@ -10,6 +10,8 @@
+   olex2_native_periodic_table_symbol;
+   olex2_native_material_create;
+   olex2_native_material_result;
++  olex2_native_scene_create;
++  olex2_native_scene_result;
+   olex2_native_options_mount;
+   olex2_native_options_update;
+   olex2_native_options_unmount;
+--- a/native/native_dialog_factory.cpp
++++ b/native/native_dialog_factory.cpp
+@@ -2,6 +2,7 @@
+ #include "dgenopt.h"
+ #include "ptable.h"
+ #include "matprop.h"
++#include "scenep.h"
+ #include "gxapp.h"
+ #include "glgroup.h"
+ #include "native_dialog_factory.h"
+@@ -27,6 +28,7 @@
+   std::unique_ptr<TDialog> dialog;TdlgMsgBox* message=nullptr;
+   Olex2NativeDialogCompleted completed=nullptr;void* context=nullptr;
+   bool materialApplied=false;std::string materialInitial,materialValue;
++  std::string sceneInitial;
+   void Check()const{if(thread!=std::this_thread::get_id())throw std::runtime_error("Dialog owner requires its creating UI thread");}
+   void Apply(const Olex2NativeDialogLayout& value){Check();auto geometry=Geometry(value);dialog->SetTitle(std::string(value.title));dialog->SetPosition(geometry.offset,geometry.centered);if(message)message->SetSize(geometry.size);else dialog->SetSize(geometry.size);}
+   void Show(bool modal){
+@@ -137,6 +139,38 @@
+   }catch(const std::exception& e){Error(error,errorCapacity,e.what());}catch(...){Error(error,errorCapacity,"Material result read failed");}
+   return -1;
+ }
++std::string SceneSignature(const TGlLightModel& model){
++  std::ostringstream o;o<<(model.IsLocalViewer()?1:0)<<(model.IsTwoSides()?1:0)<<(model.IsSmoothShade()?1:0);
++  const auto& ambient=model.GetAmbientColor();const auto& clear=model.GetClearColor();
++  for(int i=0;i<4;++i)o<<','<<ambient[i];
++  for(int i=0;i<4;++i)o<<','<<clear[i];
++  return o.str();
++}
++extern "C" void* olex2_native_scene_create(void* environment,Olex2NativeDialogCompleted completed,void* context,char* error,std::size_t capacity){
++  try{
++    Error(error,capacity,"");if(!environment)throw std::invalid_argument("Scene settings require their UI environment");
++    auto owner=std::make_shared<Owner>();owner->scheduler=CreateNapiUiScheduler(environment);owner->backend=CreateArkUiDialogBackend(owner->scheduler);owner->completed=completed;owner->context=context;
++    owner->sceneInitial=SceneSignature(TGXApp::GetInstance().GetRenderer().LightModel);
++    owner->dialog=std::make_unique<TdlgSceneProps>(ArkUiBackend(),owner->backend,owner->scheduler,nullptr,Positions());
++    owner->dialog->SetPosition(Point{0,0},true);owner->dialog->SetSize(Size{720,760});
++    auto& registry=Owners();std::lock_guard<std::mutex> lock(registry.mutex);
++    if(registry.next==std::numeric_limits<uintptr_t>::max())throw std::overflow_error("Native dialog handles exhausted");
++    auto key=reinterpret_cast<void*>(++registry.next);registry.owners.emplace(key,std::move(owner));return key;
++  }catch(const std::exception& e){Error(error,capacity,e.what());}catch(...){Error(error,capacity,"Original scene settings failed");}
++  return nullptr;
++}
++extern "C" int olex2_native_scene_result(void* key,char* signature,std::size_t capacity,int* sceneChanged,char* error,std::size_t errorCapacity){
++  try{
++    Error(error,errorCapacity,"");if(!signature||capacity==0)throw std::invalid_argument("Scene signature destination is absent");
++    signature[0]='\0';auto owner=Find(key);auto* dialog=dynamic_cast<TdlgSceneProps*>(owner->dialog.get());
++    if(!dialog)throw std::invalid_argument("Native dialog is not a scene settings dialog");
++    const std::string current=SceneSignature(TGXApp::GetInstance().GetRenderer().LightModel);
++    const auto length=std::min(capacity-1,current.size());std::memcpy(signature,current.data(),length);signature[length]='\0';
++    if(sceneChanged)*sceneChanged=current!=owner->sceneInitial?1:0;
++    return 0;
++  }catch(const std::exception& e){Error(error,errorCapacity,e.what());}catch(...){Error(error,errorCapacity,"Scene result read failed");}
++  return -1;
++}
+ extern "C" void* olex2_native_update_options_create(void* environment,Olex2NativeDialogCompleted completed,void* context,char* error,std::size_t capacity){
+   try{
+     Error(error,capacity,"");if(!environment)throw std::invalid_argument("Update options require their UI environment");
+--- a/native/native_dialog_factory.h
++++ b/native/native_dialog_factory.h
+@@ -29,6 +29,11 @@
+ // material is set on the current selection; result reports signature/applied.
+ void* olex2_native_material_create(void* napiEnvironment,Olex2NativeDialogCompleted,void* context,char* error,std::size_t);
+ int olex2_native_material_result(void* owner,char* signature,std::size_t capacity,int* applied,int* sceneChanged,char* error,std::size_t);
++// Original scene-properties dialog (Graphics -> Draw style... Scene settings).
++// OK applies and closes; the result reports whether the renderer light model
++// changed.
++void* olex2_native_scene_create(void* napiEnvironment,Olex2NativeDialogCompleted,void* context,char* error,std::size_t);
++int olex2_native_scene_result(void* owner,char* signature,std::size_t capacity,int* sceneChanged,char* error,std::size_t);
+ void* olex2_native_dialog_create(void* napiEnvironment,const Olex2NativeDialogValues*,Olex2NativeDialogCompleted,void* context,char* error,std::size_t);
+ int olex2_native_dialog_show(void* owner,bool modal,char* error,std::size_t);
+ int olex2_native_dialog_update(void* owner,const Olex2NativeDialogLayout*,char* error,std::size_t);
+--- a/upstream/olex/scenep.cpp
++++ b/upstream/olex/scenep.cpp
+@@ -21,7 +21,7 @@
+ using namespace olex2::harmony::ui;
+ namespace {
+ enum SceneEvent { SceneResize=1, SceneLightChoice, ScenePositionBase=10,
+-  SceneApply=30, SceneCancel, SceneOpen, SceneSave, SceneFontEdit, SceneHelp,
++  SceneApply=30, SceneCancel, SceneOpen, SceneSave, SceneFontEdit, SceneHelp, SceneOk,
+   SceneCutoff=40 };
+ std::string SceneUtf8(const olxstr& value) {
+   const auto bytes=TUtf8::Encode(value);
+@@ -48,7 +48,7 @@
+       "Scene Parameters","TdlgSceneProps",
+       DialogGeometry{Point{0,0},Size{900,760},true},std::move(positions)),
+     alive_(std::make_shared<Alive>()),ParentFrame(parent) {
+-  if(!ParentFrame) throw std::invalid_argument("Scene dialog requires its owning main frame");
++  // The Harmony dialog host passes no desktop main frame; file open/save stay disabled.
+   alive_->owner=this;
+   FLightModel=TGXApp::GetInstance().GetRenderer().LightModel;
+   FOriginalModel=FLightModel;
+@@ -128,7 +128,7 @@
+   footer_=std::make_shared<Widget>(nodes,NodeKind::Row,&Body());Retain(footer_);footer_->SetNumber(Property::RowSpacing,8);footer_->SetHeight(48);
+   std::weak_ptr<Alive> weak=alive_;
+   const char* labels[]={"Apply","Open","Save","Help","Cancel","OK"};
+-  const int actions[]={SceneApply,SceneOpen,SceneSave,SceneHelp,SceneCancel,SceneApply};
++  const int actions[]={SceneApply,SceneOpen,SceneSave,SceneHelp,SceneCancel,SceneOk};
+   for(size_t i=0;i<6;++i){
+     auto button=std::make_shared<TButton>(nodes,footer_.get(),-1,labels[i]);Retain(button);
+     button->SetHeight(42);button->SetNumber(Property::Focusable,1);
+@@ -153,7 +153,7 @@
+ 
+ void TdlgSceneProps::Layout() {
+   const int width=std::max(320,GetWidth()-24);
+-  scroll_->SetWidth(width);scroll_->SetHeight(std::max(120,GetHeight()-88));
++  scroll_->SetWidth(width);scroll_->SetHeight(std::max(120,GetHeight()-136));
+   content_->SetWidth(width);content_->SetHeight(1040);footer_->SetWidth(width);
+   for(auto& button:buttons_)button->SetWidth(std::max(42,(width-40)/6));
+ }
+@@ -176,6 +176,7 @@
+     return true;
+   }
+   if(event==SceneCutoff&&sender==scSCO.get()){cbUniform->SetChecked(scSCO->GetValue()>90);return true;}
++  if(event==SceneOk){OnApply();EndModal(1);return true;}
+   if(event==SceneApply){OnApply();return true;}
+   if(event==SceneCancel){OnCancel();return true;}
+   if(event==SceneOpen){OnOpen();return true;}

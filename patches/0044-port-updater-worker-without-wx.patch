@@ -1,0 +1,15 @@
+diff --git a/olex/updateth.cpp b/olex/updateth.cpp
+--- a/olex/updateth.cpp
++++ b/olex/updateth.cpp
+@@ -7,7 +7,11 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "bapp.h"
++#else
+ #include "mainform.h"
++#endif
+ #include "updateth.h"
+ #include "updateapi.h"
+ #include "patchapi.h"

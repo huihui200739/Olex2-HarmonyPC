@@ -1,0 +1,54 @@
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1738,6 +1738,30 @@
+       this.captureOriginalViewportBeforeReplacement('before-new-display-tab');
+       const result: OriginalDocumentTransferResult = await this.originalDocumentTransfer.openSynthetic(bytes,
+         this.originalDocumentBackend());
++      this.acceptOriginalDocumentResult(result);
++    } catch (error) {
++      this.failOriginalSessionOperation(error as Error); this.readOriginalDocumentStatus(); this.reconcileOriginalSessionNative();
++    } finally {
++      this.originalDocumentBusy = false; this.syncOriginalDocumentSessions();
++      this.applicationRuntime = nativeBridge.getApplicationRuntimeStatus();
++      this.originalLog = nativeBridge.getOriginalLogs(); this.refreshGraphics(); this.syncOriginalViewportInput();
++    }
++  }
++
++  private async openXyzSyntheticOriginalDocument(): Promise<void> {
++    if (this.originalDocumentOperationBusy() || !this.applicationRuntime.initialized) return;
++    if (!this.originalDocumentSessions.canAdd()) {
++      this.originalDocumentMessage = '会话最多 4 份文档、合计 32 MiB；请先明确关闭一份文档。未替换原生文档。';
++      this.saveRecord(); return;
++    }
++    this.syncOriginalDocumentSessions(); this.beginOriginalSessionOperation('open-synthetic', '');
++    this.originalDocumentBusy = true; this.syncOriginalViewportInput();
++    try {
++      const context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
++      const bytes: Uint8Array = await context.resourceManager.getRawFileContent('synthetic-view.xyz');
++      this.captureOriginalViewportBeforeReplacement('before-new-display-tab');
++      const result: OriginalDocumentTransferResult = await this.originalDocumentTransfer.openSynthetic(bytes,
++        this.originalDocumentBackend(), 'synthetic-view.xyz');
+       this.acceptOriginalDocumentResult(result);
+     } catch (error) {
+       this.failOriginalSessionOperation(error as Error); this.readOriginalDocumentStatus(); this.reconcileOriginalSessionNative();
+@@ -3203,6 +3227,10 @@
+           .fontColor('#536857').backgroundColor('#F2F5EC')
+           .enabled(this.applicationRuntime.initialized && !this.originalDocumentOperationBusy())
+           .onClick(() => this.openBondedSyntheticOriginalDocument())
++        Button('XYZ 示例').id('olex2-original-document-xyz').height(26).fontSize(10)
++          .fontColor('#536857').backgroundColor('#F2F5EC')
++          .enabled(this.applicationRuntime.initialized && !this.originalDocumentOperationBusy())
++          .onClick(() => this.openXyzSyntheticOriginalDocument())
+         Text('非科研数据 · 仅平台显示').fontSize(10).fontColor('#7C8064').layoutWeight(1)
+       }.width('100%')
+       Text(this.originalDocumentBusy ? '正在处理原版文档；请等待文件操作完成…' : this.originalDocumentMessage)
+--- a/app/entry/src/main/resources/rawfile/synthetic-view.xyz
++++ b/app/entry/src/main/resources/rawfile/synthetic-view.xyz
+@@ -0,0 +1,7 @@
++5
++synthetic non-biological display fixture, cartesian coordinates in angstrom
++C    0.000  0.000  0.000
++H    0.630  0.630  0.630
++H   -0.670 -0.670  0.630
++H   -0.670  0.630 -0.670
++H    0.630 -0.670 -0.670

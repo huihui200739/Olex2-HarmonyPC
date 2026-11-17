@@ -1,0 +1,54 @@
+--- a/upstream/xlib/symmspace.h
++++ b/upstream/xlib/symmspace.h
+@@ -155,18 +155,20 @@
+     // before the lattice-centering deduction below.
+     smatd_list unique;
+     for (size_t i = 0; i < sp.Count(); i++) {
++      smatd candidate = sp[i];
++      candidate.t -= candidate.t.Floor<int>();
+       bool found = false;
+       for (size_t j = 0; j < unique.Count() && !found; j++) {
+         bool same = true;
+         for (int r = 0; r < 3 && same; r++)
+           for (int c = 0; c < 3 && same; c++)
+-            same = olx_abs(unique[j].r[r][c] - sp[i].r[r][c]) < 1e-6;
++            same = olx_abs(unique[j].r[r][c] - candidate.r[r][c]) < 1e-6;
+         if (same)
+           for (int k = 0; k < 3 && same; k++)
+-            same = olx_abs(unique[j].t[k] - sp[i].t[k]) < 1e-6;
++            same = olx_abs(unique[j].t[k] - candidate.t[k]) < 1e-6;
+         found = same;
+       }
+-      if (!found) unique.AddCopy(sp[i]);
++      if (!found) unique.AddCopy(candidate);
+     }
+     if (unique.Count() != sp.Count()) {
+       return GetInfo(unique, translations_);
+@@ -199,8 +201,11 @@
+     }
+     const size_t min_a_group = groups.GetValue(0).Count();
+     for (size_t i = 0; i < groups.Count(); i++) {
+-      if (groups.GetValue(i).Count() != min_a_group)
+-        throw TInvalidArgumentException(__OlxSourceInfo, "matrix list");
++      if (groups.GetValue(i).Count() != min_a_group) {
++        olxstr gd;
++        for(size_t gi=0;gi<groups.Count();++gi){gd<<"g"<<gi<<"n"<<groups.GetValue(gi).Count()<<":";for(size_t gj=0;gj<groups.GetValue(gi).Count();++gj){const auto& op=groups.GetValue(gi)[gj];for(int r=0;r<3;++r)for(int c=0;c<3;++c)gd<<op.r[r][c]<<',';gd<<'|';for(int k=0;k<3;++k)gd<<op.t[k]<<',';gd<<'; ';}}
++        throw TInvalidArgumentException(__OlxSourceInfo, olxstr("matrix list ")<<gd);
++      }
+     }
+     if (min_a_group == 1)
+       rv.latt = 1; //'P';
+--- a/app/entry/src/main/resources/rawfile/synthetic-view.ins
++++ b/app/entry/src/main/resources/rawfile/synthetic-view.ins
+@@ -1,8 +1,10 @@
+ TITL synthetic non-biological display fixture
+-CELL 0.71073 10.000 10.000 10.000 90.000 90.000 90.000
++CELL 0.71073 10.000 10.000 10.000 90.000 100.000 90.000
+ ZERR 1 0.000 0.000 0.000 0.000 0.000 0.000
+ LATT 1
++SYMM -X, 0.5+Y, 0.5-Z
+ SYMM -X, -Y, -Z
++SYMM X, 0.5-Y, 0.5+Z
+ SFAC C H
+ UNIT 5 4
+ C1 1 0.5000 0.5000 0.5000 11.00000 0.02000

@@ -1,0 +1,104 @@
+--- a/glib/gltexture.cpp
++++ b/glib/gltexture.cpp
+@@ -8,6 +8,23 @@
+ ******************************************************************************/
+ #include "gltexture.h"
+ #include "glpixelstorescope.h"
++
++#ifdef OLEX2_HARMONY_GL4ES_TEXTURE_1D_READBACK
++namespace {
++class ScopedGl4esReadAlias {
++  GLint previous_ = 0;
++public:
++  explicit ScopedGl4esReadAlias(GLuint id) {
++    olx_gl::get(GL_TEXTURE_BINDING_2D, &previous_);
++    olx_gl::bindTexture(GL_TEXTURE_2D, id);
++  }
++  ~ScopedGl4esReadAlias() {
++    olx_gl::bindTexture(GL_TEXTURE_2D, static_cast<GLuint>(previous_));
++  }
++};
++}
++#endif
++
+ 
+ //.............................................................................
+ TGlTexture::TGlTexture(GLuint id, uint32_t type, GLint level,
+@@ -282,8 +299,18 @@
+   }
+   olex2_harmony::ScopedPackedPixels<olx_gl> pack(
+     GL_PACK_ALIGNMENT, GL_PACK_ROW_LENGTH, GL_PACK_SKIP_ROWS, GL_PACK_SKIP_PIXELS);
+-  olx_gl::getTexImage(tex.GetType(), tex.GetLevel(), GL_RGBA,
+-    GL_UNSIGNED_BYTE, rv.data);
++#ifdef OLEX2_HARMONY_GL4ES_TEXTURE_1D_READBACK
++  if (tex.GetType() == GL_TEXTURE_1D) {
++    ScopedGl4esReadAlias alias(tex.GetId());
++    olx_gl::getTexImage(GL_TEXTURE_2D, tex.GetLevel(), GL_RGBA,
++      GL_UNSIGNED_BYTE, rv.data);
++  }
++  else
++#endif
++  {
++    olx_gl::getTexImage(tex.GetType(), tex.GetLevel(), GL_RGBA,
++      GL_UNSIGNED_BYTE, rv.data);
++  }
+   return rv;
+ }
+ //.............................................................................
+@@ -294,7 +321,8 @@
+   olx_gl::bindTexture(tex.GetType(), tex.GetId());
+   olex2_harmony::ScopedPackedPixels<olx_gl> unpack(
+     GL_UNPACK_ALIGNMENT, GL_UNPACK_ROW_LENGTH, GL_UNPACK_SKIP_ROWS, GL_UNPACK_SKIP_PIXELS);
+-  if (data.height != 0) {
++  // A 1D readback reports height one, but still requires the 1D overload.
++  if (tex.GetType() == GL_TEXTURE_2D) {
+     olx_gl::texImage(tex.GetType(), tex.GetLevel(), 4,
+       data.width, data.height, data.border,
+       GL_RGBA, GL_UNSIGNED_BYTE, data.data);
+@@ -370,21 +398,17 @@
+ GLuint TTextureManager::Add1DTexture(const olxstr& name, GLint level,
+   GLsizei width, GLint border, GLenum format, const GLvoid *pixels)
+ {
+-  olx_gl::pixelStore(GL_UNPACK_ALIGNMENT, 4);
+-  if (format == GL_RGB) {
+-    olx_gl::texImage(GL_TEXTURE_2D, level, 3, width, border, format,
+-      GL_UNSIGNED_BYTE, pixels);
+-  }
+-  else if (format == GL_RGBA) {
+-    olx_gl::texImage(GL_TEXTURE_2D, level, 4, width, border, format,
+-      GL_UNSIGNED_BYTE, pixels);
+-  }
+-  else {
++  if (format != GL_RGB && format != GL_RGBA) {
+     throw TInvalidArgumentException(__OlxSourceInfo,
+       olxstr("format=") << (int)format);
+   }
+   GLuint texId = 0;
+   olx_gl::genTextures(1, &texId);
++  olx_gl::bindTexture(GL_TEXTURE_1D, texId);
++  olex2_harmony::ScopedPackedPixels<olx_gl> unpack(
++    GL_UNPACK_ALIGNMENT, GL_UNPACK_ROW_LENGTH, GL_UNPACK_SKIP_ROWS, GL_UNPACK_SKIP_PIXELS);
++  olx_gl::texImage(GL_TEXTURE_1D, level, format == GL_RGB ? 3 : 4,
++    width, border, format, GL_UNSIGNED_BYTE, pixels);
+   TGlTexture* tex = new TGlTexture(texId, tpt1D, level, name);
+   Textures.Add(texId, tex);
+   return texId;
+@@ -416,13 +440,17 @@
+   }
+   olx_array_ptr<GLuint> texIds(new  GLuint[Textures.Count()]);
+   olx_gl::genTextures((GLuint)Textures.Count(), texIds);
++  sorted::PrimitiveAssociation<GLuint, TGlTexture*> recreated;
+   for (size_t i=0; i < Textures.Count(); i++) {
+     TGlTexture &glt = *Textures.GetValue(i);
+     if (glt.GetId() == ~0) {
+       glt.SetId((GLuint)(texIds[i]));
+       glt.WriteData(TextureData[i]);
+     }
+-  }
++    recreated.Add(glt.GetId(), &glt);
++  }
++  // Manager lookups must follow the regenerated object IDs.
++  Textures = recreated;
+   TextureData.Clear();
+ }
+ //.............................................................................

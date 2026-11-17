@@ -1,0 +1,158 @@
+--- a/upstream/olex/main_gui.cpp
++++ b/upstream/olex/main_gui.cpp
+@@ -37,6 +37,23 @@
+     app.CenterView();
+     app.GetRenderer().GetBasis().SetZoom(
+       app.GetRenderer().CalcZoom() * app.GetExtraZoom());
++    return true;
++  }
++  if (action == "center-model") {
++    // Match the original `center` command: center the current atom selection,
++    // or all visible atoms when the selection is empty, weighted by occupancy.
++    const auto atoms = app.FindXAtoms(TStrList(), true, true);
++    vec3d center;
++    double weight = 0;
++    for (size_t i = 0; i < atoms.Count(); i++) {
++      const double occupancy = atoms[i]->CAtom().GetChemOccu();
++      center += atoms[i]->crd() * occupancy;
++      weight += occupancy;
++    }
++    if (weight != 0) {
++      center /= weight;
++      app.GetRenderer().GetBasis().SetCenter(-center);
++    }
+     return true;
+   }
+   return false;
+--- a/native/original_renderer_host.h
++++ b/native/original_renderer_host.h
+@@ -5,7 +5,7 @@
+ #include "display_font_metrics.h"
+ // Private same-build document-view request; both DSOs use the same libc++.
+ // This is not a stable third-party plugin ABI or a security sandbox.
+-enum class Olex2DocumentOperation { Render, Open, Close, Export, ResetView, Pick, ClearSelection, SelectAll, InvertSelection, CaptureViewport, RestoreViewport, ToggleCellVisibility, ToggleBasisVisibility, ToggleFrameVisibility, ShowAllVisible };
++enum class Olex2DocumentOperation { Render, Open, Close, Export, ResetView, Pick, ClearSelection, SelectAll, InvertSelection, CaptureViewport, RestoreViewport, ToggleCellVisibility, ToggleBasisVisibility, ToggleFrameVisibility, ShowAllVisible, CenterModel };
+ struct Olex2DocumentRequest {
+   Olex2DocumentOperation operation=Olex2DocumentOperation::Render;
+   std::string name,bytes;
+--- a/native/original_document_view.cpp
++++ b/native/original_document_view.cpp
+@@ -234,7 +234,8 @@
+   return op==Olex2DocumentOperation::Pick||op==Olex2DocumentOperation::ClearSelection||
+     op==Olex2DocumentOperation::SelectAll||op==Olex2DocumentOperation::InvertSelection||
+     op==Olex2DocumentOperation::ToggleCellVisibility||op==Olex2DocumentOperation::ToggleBasisVisibility||
+-    op==Olex2DocumentOperation::ToggleFrameVisibility||op==Olex2DocumentOperation::ShowAllVisible;
++    op==Olex2DocumentOperation::ToggleFrameVisibility||op==Olex2DocumentOperation::ShowAllVisible||
++    op==Olex2DocumentOperation::CenterModel;
+ }
+ void ResetSelectionObservation(OriginalDocumentState& state){
+   state.selectionSequence=0;state.originalPickingCalls=0;state.pickHit=false;
+@@ -292,6 +293,9 @@
+   }else if(request.operation==Olex2DocumentOperation::ShowAllVisible){
+     if(!DispatchHarmonyMainGuiAction(app,"show-all"))throw std::runtime_error("Harmony main-form show-all action is unavailable");
+     action="show-all";
++  }else if(request.operation==Olex2DocumentOperation::CenterModel){
++    if(!DispatchHarmonyMainGuiAction(app,"center-model"))throw std::runtime_error("Harmony main-form center action is unavailable");
++    action="center-model";
+   }
+   ++state.selectionSequence;state.pickHit=hit;state.lastPickedCollection=std::move(collection);state.selectionAction=std::move(action);
+ }
+@@ -347,6 +351,7 @@
+   else if(state.selectionAction=="toggle-basis")interactionSource="original TMainForm::OnBasisVisible/TGXApp::SetBasisVisible";
+   else if(state.selectionAction=="toggle-frame")interactionSource="original TMainForm::FrameVChange/T3DFrameCtrl::SetVisible";
+   else if(state.selectionAction=="show-all")interactionSource="original TMainForm::OnShowAll/GXLibMacros::macFmol";
++  else if(state.selectionAction=="center-model")interactionSource="original TMainForm::OnModelCenter/GXLibMacros::macCenter";
+   std::ostringstream out;out<<"{\"passed\":"<<(passed?"true":"false")<<",\"loaded\":"<<(state.loaded?"true":"false")
+     <<",\"name\":"<<Quote(state.name)<<",\"format\":"<<Quote(state.format)<<",\"byteCount\":"<<state.byteCount<<",\"sha256\":"<<Quote(state.sha256)
+     <<",\"revision\":"<<state.revision<<",\"frames\":"<<state.frames<<",\"atomCount\":"<<(state.loaded?app.GetAtoms().count:0)
+--- a/app/entry/src/main/cpp/renderer.cpp
++++ b/app/entry/src/main/cpp/renderer.cpp
+@@ -680,6 +680,7 @@
+   else if(action=="toggle-basis")request.operation=Olex2DocumentOperation::ToggleBasisVisibility;
+   else if(action=="toggle-frame")request.operation=Olex2DocumentOperation::ToggleFrameVisibility;
+   else if(action=="show-all")request.operation=Olex2DocumentOperation::ShowAllVisible;
++  else if(action=="center-model")request.operation=Olex2DocumentOperation::CenterModel;
+   else return reject("Unknown original document interaction action");
+   if(!std::isfinite(x)||!std::isfinite(y)||x<0||x>1||y<0||y>1||mode>2)
+     return reject("Expected finite normalized viewport coordinates in [0,1] and selection mode 0, 1 or 2");
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -118,8 +118,8 @@
+     }
+     if(!ReadString(env,args[0],32,action)||
+         (action!="pick"&&action!="clear-selection"&&action!="select-all"&&action!="invert-selection"&&
+-         action!="toggle-cell"&&action!="toggle-basis"&&action!="toggle-frame"&&action!="show-all"))
+-      return reject("Action must be pick, clear-selection, select-all, invert-selection, toggle-cell, toggle-basis, toggle-frame or show-all");
++         action!="toggle-cell"&&action!="toggle-basis"&&action!="toggle-frame"&&action!="show-all"&&action!="center-model"))
++      return reject("Action must be pick, clear-selection, select-all, invert-selection, toggle-cell, toggle-basis, toggle-frame, show-all or center-model");
+     double x=0,y=0,mode=0;
+     if(napi_get_value_double(env,args[1],&x)!=napi_ok||napi_get_value_double(env,args[2],&y)!=napi_ok||
+         napi_get_value_double(env,args[3],&mode)!=napi_ok||!std::isfinite(x)||!std::isfinite(y)||
+--- a/app/entry/src/main/cpp/types/libolex2native/index.d.ts
++++ b/app/entry/src/main/cpp/types/libolex2native/index.d.ts
+@@ -108,7 +108,7 @@
+ // Private candidate38 ABI: JSON envelopes are parsed/validated by the document UI.
+ export const openOriginalDocument: (name: string, bytes: Uint8Array) => string;
+ // Existing original viewport only. x/y: finite normalized top-left [0,1].
+-// action: pick | clear-selection | select-all | invert-selection | toggle-cell | toggle-basis | toggle-frame | show-all.
++// action: pick | clear-selection | select-all | invert-selection | toggle-cell | toggle-basis | toggle-frame | show-all | center-model.
+ // mode: integer 0 replace, 1 add, 2 toggle; all four arguments are required.
+ // Returns the actual document/core/presentation envelope (including failures).
+ export const interactOriginalDocument: (action: string, x: number, y: number, mode: number) => string;
+--- a/app/entry/src/main/ets/model/OriginalViewportInput.ts
++++ b/app/entry/src/main/ets/model/OriginalViewportInput.ts
+@@ -8,7 +8,7 @@
+ export interface OriginalViewportKeyResult { handled: boolean; action: string; }
+ 
+ export function originalSelectionRequest(action: string, x: number, y: number, mode: number): OriginalSelectionRequest {
+-  if ((action !== 'pick' && action !== 'clear-selection' && action !== 'select-all' && action !== 'invert-selection' && action !== 'toggle-cell' && action !== 'toggle-basis' && action !== 'toggle-frame' && action !== 'show-all') ||
++  if ((action !== 'pick' && action !== 'clear-selection' && action !== 'select-all' && action !== 'invert-selection' && action !== 'toggle-cell' && action !== 'toggle-basis' && action !== 'toggle-frame' && action !== 'show-all' && action !== 'center-model') ||
+     !Number.isFinite(x) || !Number.isFinite(y) || x < 0 || x > 1 || y < 0 || y > 1 ||
+     !Number.isInteger(mode) || mode < 0 || mode > 2) {
+     throw new Error('选择动作、视口坐标或选择模式不合法');
+--- a/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
++++ b/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
+@@ -5,6 +5,7 @@
+ export const ORIGINAL_MAIN_GUI_BASIS_SOURCE: string = 'original TMainForm::OnBasisVisible/TGXApp::SetBasisVisible';
+ export const ORIGINAL_MAIN_GUI_FRAME_SOURCE: string = 'original TMainForm::FrameVChange/T3DFrameCtrl::SetVisible';
+ export const ORIGINAL_MAIN_GUI_SHOW_ALL_SOURCE: string = 'original TMainForm::OnShowAll/GXLibMacros::macFmol';
++export const ORIGINAL_MAIN_GUI_CENTER_SOURCE: string = 'original TMainForm::OnModelCenter/GXLibMacros::macCenter';
+ export interface OriginalDocumentCoreStatus {
+   passed: boolean; loaded: boolean; name: string; format: string;
+   byteCount: number; sha256: string; revision: number; frames: number;
+@@ -88,12 +89,13 @@
+       (core.selectionAction !== '' && core.selectionAction !== 'pick' && core.selectionAction !== 'clear-selection' &&
+        core.selectionAction !== 'select-all' && core.selectionAction !== 'invert-selection' && core.selectionAction !== 'restore-selection' &&
+        core.selectionAction !== 'toggle-cell' && core.selectionAction !== 'toggle-basis' && core.selectionAction !== 'toggle-frame' &&
+-       core.selectionAction !== 'show-all'))) ||
++       core.selectionAction !== 'show-all' && core.selectionAction !== 'center-model'))) ||
+     (fields.indexOf('selectionSource') >= 0 && (typeof core.selectionSource !== 'string' ||
+       core.selectionSource !== ORIGINAL_SELECTION_SOURCE && core.selectionSource !== ORIGINAL_MAIN_GUI_CELL_SOURCE &&
+       core.selectionSource !== ORIGINAL_MAIN_GUI_BASIS_SOURCE &&
+       core.selectionSource !== ORIGINAL_MAIN_GUI_FRAME_SOURCE &&
+-      core.selectionSource !== ORIGINAL_MAIN_GUI_SHOW_ALL_SOURCE))) {
++      core.selectionSource !== ORIGINAL_MAIN_GUI_SHOW_ALL_SOURCE &&
++      core.selectionSource !== ORIGINAL_MAIN_GUI_CENTER_SOURCE))) {
+     throw new Error('原版文档选择状态格式不合法');
+   }
+ }
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -530,7 +530,7 @@
+         validated.action === 'clear-selection' ? '已清除选择' : validated.action === 'select-all' ? '已全选' :
+         validated.action === 'invert-selection' ? '已反选' : validated.action === 'toggle-cell' ? '已切换晶胞显示' :
+           validated.action === 'toggle-basis' ? '已切换基矢显示' : validated.action === 'toggle-frame' ? '已切换包围框显示' :
+-          '已显示全部分子并重新居中';
++            validated.action === 'center-model' ? '模型已居中' : '已显示全部分子并重新居中';
+       this.originalSelectionMessage = `${actionLabel} · 选中 ${core.selectedObjectCount} · 选择序号 ${core.selectionSequence}` +
+         (core.lastPickedCollection.length > 0 ? ` · 集合 ${core.lastPickedCollection}` : '');
+     } catch (error) {
+@@ -2659,6 +2659,8 @@
+         }, (mode: number) => `selection-mode-${mode}`)
+         Button('包围框').id('olex2-original-toggle-frame').height(25).fontSize(10)
+           .enabled(this.originalSelectionEnabled()).onClick(() => this.selectOriginalDocument('toggle-frame'))
++        Button('模型居中').id('olex2-original-center-model').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled()).onClick(() => this.selectOriginalDocument('center-model'))
+         Button('显示全部').id('olex2-original-show-all').height(25).fontSize(10)
+           .enabled(this.originalSelectionEnabled()).onClick(() => this.selectOriginalDocument('show-all'))
+         Text(this.originalViewportFocused ? '视口焦点' : '点击视口聚焦')

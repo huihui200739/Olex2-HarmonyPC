@@ -1,0 +1,338 @@
+diff --git a/olex/ctrls/checkboxext.h b/olex/ctrls/checkboxext.h
+--- a/olex/ctrls/checkboxext.h
++++ b/olex/ctrls/checkboxext.h
+@@ -5,7 +5,41 @@
+ *                                                                             *
+ * This source file is distributed under the terms of the licence located in   *
+ * the root folder.                                                            *
+-******************************************************************************/
++******************************************************************************/
++
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#ifndef __olx_ctrl_checkbox_H
++#define __olx_ctrl_checkbox_H
++#include "olxctrlbase.h"
++namespace ctrl_ext {
++class TCheckBox:public olex2::harmony::ui::Widget,public AActionHandler,public AOlxCtrl {
++  olxstr Data,DependMode;
++  TActionQueue* ActionQueue=nullptr;
++  bool checked_=false;
++  olex2::harmony::ui::EventWidget mark_,caption_;
++  void Changed(const olex2::harmony::ui::NodeEvent&);
++  void Dispatch();
++public:
++  TCheckBox(olex2::harmony::ui::NodeBackend&,olex2::harmony::ui::Widget*,int id=-1,const olxstr& label=EmptyString(),olex2::harmony::ui::Point={},olex2::harmony::ui::Size={},long style=0);
++  ~TCheckBox()override;
++  using Widget::IsEnabled;
++  void SetActionQueue(TActionQueue&,const olxstr&);
++  bool Execute(const IOlxObject*,const IOlxObject*,TActionQueue*)override;
++  void OnRemove(TActionQueue*)override{ActionQueue=nullptr;}
++  DefPropC(olxstr,Data)
++  AOlxCtrl::ActionQueue &OnClick,&OnCheck,&OnUncheck;
++  void SetCaption(const olxstr&);
++  olxstr GetCaption()const;
++  bool IsChecked()const{return checked_;}
++  void SetChecked(bool);
++  void SetEventLifetime(const std::shared_ptr<void>& value){Widget::SetEventLifetime(value);mark_.SetEventLifetime(value);caption_.SetEventLifetime(value);}
++  const std::string& LastEventError()const;
++};
++}
++#endif
++
++#else
++
+ 
+ #ifndef __olx_ctrl_checkbox_H
+ #define __olx_ctrl_checkbox_H
+@@ -44,3 +78,5 @@
+   };
+ }; // end namespace ctrl_ext
+ #endif
++
++#endif // native option controls / original wx
+diff --git a/olex/ctrls/checkboxext.cpp b/olex/ctrls/checkboxext.cpp
+--- a/olex/ctrls/checkboxext.cpp
++++ b/olex/ctrls/checkboxext.cpp
+@@ -5,7 +5,42 @@
+ *                                                                             *
+ * This source file is distributed under the terms of the licence located in   *
+ * the root folder.                                                            *
+-******************************************************************************/
++******************************************************************************/
++
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "checkboxext.h"
++#include "olx_control_state.h"
++#include "eutf8.h"
++#include <cmath>
++using namespace ctrl_ext;
++using namespace olex2::harmony::ui;
++TCheckBox::TCheckBox(NodeBackend& backend,Widget* parent,int id,const olxstr& label,Point pos,Size size,long style)
++ :Widget(backend,NodeKind::Row,parent,id,pos,size,style),AOlxCtrl(this),
++  mark_(backend,NodeKind::CheckBox,this,{EventKind::CheckChange},[this](const NodeEvent& e){Changed(e);}),
++  caption_(backend,NodeKind::Text,this,{EventKind::Click},[this](const NodeEvent&){if(IsEnabled()&&IsShown()){SetChecked(!checked_);Dispatch();}}),
++  OnClick(AOlxCtrl::ActionQueue::New(Actions,evt_on_click_id)),OnCheck(AOlxCtrl::ActionQueue::New(Actions,evt_on_check_id)),OnUncheck(AOlxCtrl::ActionQueue::New(Actions,evt_on_uncheck_id)){
++  SetToDelete(false);SetNumber(Property::RowSpacing,5);mark_.SetWidth(22);mark_.SetHeight(22);mark_.SetNumber(Property::Focusable,1);SetCaption(label);SetChecked(false);
++}
++TCheckBox::~TCheckBox(){if(ActionQueue)ActionQueue->Remove(this);}
++void TCheckBox::SetCaption(const olxstr& value){auto utf8=TUtf8::Encode(value);std::string text(utf8.c_str(),utf8.Length());caption_.SetText(TextProperty::Content,text);mark_.SetText(TextProperty::Accessibility,text);}
++olxstr TCheckBox::GetCaption()const{auto text=caption_.GetText(TextProperty::Content);return TUtf8::Decode(text.c_str(),text.size());}
++void TCheckBox::SetChecked(bool value){const bool old=checked_;checked_=value;try{mark_.SetNumber(Property::Checked,value?1:0);}catch(...){checked_=old;throw;}}
++void TCheckBox::Changed(const NodeEvent& event){
++  if(event.kind!=EventKind::CheckChange||!std::isfinite(event.value)||(event.value!=0&&event.value!=1))return;
++  if(!IsEnabled()||!IsShown()){mark_.SetNumber(Property::Checked,checked_?1:0);return;}
++  const bool value=event.value!=0;if(value==checked_)return;SetChecked(value);Dispatch();
++}
++void TCheckBox::Dispatch(){OnClick.Execute(static_cast<AOlxCtrl*>(this));if(checked_)OnCheck.Execute(static_cast<AOlxCtrl*>(this));else OnUncheck.Execute(static_cast<AOlxCtrl*>(this));}
++void TCheckBox::SetActionQueue(TActionQueue& q,const olxstr& mode){if(ActionQueue)ActionQueue->Remove(this);ActionQueue=&q;DependMode=mode;ActionQueue->Add(this);}
++bool TCheckBox::Execute(const IOlxObject*,const IOlxObject* data,TActionQueue*){
++  if(data&&data->Is<TModeChange>())SetChecked(static_cast<const TModeChange*>(data)->GetStatus());
++  else if(data&&data->Is<TStateChange>())SetChecked(static_cast<const TStateChange*>(data)->GetStatus());
++  else Dispatch();return true;
++}
++const std::string& TCheckBox::LastEventError()const{if(!Widget::LastEventError().empty())return Widget::LastEventError();if(!mark_.LastEventError().empty())return mark_.LastEventError();return caption_.LastEventError();}
++
++#else
++
+ 
+ #include "checkboxext.h"
+ #include "frameext.h"
+@@ -75,3 +110,5 @@
+     OnUncheck.Execute((AOlxCtrl*)this);
+   }
+ }
++
++#endif // native option controls / original wx
+diff --git a/olex/ctrls/choiceext.h b/olex/ctrls/choiceext.h
+--- a/olex/ctrls/choiceext.h
++++ b/olex/ctrls/choiceext.h
+@@ -6,6 +6,44 @@
+ * This source file is distributed under the terms of the licence located in   *
+ * the root folder.                                                            *
+ ******************************************************************************/
++
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#ifndef __olx_ctrl_choice_H
++#define __olx_ctrl_choice_H
++#include "olxctrlbase.h"
++#include "native_choice.h"
++#include "itemlist.h"
++namespace ctrl_ext {
++class TChoice:public TItemList<olex2::harmony::ui::NativeChoiceList>,public AOlxCtrl {
++  olxstr Data,StrValue;
++  bool entered_=false,hovered_=false,OnChangeAlways=false,hasDefault=false;
++  olxstr_dict<olxstr> drawParams;
++  uint32_t drawBase_=0;
++  void ApplyDrawParams();
++protected:
++  void OnNativeEvent(const olex2::harmony::ui::NodeEvent&)override;
++public:
++  TChoice(olex2::harmony::ui::NodeBackend&,olex2::harmony::ui::Widget*,int id=-1,olex2::harmony::ui::Point={},olex2::harmony::ui::Size={},long style=0);
++  ~TChoice()override;
++  void Clear();
++  olxstr GetValue()const{return GetSelection()<0?EmptyString():GetString(static_cast<size_t>(GetSelection()));}
++  void SetCustomDrawParams(const olxstr& value){drawBase_=GetBackgroundColor();drawParams=MapFromToks(value);ApplyDrawParams();}
++  olxstr GetText()const;
++  void SetText(const olxstr&);
++  void AddItems(const TStrList& values){TItemList<olex2::harmony::ui::NativeChoiceList>::AddItems(values);if(HasDefault()&&!IsEmpty())SetSelection(0);}
++  DefPropC(olxstr,Data)
++  DefPropBIsSet(OnChangeAlways)
++  bool HasDefault()const{return hasDefault;}
++  void SetHasDefault(bool value){hasDefault=value;}
++  void HandleOnLeave();
++  void HandleOnEnter();
++  ActionQueue &OnChange,&OnLeave,&OnEnter;
++};
++}
++#endif
++
++#else
++
+ 
+ #ifndef __olx_ctrl_choice_H
+ #define __olx_ctrl_choice_H
+@@ -67,3 +105,5 @@
+   };
+ };  // end namespace ctrl_ext
+ #endif
++
++#endif // native option controls / original wx
+diff --git a/olex/ctrls/choiceext.cpp b/olex/ctrls/choiceext.cpp
+--- a/olex/ctrls/choiceext.cpp
++++ b/olex/ctrls/choiceext.cpp
+@@ -6,6 +6,45 @@
+ * This source file is distributed under the terms of the licence located in   *
+ * the root folder.                                                            *
+ ******************************************************************************/
++
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "choiceext.h"
++#include "olxvar.h"
++#include <algorithm>
++#include <cmath>
++using namespace ctrl_ext;
++using namespace olex2::harmony::ui;
++TChoice::TChoice(NodeBackend& backend,Widget* parent,int id,Point pos,Size size,long style)
++ :TItemList<NativeChoiceList>(backend,parent,id,pos,size,style),AOlxCtrl(this),
++  OnChange(AOlxCtrl::ActionQueue::New(Actions,evt_change_id)),OnLeave(AOlxCtrl::ActionQueue::New(Actions,evt_on_mouse_leave_id)),OnEnter(AOlxCtrl::ActionQueue::New(Actions,evt_on_mouse_enter_id)){
++  OnLeave.SetEnabled(false);Listen({EventKind::Click,EventKind::ChoiceChange,EventKind::Focus,EventKind::Blur,EventKind::Hover});
++}
++TChoice::~TChoice(){_Clear();}
++void TChoice::Clear(){_Clear();NativeChoiceList::Clear();StrValue.SetLength(0);}
++void TChoice::SetText(const olxstr& text){auto found=_SetText(text);if(found.a!=InvalidIndex){SetSelection(static_cast<int>(found.a));StrValue=found.b;}else if(HasDefault()&&!IsEmpty()){SetSelection(0);StrValue=GetValue();}else{SetSelection(-1);StrValue=EmptyString();}}
++olxstr TChoice::GetText()const{int selected=GetSelection();if(selected<0)return EmptyString();auto value=_GetText(static_cast<size_t>(selected));return value.a?value.b:GetValue();}
++void TChoice::HandleOnEnter(){if(OnEnter.IsEnabled()){OnEnter.Execute(this);OnEnter.SetEnabled(false);OnLeave.SetEnabled(true);}}
++void TChoice::HandleOnLeave(){if(OnLeave.IsEnabled()){auto value=GetValue();if(value!=StrValue){StrValue=value;OnChange.Execute(this);}OnLeave.Execute(this);OnLeave.SetEnabled(false);OnEnter.SetEnabled(true);}}
++void TChoice::OnNativeEvent(const NodeEvent& event){
++  if(event.kind==EventKind::Click){Backend().OpenOptions(Handle());}
++  else if(event.kind==EventKind::ChoiceChange){if(!ApplyUserSelection(event.value))return;auto value=GetValue();const bool changed=IsOnChangeAlways()||value!=StrValue;StrValue=value;SetNumber(Property::ChoiceSelection,GetSelection());Backend().CloseOptions(Handle());if(changed){if(!Data.IsEmpty())TOlxVars::SetVar(Data,GetText());OnChange.Execute(this);}}
++  else if(event.kind==EventKind::Focus){if(!entered_){entered_=true;HandleOnEnter();}}
++  else if(event.kind==EventKind::Blur){if(entered_){entered_=false;HandleOnLeave();}}
++  else if(event.kind==EventKind::Hover){hovered_=event.value!=0;ApplyDrawParams();}
++}
++void TChoice::ApplyDrawParams(){
++  if(drawParams.IsEmpty())return;
++  auto width=drawParams.Find("border.width","1").ToDouble(),radius=drawParams.Find("border.radius","0").ToDouble();
++  if(!std::isfinite(width)||!std::isfinite(radius)||width<0||radius<0)throw std::invalid_argument("Native choice border dimensions must be nonnegative");
++  const uint32_t base=drawBase_;
++  auto lighten=[base](double percent){auto channel=[percent](uint32_t v){return static_cast<uint32_t>(std::max(0.0,std::min(255.0,v*percent/100.0)));};return (base&0xff000000)|(channel((base>>16)&255)<<16)|(channel((base>>8)&255)<<8)|channel(base&255);};
++  SetNumber(Property::BorderWidth,width);SetNumber(Property::BorderRadius,radius);
++  SetNumber(Property::BorderColor,lighten(drawParams.Find("border.lightness",CustomDraw_Border_Lightness).ToDouble()));
++  SetNumber(Property::Background,lighten(hovered_?drawParams.Find("highlight.lightness",CustomDraw_Highlight_Lightness).ToDouble():100));
++}
++
++#else
++
+ 
+ #include "choiceext.h"
+ #include "frameext.h"
+@@ -163,3 +202,5 @@
+   event.Skip(false);
+ }
+ //..............................................................................
++
++#endif // native option controls / original wx
+diff --git a/olex/ctrls/itemlist.h b/olex/ctrls/itemlist.h
+--- a/olex/ctrls/itemlist.h
++++ b/olex/ctrls/itemlist.h
+@@ -11,7 +11,9 @@
+ #define __olx_ctrl_ilist_H
+ #include "olxctrlbase.h"
+ #include "estrlist.h"
+-#include "wx/combo.h"
++#if !defined(OLEX2_NATIVE_WIDGETS) || defined(__WXWIDGETS__)
++#include "wx/combo.h"
++#endif
+ 
+ namespace ctrl_ext {
+   template <class parent_t>
+@@ -40,11 +42,17 @@
+           if (d_o->Delete) {
+             delete d_o->Data;
+           }
+-          delete d_o;
++          delete d_o;
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++          parent_t::SetClientData(i, NULL);
++#endif
+         }
+       }
+     }
+   public:
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++    using parent_t::parent_t;
++#endif
+     void AddObject(const olxstr &Item, IOlxObject *Data = NULL) {
+       _AddObject(Item, Data, false);
+     }
+diff --git a/gxlib/olxstate.h b/gxlib/olxstate.h
+--- a/gxlib/olxstate.h
++++ b/gxlib/olxstate.h
+@@ -12,24 +12,13 @@
+ #include "estlist.h"
+ #include "eset.h"
+ #include "integration.h"
+-#include "gxapp.h"
++#include "gxapp.h"
++#include "olx_control_state.h"
+ #undef Status
+ 
+ BeginGxlNamespace()
+ 
+-class TStateChange: public IOlxObject {
+-  const size_t State;
+-  const bool Status;
+-  const olxstr Data;
+-public:
+-  TStateChange(size_t state, bool status, const olxstr& data=EmptyString())
+-  : State(state), Status(status), Data(data)
+-  {}
+-  bool GetStatus() const {  return Status;  }
+-  size_t GetState() const {  return State;  }
+-  const olxstr& GetData() const {  return Data;  }
+-};
+-
++
+ class TStateRegistry {
+ public:
+   struct IGetter {
+@@ -327,16 +316,6 @@
+   static bool CheckMode(const olxstr &mode);
+ };
+ 
+-class TModeChange: public IOlxObject  {
+-  bool FStatus;
+-  size_t Mode;
+-public:
+-  TModeChange(size_t mode, bool status)
+-    : FStatus(status), Mode(mode)
+-  {}
+-  ~TModeChange()  {}
+-  bool GetStatus() const {  return FStatus;  }
+-};
+ //.............................................................................
+ EndGxlNamespace()
+ #endif
+diff --git a/gxlib/olx_control_state.h b/gxlib/olx_control_state.h
+new file mode 100644
+--- /dev/null
++++ b/gxlib/olx_control_state.h
+@@ -0,0 +1,38 @@
++/******************************************************************************
++* Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
++*                                                                             *
++* This file is part of the OlexSys Development Framework.                     *
++*                                                                             *
++* This source file is distributed under the terms of the licence located in   *
++* the root folder.                                                            *
++******************************************************************************/
++#pragma once
++#include "gxbase.h"
++#include "estlist.h"
++#undef Status
++BeginGxlNamespace()
++class TStateChange: public IOlxObject {
++  const size_t State;
++  const bool Status;
++  const olxstr Data;
++public:
++  TStateChange(size_t state, bool status, const olxstr& data=EmptyString())
++  : State(state), Status(status), Data(data)
++  {}
++  bool GetStatus() const {  return Status;  }
++  size_t GetState() const {  return State;  }
++  const olxstr& GetData() const {  return Data;  }
++};
++
++class TModeChange: public IOlxObject  {
++  bool FStatus;
++  size_t Mode;
++public:
++  TModeChange(size_t mode, bool status)
++    : FStatus(status), Mode(mode)
++  {}
++  ~TModeChange()  {}
++  bool GetStatus() const {  return FStatus;  }
++};
++
++EndGxlNamespace()

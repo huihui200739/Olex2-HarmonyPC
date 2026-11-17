@@ -1,0 +1,40 @@
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1799,6 +1799,26 @@
+       this.commandError = '原版命令输入应为1～4096字节；请检查输入后重试';
+     }
+     this.saveRecord();
++  }
++
++  private showOriginalAtomInfo(): void {
++    const count: number | undefined = this.originalDocument.core.selectedObjectCount;
++    if (!this.originalSelectionEnabled() || count === undefined || count === 0) {
++      this.originalSelectionMessage = '先选中至少一个原子，再查看原版原子信息';
++      return;
++    }
++    try {
++      const result: OriginalCommandReport = nativeBridge.executeOriginalCommand('Info');
++      let text: string = result.output.trim();
++      if (text.length === 0) text = result.text.length > 0 ? result.text : '';
++      if (text.length === 0) text = result.passed ? '原版 Info 没有返回文本；选中对象可能不是原子。' : result.error;
++      if (text.length > 4000) text = text.substring(0, 4000) + '\n…（已截断）';
++      AlertDialog.show({ title: '原版原子信息', message: text,
++        confirm: { value: '关闭', action: () => {} } });
++    } catch (error) {
++      AlertDialog.show({ title: '原版原子信息', message: (error as Error).message || '原版 Info 命令失败',
++        confirm: { value: '关闭', action: () => {} } });
++    }
+   }
+ 
+   private executeDesktopCommand(): void {
+@@ -2801,6 +2821,10 @@
+           .enabled(this.originalSelectionEnabled() && this.originalDocument.core.selectedObjectCount !== undefined &&
+             this.originalDocument.core.selectedObjectCount > 0)
+           .onClick(() => this.selectOriginalDocument('hide-selection'))
++        Button('信息').id('olex2-original-atom-info').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled() && this.originalDocument.core.selectedObjectCount !== undefined &&
++            this.originalDocument.core.selectedObjectCount > 0)
++          .onClick(() => this.showOriginalAtomInfo())
+         Text(this.originalViewportFocused ? '视口焦点' : '点击视口聚焦')
+           .id('olex2-original-viewport-focus').fontSize(10).fontColor('#758579').layoutWeight(1)
+       }.width('100%')

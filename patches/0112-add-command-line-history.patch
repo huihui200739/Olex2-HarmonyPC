@@ -1,0 +1,60 @@
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -222,6 +222,8 @@
+   private desktopShortcutLatch: DesktopShortcutLatch = new DesktopShortcutLatch();
+   private desktopMetaKeys: Set<number> = new Set<number>();
+   @State private commandText: string = 'pc.help';
++  @State private commandHistory: string[] = [];
++  private commandHistoryIndex: number = -1;
+   private generateDialogTimer: number = -1;
+   private generateDialogOpen: boolean = false;
+   private periodicTableTimer: number = -1;
+@@ -1889,6 +1891,7 @@
+ 
+   private executeOriginalCommand(): void {
+     const input: string = this.commandText;
++    this.recordCommandHistory(input);
+     try {
+       const result: OriginalCommandReport = nativeBridge.executeOriginalCommand(input);
+       this.applicationRuntime = result.runtime;
+@@ -2275,10 +2278,29 @@
+     } catch (error) {
+       this.originalSelectionMessage = (error as Error).message || '原版图元对话框轮询失败';
+     }
++  }
++
++  private recordCommandHistory(input: string): void {
++    const value: string = input.trim();
++    if (value.length === 0) return;
++    if (this.commandHistory.length === 0 || this.commandHistory[this.commandHistory.length - 1] !== value) {
++      this.commandHistory.push(value);
++      if (this.commandHistory.length > 20) this.commandHistory.shift();
++    }
++    this.commandHistoryIndex = -1;
++  }
++
++  private commandHistoryStep(previous: boolean): void {
++    if (this.commandHistory.length === 0) return;
++    if (this.commandHistoryIndex < 0) this.commandHistoryIndex = this.commandHistory.length;
++    if (previous) this.commandHistoryIndex = Math.max(0, this.commandHistoryIndex - 1);
++    else this.commandHistoryIndex = Math.min(this.commandHistory.length, this.commandHistoryIndex + 1);
++    this.commandText = this.commandHistoryIndex >= this.commandHistory.length ? '' : this.commandHistory[this.commandHistoryIndex];
+   }
+ 
+   private executeDesktopCommand(): void {
+     const input: string = this.commandText;
++    this.recordCommandHistory(input);
+     const sequence: number = this.commandStatus.sequence + 1;
+     try {
+       const result: DesktopCommandReport = nativeBridge.executeDesktopCommand(input);
+@@ -3113,6 +3135,10 @@
+           .type(InputType.Normal).enableAutoFill(false).enterKeyType(EnterKeyType.Go)
+           .onChange((value: string) => { this.commandText = value; })
+           .onSubmit(() => { this.submitCommand(); })
++        Button('↑').id('olex2-command-history-prev').padding(0).width(24).height(28).fontSize(12).backgroundColor('#355345')
++          .onClick(() => { this.commandHistoryStep(true); })
++        Button('↓').id('olex2-command-history-next').padding(0).width(24).height(28).fontSize(12).backgroundColor('#355345')
++          .onClick(() => { this.commandHistoryStep(false); })
+         Button('×').id('olex2-command-clear').padding(0).width(24).height(28).fontSize(13).backgroundColor('#355345')
+           .onClick(() => { this.commandText = ''; })
+       }.width('100%')

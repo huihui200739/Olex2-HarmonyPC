@@ -1,0 +1,246 @@
+--- a/upstream/gxlib/wxglscene.h
++++ b/upstream/gxlib/wxglscene.h
+@@ -1,3 +1,43 @@
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#pragma once
++#include "gxbase.h"
++#include "glscene.h"
++#include "platform_font_factory.h"
++#include "original_renderer_host.h"
++#include <string>
++
++BeginGxlNamespace()
++// Harmony supplies a leased EGL surface instead of a wx canvas/context. The
++// renderer still owns this original scene and all original TGlFont instances.
++class TwxGlScene : public AGlScene {
++  Olex2LegacyHost host_{};
++  bool bound_=false;
++  mutable olex2::harmony::PlatformFontFactory fonts_;
++  std::string fontsFolder_;
++  double fontScale_=1;
++  bool scaling_=false;
++protected:
++  TGlFont& DoCreateFont(TGlFont&,bool half) const override;
++  void RequireCurrent() const;
++public:
++  explicit TwxGlScene(const olxstr& fontsFolder=EmptyString());
++  ~TwxGlScene() override;
++  void Bind(const Olex2LegacyHost&);
++  void Unbind() noexcept;
++  bool IsBound() const {return bound_;}
++  bool MakeCurrent() override;
++  void ScaleFonts(double scale) override;
++  void RestoreFontScale() override;
++  void ReleaseFontResources();
++  bool FontsAllReleased() const {return fonts_.AllReleased();}
++  const olex2::harmony::SystemFontCatalog& FontCatalog() const {return fonts_.FontCatalog();}
++  const olex2::harmony::FontDisplayMetrics& DisplayMetrics() const {return fonts_.DisplayMetrics();}
++  const olex2::harmony::NativeFontRecord& FontRecord(const TGlFont& font) const {return fonts_.Record(font);}
++  olxstr ShowFontDialog(TGlFont*,const olxstr&) override;
++};
++EndGxlNamespace()
++
++#else
+ /******************************************************************************
+ * Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
+ *                                                                             *
+@@ -61,3 +101,5 @@
+ EndGxlNamespace()
+ #endif // wxwidgets
+ #endif // guard
++
++#endif // Harmony native scene / original wx implementation
+--- a/upstream/gxlib/wxglscene.cpp
++++ b/upstream/gxlib/wxglscene.cpp
+@@ -1,3 +1,64 @@
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "wxglscene.h"
++#include "eutf8.h"
++#include <cmath>
++#include <stdexcept>
++
++TwxGlScene::TwxGlScene(const olxstr& fontsFolder) {
++  auto utf8=TUtf8::Encode(fontsFolder);
++  fontsFolder_.assign(utf8.c_str(),utf8.Length());
++  if(fontsFolder_.find('\0')!=std::string::npos)
++    throw std::invalid_argument("Font folder contains an embedded NUL");
++  if(!fontsFolder_.empty()&&fontsFolder_.back()!='/')fontsFolder_+='/';
++}
++TwxGlScene::~TwxGlScene()=default;
++void TwxGlScene::Bind(const Olex2LegacyHost& host) {
++  if(bound_||IsEnabled())throw std::logic_error("The original scene already has a surface lease");
++  if(!host.make_current||!host.framebuffer_size||!host.resolve)
++    throw std::invalid_argument("Incomplete original scene surface lease");
++  // A display transition may only replace metrics after the old-context lists
++  // have been retired. The factory keeps same-display glyphs between leases.
++  fonts_.SetDisplayMetrics(host.font_display_metrics);
++  host_=host;bound_=true;SetEnabled(true);
++}
++void TwxGlScene::Unbind() noexcept {
++  SetEnabled(false);bound_=false;host_=Olex2LegacyHost{};
++}
++bool TwxGlScene::MakeCurrent() {
++  return IsEnabled()&&bound_&&host_.make_current&&host_.make_current()!=0;
++}
++void TwxGlScene::RequireCurrent() const {
++  if(!bound_||!IsEnabled()||!host_.make_current||!host_.make_current())
++    throw std::runtime_error("No current leased context for original scene fonts");
++}
++TGlFont& TwxGlScene::DoCreateFont(TGlFont& font,bool half) const {
++  RequireCurrent();
++  return fonts_.Create(font,half,fontScale_,fontsFolder_);
++}
++void TwxGlScene::ReleaseFontResources() {
++  RequireCurrent();
++  fonts_.Release();
++}
++void TwxGlScene::ScaleFonts(double scale) {
++  if(!std::isfinite(scale)||scale<=0||scale>8||scaling_)
++    throw std::invalid_argument("Unbalanced or invalid original scene font scale");
++  RequireCurrent();
++  // Release both regular and small display lists. Recreate lazily through the
++  // genuine scene, keeping persisted IDs, exact families and @ vector sizes.
++  fonts_.Release();fontScale_=scale;scaling_=true;
++}
++void TwxGlScene::RestoreFontScale() {
++  if(!scaling_)return;
++  RequireCurrent();
++  fonts_.Release();fontScale_=1;scaling_=false;
++}
++olxstr TwxGlScene::ShowFontDialog(TGlFont*,const olxstr&) {
++  // The previous platform scene had this same explicit limitation. ArkUI
++  // selection must be asynchronous; no fake cancellation or nested UI loop.
++  throw std::runtime_error("The original scene needs an asynchronous native font chooser");
++}
++
++#else
+ /******************************************************************************
+ * Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
+ *                                                                             *
+@@ -581,3 +642,5 @@
+ }
+ //.............................................................................
+ #endif // __WXWIDGETS__
++
++#endif // Harmony native scene / original wx implementation
+--- a/native/platform_window_scene.h
++++ b/native/platform_window_scene.h
+@@ -1,66 +1,28 @@
+ #pragma once
+-#include "glscene.h"
+-#include "platform_font_factory.h"
+-#include <cmath>
+-#include "original_renderer_host.h"
++#include "wxglscene.h"
+ #include <cstdint>
+-#include <stdexcept>
+ 
+ namespace olex2::harmony {
+-// The genuine renderer owns this scene for the entire application lifetime.
+-// A surface lease is short-lived; no callback points into an expired ABI frame.
++// Telemetry decorates the original Harmony scene; surface/font operations live
++// in gxlib/wxglscene.cpp and are shared by the real application runtime.
+ struct PlatformSceneLifetime {
+   uint64_t bindings=0, detachments=0, makeCurrent=0, startDraw=0, endDraw=0;
+   uint64_t destroyed=0, fontRequests=0;
+   bool cleanupFailed=false;
+ };
+-class PlatformWindowScene final:public AGlScene {
++class PlatformWindowScene final:public TwxGlScene {
+   PlatformSceneLifetime& lifetime_;
+-  Olex2LegacyHost host_{};
+-  bool bound_=false;
+-  mutable PlatformFontFactory fonts_;
+-  double fontScale_=1;
+-  bool scaling_=false;
+   TGlFont& DoCreateFont(TGlFont& font,bool half) const override {
+     ++lifetime_.fontRequests;
+-    if(!bound_ || !IsEnabled() || !host_.make_current || !host_.make_current())throw std::runtime_error("No current leased context for font creation");
+-    return fonts_.Create(font,half,fontScale_);
++    return TwxGlScene::DoCreateFont(font,half);
+   }
+ public:
+   explicit PlatformWindowScene(PlatformSceneLifetime& lifetime):lifetime_(lifetime) {}
+   ~PlatformWindowScene() override {++lifetime_.destroyed;}
+-  void Bind(const Olex2LegacyHost& host) {
+-    if(bound_ || IsEnabled())throw std::logic_error("A platform scene already has a surface lease");
+-    if(!host.make_current || !host.framebuffer_size || !host.resolve)
+-      throw std::invalid_argument("Incomplete platform scene surface lease");
+-    fonts_.SetDisplayMetrics(host.font_display_metrics);
+-    host_=host;bound_=true;SetEnabled(true);++lifetime_.bindings;
+-  }
+-  void Unbind() noexcept {
+-    if(bound_)++lifetime_.detachments;
+-    SetEnabled(false);bound_=false;host_=Olex2LegacyHost{};
+-  }
+-  bool IsBound()const {return bound_;}
+-  bool MakeCurrent() override {
+-    ++lifetime_.makeCurrent;
+-    return IsEnabled() && bound_ && host_.make_current && host_.make_current()!=0;
+-  }
++  void Bind(const Olex2LegacyHost& host) {TwxGlScene::Bind(host);++lifetime_.bindings;}
++  void Unbind() noexcept {if(IsBound())++lifetime_.detachments;TwxGlScene::Unbind();}
++  bool MakeCurrent() override {++lifetime_.makeCurrent;return TwxGlScene::MakeCurrent();}
+   bool StartDraw() override {++lifetime_.startDraw;return AGlScene::StartDraw();}
+   void EndDraw() override {++lifetime_.endDraw;AGlScene::EndDraw();}
+-  void ReleaseFontResources() {fonts_.Release();}
+-  bool FontsAllReleased()const {return fonts_.AllReleased();}
+-  const SystemFontCatalog& FontCatalog()const {return fonts_.FontCatalog();}
+-  const FontDisplayMetrics& DisplayMetrics()const {return fonts_.DisplayMetrics();}
+-  const NativeFontRecord& FontRecord(const TGlFont& font)const {return fonts_.Record(font);}
+-  void ScaleFonts(double scale) override {
+-    if(!bound_ || !std::isfinite(scale) || scale<=0 || scale>8 || scaling_)throw std::invalid_argument("Unbalanced or invalid platform font scale");
+-    fonts_.Release();fontScale_=scale;scaling_=true;
+-  }
+-  void RestoreFontScale() override {
+-    if(!scaling_)return;
+-    if(!bound_)throw std::logic_error("Font scale restoration needs a leased context");
+-    fonts_.Release();fontScale_=1;scaling_=false;
+-  }
+-  olxstr ShowFontDialog(TGlFont*,const olxstr&) override {throw std::runtime_error("Platform font dialog has not been implemented");}
+ };
+ }
+--- a/native/platform_font_factory.h
++++ b/native/platform_font_factory.h
+@@ -47,7 +47,7 @@
+     displayMetrics_=value;
+   }
+   const FontDisplayMetrics& DisplayMetrics()const {return displayMetrics_;}
+-  TGlFont& Create(TGlFont&,bool half,double scale) const;
++  TGlFont& Create(TGlFont&,bool half,double scale,const std::string& resourceFolder={}) const;
+   const SystemFontCatalog& FontCatalog() const;
+   void Release() const; // Must run with the leased original context current.
+   const NativeFontRecord& Record(const TGlFont&) const;
+--- a/native/platform_font_factory.cpp
++++ b/native/platform_font_factory.cpp
+@@ -19,7 +19,7 @@
+   ~BorrowedCells(){for(size_t c=0;c<256;++c)font.CharSize(c)->Data=nullptr;}
+ };
+ }
+-TGlFont& PlatformFontFactory::Create(TGlFont& font,bool half,double scale) const {
++TGlFont& PlatformFontFactory::Create(TGlFont& font,bool half,double scale,const std::string& resourceFolder) const {
+   const std::string description=TUtf8::Encode(font.GetIdString()).c_str();
+   const bool resource=!description.empty()&&description.front()=='#';
+   const bool family=IsFamilyFontId(description);
+@@ -36,8 +36,9 @@
+   if(!record){auto item=std::make_unique<NativeFontRecord>();item->font=&font;record=item.get();records_.push_back(std::move(item));}
+   if(resource) {
+     const auto plan=PlanResourceFont(effective);
+-    const std::string base=TUtf8::Encode(TBasicApp::GetBaseDir()).c_str();
+-    const std::string path=base+"etc/Fonts/"+resourceSpec.file;
++    const std::string folder=resourceFolder.empty()?
++      std::string(TUtf8::Encode(TBasicApp::GetBaseDir()).c_str())+"etc/Fonts/":resourceFolder;
++    const std::string path=folder+resourceSpec.file;
+     if(record->description!=description||record->effectivePoints!=effective||record->half!=half||record->resourcePath!=path) {
+       auto data=LoadOlexFontResource(path,plan.Entry(resourceSpec));
+       OriginalFontCells cells;
+--- a/cmake/Olex2NativeWidgets.cmake
++++ b/cmake/Olex2NativeWidgets.cmake
+@@ -5,6 +5,7 @@
+     message(FATAL_ERROR "Native original widgets require the real source runtime")
+   endif()
+   target_sources(${target} PRIVATE
++    "${project_root}/upstream/gxlib/wxglscene.cpp"
+     "${project_root}/upstream/olex/dgenopt.cpp"
+     "${project_root}/upstream/olex/ptable.cpp"
+     "${project_root}/upstream/olex/nui/nui.cpp"

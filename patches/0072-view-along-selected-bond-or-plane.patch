@@ -1,0 +1,153 @@
+--- a/upstream/olex/main_gui.cpp
++++ b/upstream/olex/main_gui.cpp
+@@ -3,6 +3,9 @@
+ #include "gxapp.h"
+ #include "olxstate.h"
+ #include "integration.h"
++#include "xbond.h"
++#include "xplane.h"
++#include "xgrid.h"
+ 
+ namespace olex2::harmony {
+ namespace {
+@@ -72,6 +75,28 @@
+       app.GetRenderer().GetBasis().OrientNormal(normal);
+       return true;
+     }
++  }
++  if (action == "view-along-selection") {
++    TGlGroup& selection = app.GetSelection();
++    if (selection.Count() != 1) return false;
++    vec3d normal, center;
++    if (selection[0].Is<TXPlane>()) {
++      auto& plane = (TXPlane&)selection[0];
++      normal = plane.GetNormal();
++      center = plane.GetCenter();
++    }
++    else if (selection[0].Is<TXBond>()) {
++      auto& bond = (TXBond&)selection[0];
++      normal = bond.B().crd() - bond.A().crd();
++      center = (bond.B().crd() + bond.A().crd()) / 2;
++    }
++    else return false;
++    if (normal.QLength() < 1e-6) return false;
++    normal.Normalise();
++    app.GetRenderer().GetBasis().OrientNormal(normal);
++    app.GetRenderer().GetBasis().SetCenter(-center);
++    if (app.XGrid().IsVisible()) app.SetGridDepth(center);
++    return true;
+   }
+   return false;
+ }
+--- a/native/original_renderer_host.h
++++ b/native/original_renderer_host.h
+@@ -5,7 +5,7 @@
+ #include "display_font_metrics.h"
+ // Private same-build document-view request; both DSOs use the same libc++.
+ // This is not a stable third-party plugin ABI or a security sandbox.
+-enum class Olex2DocumentOperation { Render, Open, Close, Export, ResetView, Pick, ClearSelection, SelectAll, InvertSelection, CaptureViewport, RestoreViewport, ToggleCellVisibility, ToggleBasisVisibility, ToggleFrameVisibility, ShowAllVisible, CenterModel, ViewAlong100, ViewAlong010, ViewAlong001, ViewAlong110, ViewAlong101, ViewAlong011, ViewAlong111 };
++enum class Olex2DocumentOperation { Render, Open, Close, Export, ResetView, Pick, ClearSelection, SelectAll, InvertSelection, CaptureViewport, RestoreViewport, ToggleCellVisibility, ToggleBasisVisibility, ToggleFrameVisibility, ShowAllVisible, CenterModel, ViewAlong100, ViewAlong010, ViewAlong001, ViewAlong110, ViewAlong101, ViewAlong011, ViewAlong111, ViewAlongSelection };
+ struct Olex2DocumentRequest {
+   Olex2DocumentOperation operation=Olex2DocumentOperation::Render;
+   std::string name,bytes;
+--- a/native/original_document_view.cpp
++++ b/native/original_document_view.cpp
+@@ -306,7 +306,8 @@
+   }else if(request.operation==Olex2DocumentOperation::ViewAlong100||
+       request.operation==Olex2DocumentOperation::ViewAlong010||request.operation==Olex2DocumentOperation::ViewAlong001||
+       request.operation==Olex2DocumentOperation::ViewAlong110||request.operation==Olex2DocumentOperation::ViewAlong101||
+-      request.operation==Olex2DocumentOperation::ViewAlong011||request.operation==Olex2DocumentOperation::ViewAlong111){
++      request.operation==Olex2DocumentOperation::ViewAlong011||request.operation==Olex2DocumentOperation::ViewAlong111||
++      request.operation==Olex2DocumentOperation::ViewAlongSelection){
+     const char* direction=request.operation==Olex2DocumentOperation::ViewAlong100?"100":
+       request.operation==Olex2DocumentOperation::ViewAlong010?"010":
+       request.operation==Olex2DocumentOperation::ViewAlong001?"001":
+@@ -314,8 +315,11 @@
+       request.operation==Olex2DocumentOperation::ViewAlong101?"101":
+       request.operation==Olex2DocumentOperation::ViewAlong011?"011":"111";
+     action=std::string("view-along-")+direction;
++    if(request.operation==Olex2DocumentOperation::ViewAlongSelection) action="view-along-selection";
+     if(!DispatchHarmonyMainGuiAction(app,action))
+-      throw std::runtime_error("Harmony main-form crystallographic view action is unavailable");
++      throw std::runtime_error(request.operation==Olex2DocumentOperation::ViewAlongSelection ?
++        "Select exactly one bond or plane before using view-along-selection" :
++        "Harmony main-form crystallographic view action is unavailable");
+     // The original `matr` command replaces the orientation matrix directly.
+     // Make that orientation the camera reference, with zero relative angles,
+     // so capture/restore and subsequent mouse rotation remain representable.
+@@ -376,7 +380,8 @@
+   else if(state.selectionAction=="toggle-frame")interactionSource="original TMainForm::FrameVChange/T3DFrameCtrl::SetVisible";
+   else if(state.selectionAction=="show-all")interactionSource="original TMainForm::OnShowAll/GXLibMacros::macFmol";
+   else if(state.selectionAction=="center-model")interactionSource="original TMainForm::OnModelCenter/GXLibMacros::macCenter";
+-  else if(state.selectionAction.rfind("view-along-",0)==0)interactionSource="original TMainForm::OnViewAlong/GXLibMacros::macMatr";
++  else if(state.selectionAction.rfind("view-along-",0)==0)interactionSource=state.selectionAction=="view-along-selection"?
++    "original TMainForm::OnBond/OnPlane/GXLibMacros::macSetView":"original TMainForm::OnViewAlong/GXLibMacros::macMatr";
+   std::ostringstream out;out<<"{\"passed\":"<<(passed?"true":"false")<<",\"loaded\":"<<(state.loaded?"true":"false")
+     <<",\"name\":"<<Quote(state.name)<<",\"format\":"<<Quote(state.format)<<",\"byteCount\":"<<state.byteCount<<",\"sha256\":"<<Quote(state.sha256)
+     <<",\"revision\":"<<state.revision<<",\"frames\":"<<state.frames<<",\"atomCount\":"<<(state.loaded?app.GetAtoms().count:0)
+--- a/app/entry/src/main/cpp/renderer.cpp
++++ b/app/entry/src/main/cpp/renderer.cpp
+@@ -688,6 +688,7 @@
+   else if(action=="view-along-101")request.operation=Olex2DocumentOperation::ViewAlong101;
+   else if(action=="view-along-011")request.operation=Olex2DocumentOperation::ViewAlong011;
+   else if(action=="view-along-111")request.operation=Olex2DocumentOperation::ViewAlong111;
++  else if(action=="view-along-selection")request.operation=Olex2DocumentOperation::ViewAlongSelection;
+   else return reject("Unknown original document interaction action");
+   if(!std::isfinite(x)||!std::isfinite(y)||x<0||x>1||y<0||y>1||mode>2)
+     return reject("Expected finite normalized viewport coordinates in [0,1] and selection mode 0, 1 or 2");
+@@ -702,7 +703,8 @@
+   const bool viewAlong=request.operation==Olex2DocumentOperation::ViewAlong100||
+       request.operation==Olex2DocumentOperation::ViewAlong010||request.operation==Olex2DocumentOperation::ViewAlong001||
+       request.operation==Olex2DocumentOperation::ViewAlong110||request.operation==Olex2DocumentOperation::ViewAlong101||
+-      request.operation==Olex2DocumentOperation::ViewAlong011||request.operation==Olex2DocumentOperation::ViewAlong111;
++      request.operation==Olex2DocumentOperation::ViewAlong011||request.operation==Olex2DocumentOperation::ViewAlong111||
++      request.operation==Olex2DocumentOperation::ViewAlongSelection;
+   const auto result=RunOriginalDocumentLocked(std::move(request));
+   if(viewAlong&&result.passed&&result.corePassed&&result.loaded&&result.surfacePresented&&result.parentContextRestored){
+     // The original direction command replaces the basis, so its relative
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -120,8 +120,8 @@
+         (action!="pick"&&action!="clear-selection"&&action!="select-all"&&action!="invert-selection"&&
+          action!="toggle-cell"&&action!="toggle-basis"&&action!="toggle-frame"&&action!="show-all"&&action!="center-model"&&
+         action!="view-along-100"&&action!="view-along-010"&&action!="view-along-001"&&action!="view-along-110"&&
+-        action!="view-along-101"&&action!="view-along-011"&&action!="view-along-111"))
+-      return reject("Allowed: pick, clear-selection, select-all, invert-selection, toggles, show-all, center-model; view-along 100/010/001/110/101/011/111");
++        action!="view-along-101"&&action!="view-along-011"&&action!="view-along-111"&&action!="view-along-selection"))
++      return reject("Allowed: pick, clear-selection, select-all, invert-selection, toggle-cell, toggle-basis, toggle-frame, show-all, center-model, view-along-100/010/001/110/101/011/111/selection");
+     double x=0,y=0,mode=0;
+     if(napi_get_value_double(env,args[1],&x)!=napi_ok||napi_get_value_double(env,args[2],&y)!=napi_ok||
+         napi_get_value_double(env,args[3],&mode)!=napi_ok||!std::isfinite(x)||!std::isfinite(y)||
+--- a/app/entry/src/main/ets/model/OriginalViewportInput.ts
++++ b/app/entry/src/main/ets/model/OriginalViewportInput.ts
+@@ -10,7 +10,7 @@
+ export function originalSelectionRequest(action: string, x: number, y: number, mode: number): OriginalSelectionRequest {
+   if ((action !== 'pick' && action !== 'clear-selection' && action !== 'select-all' && action !== 'invert-selection' && action !== 'toggle-cell' && action !== 'toggle-basis' && action !== 'toggle-frame' && action !== 'show-all' && action !== 'center-model' && action !== 'view-along-100' && action !== 'view-along-010' &&
+       action !== 'view-along-001' && action !== 'view-along-110' && action !== 'view-along-101' &&
+-      action !== 'view-along-011' && action !== 'view-along-111') ||
++      action !== 'view-along-011' && action !== 'view-along-111' && action !== 'view-along-selection') ||
+     !Number.isFinite(x) || !Number.isFinite(y) || x < 0 || x > 1 || y < 0 || y > 1 ||
+     !Number.isInteger(mode) || mode < 0 || mode > 2) {
+     throw new Error('选择动作、视口坐标或选择模式不合法');
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -530,7 +530,8 @@
+         validated.action === 'clear-selection' ? '已清除选择' : validated.action === 'select-all' ? '已全选' :
+         validated.action === 'invert-selection' ? '已反选' : validated.action === 'toggle-cell' ? '已切换晶胞显示' :
+           validated.action === 'toggle-basis' ? '已切换基矢显示' : validated.action === 'toggle-frame' ? '已切换包围框显示' :
+-            validated.action === 'center-model' ? '模型已居中' : validated.action.startsWith('view-along-') ?
++            validated.action === 'center-model' ? '模型已居中' : validated.action === 'view-along-selection' ?
++            '已沿所选键/平面调整视向' : validated.action.startsWith('view-along-') ?
+             `视向已切换至 ${validated.action.substring('view-along-'.length)}` : '已显示全部分子并重新居中';
+       this.originalSelectionMessage = `${actionLabel} · 选中 ${core.selectedObjectCount} · 选择序号 ${core.selectionSequence}` +
+         (core.lastPickedCollection.length > 0 ? ` · 集合 ${core.lastPickedCollection}` : '');
+@@ -2673,7 +2674,8 @@
+             { value: '沿 110 方向查看', action: () => this.selectOriginalDocument('view-along-110') },
+             { value: '沿 101 方向查看', action: () => this.selectOriginalDocument('view-along-101') },
+             { value: '沿 011 方向查看', action: () => this.selectOriginalDocument('view-along-011') },
+-            { value: '沿 111 方向查看', action: () => this.selectOriginalDocument('view-along-111') }
++            { value: '沿 111 方向查看', action: () => this.selectOriginalDocument('view-along-111') },
++            { value: '沿所选键/平面查看', action: () => this.selectOriginalDocument('view-along-selection') }
+           ])
+         Text(this.originalViewportFocused ? '视口焦点' : '点击视口聚焦')
+           .id('olex2-original-viewport-focus').fontSize(10).fontColor('#758579').layoutWeight(1)

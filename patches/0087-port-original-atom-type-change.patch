@@ -1,0 +1,51 @@
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1821,6 +1821,27 @@
+     }
+   }
+ 
++  private runOriginalSelectionCommand(command: string): void {
++    if (!this.originalSelectionEnabled()) return;
++    try {
++      const result: OriginalCommandReport = nativeBridge.executeOriginalCommand(command);
++      this.commandPassed = result.passed;
++      this.commandError = result.error;
++      const output: string = result.output.trim();
++      this.commandMessage = output.length > 0 ? output : (result.passed ? result.text : '原版命令未通过');
++      this.originalSelectionMessage = result.passed ?
++        `已执行原版命令 ${command}` + (output.length > 0 ? '；输出见命令状态' : '') :
++        (result.error || '原版命令未通过');
++      if (result.passed) {
++        try { nativeBridge.redrawOriginalDocument(); } catch (redrawError) { this.originalLog = nativeBridge.getOriginalLogs(); }
++      }
++      this.readOriginalDocumentStatus();
++      this.refreshGraphics();
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版选择命令失败';
++    }
++  }
++
+   private executeDesktopCommand(): void {
+     const input: string = this.commandText;
+     const sequence: number = this.commandStatus.sequence + 1;
+@@ -2842,6 +2863,20 @@
+         Text('由当前选中原子/键确定片段；仅显示会重新居中').fontSize(10).fontColor('#758579').layoutWeight(1)
+       }.width('100%')
+       Row({ space: 5 }) {
++        Button('原子类型').id('olex2-original-atom-type').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled() && this.originalDocument.core.selectedObjectCount !== undefined &&
++            this.originalDocument.core.selectedObjectCount > 0)
++          .bindMenu([
++            { value: 'C', action: () => this.runOriginalSelectionCommand('name sel C') },
++            { value: 'N', action: () => this.runOriginalSelectionCommand('name sel N') },
++            { value: 'O', action: () => this.runOriginalSelectionCommand('name sel O') },
++            { value: 'F', action: () => this.runOriginalSelectionCommand('name sel F') },
++            { value: 'H', action: () => this.runOriginalSelectionCommand('name sel H') },
++            { value: 'S', action: () => this.runOriginalSelectionCommand('name sel S') }
++          ])
++        Text('原版 Name 命令 · 修改当前选择的元素类型').fontSize(10).fontColor('#758579').layoutWeight(1)
++      }.width('100%')
++      Row({ space: 5 }) {
+         Button('切换网格').id('olex2-original-toggle-grid').height(25).fontSize(10)
+           .enabled(this.originalSelectionEnabled()).onClick(() => this.selectOriginalDocument('toggle-grid'))
+         Text('需先载入晶体学网格数据').fontSize(10).fontColor('#758579').layoutWeight(1)

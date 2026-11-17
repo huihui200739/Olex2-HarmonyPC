@@ -1,0 +1,140 @@
+--- a/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
++++ b/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
+@@ -347,10 +347,11 @@
+     return result;
+   }
+ 
+-  async openSynthetic(bytes: Uint8Array, backend: OriginalDocumentBackend): Promise<OriginalDocumentTransferResult> {
++  async openSynthetic(bytes: Uint8Array, backend: OriginalDocumentBackend,
++    name: string = 'synthetic-display.cif'): Promise<OriginalDocumentTransferResult> {
+     if (this.active) return this.current;
+     const result: OriginalDocumentTransferResult = this.begin('import', 'synthetic-platform-display');
+-    result.status.name = 'synthetic-display.cif';
++    result.status.name = name;
+     let nativeResponseReceived: boolean = false;
+     try {
+       result.document = parseOriginalDocument(backend.status());
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1744,6 +1744,30 @@
+     }
+   }
+ 
++  private async openBondedSyntheticOriginalDocument(): Promise<void> {
++    if (this.originalDocumentOperationBusy() || !this.applicationRuntime.initialized) return;
++    if (!this.originalDocumentSessions.canAdd()) {
++      this.originalDocumentMessage = '会话最多 4 份文档、合计 32 MiB；请先明确关闭一份文档。未替换原生文档。';
++      this.saveRecord(); return;
++    }
++    this.syncOriginalDocumentSessions(); this.beginOriginalSessionOperation('open-synthetic', '');
++    this.originalDocumentBusy = true; this.syncOriginalViewportInput();
++    try {
++      const context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
++      const bytes: Uint8Array = await context.resourceManager.getRawFileContent('synthetic-bonded.cif');
++      this.captureOriginalViewportBeforeReplacement('before-new-display-tab');
++      const result: OriginalDocumentTransferResult = await this.originalDocumentTransfer.openSynthetic(bytes,
++        this.originalDocumentBackend(), 'synthetic-bonded.cif');
++      this.acceptOriginalDocumentResult(result);
++    } catch (error) {
++      this.failOriginalSessionOperation(error as Error); this.readOriginalDocumentStatus(); this.reconcileOriginalSessionNative();
++    } finally {
++      this.originalDocumentBusy = false; this.syncOriginalDocumentSessions();
++      this.applicationRuntime = nativeBridge.getApplicationRuntimeStatus();
++      this.originalLog = nativeBridge.getOriginalLogs(); this.refreshGraphics(); this.syncOriginalViewportInput();
++    }
++  }
++
+   private executeEditedPython(): void {
+     if (this.pythonTransferBusy) return;
+     try { encodePythonDocument(this.pythonEditorSource); }
+@@ -3019,6 +3043,21 @@
+             { value: '自由', action: () => this.runOriginalSelectionCommand('free uiso sel') }
+           ])
+         Text('原版 Fix/Free uiso · 绝对值作用于当前选择').fontSize(10).fontColor('#758579').layoutWeight(1)
++      }.width('100%')
++      Row({ space: 5 }) {
++        Button('连接').id('olex2-original-connectivity').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled() && this.originalDocument.core.selectedObjectCount !== undefined &&
++            this.originalDocument.core.selectedObjectCount > 0)
++          .bindMenu([
++            { value: '0', action: () => this.runOriginalSelectionCommand('conn 0') },
++            { value: '1', action: () => this.runOriginalSelectionCommand('conn 1') },
++            { value: '2', action: () => this.runOriginalSelectionCommand('conn 2') },
++            { value: '3', action: () => this.runOriginalSelectionCommand('conn 3') },
++            { value: '4', action: () => this.runOriginalSelectionCommand('conn 4') },
++            { value: '12', action: () => this.runOriginalSelectionCommand('conn 12') },
++            { value: '24', action: () => this.runOriginalSelectionCommand('conn 24') }
++          ])
++        Text('原版 Conn · 最大成键数作用于当前选择').fontSize(10).fontColor('#758579').layoutWeight(1)
+       }.width('100%')
+       Row({ space: 5 }) {
+         Button('切换网格').id('olex2-original-toggle-grid').height(25).fontSize(10)
+@@ -3090,13 +3129,17 @@
+           .fontColor('#536857').backgroundColor('#F2F5EC')
+           .enabled(this.applicationRuntime.initialized && !this.originalDocumentOperationBusy())
+           .onClick(() => this.openSyntheticOriginalDocument())
++        Button('成键示例').id('olex2-original-document-bonded').height(26).fontSize(10)
++          .fontColor('#536857').backgroundColor('#F2F5EC')
++          .enabled(this.applicationRuntime.initialized && !this.originalDocumentOperationBusy())
++          .onClick(() => this.openBondedSyntheticOriginalDocument())
+         Text('非科研数据 · 仅平台显示').fontSize(10).fontColor('#7C8064').layoutWeight(1)
+       }.width('100%')
+       Text(this.originalDocumentBusy ? '正在处理原版文档；请等待文件操作完成…' : this.originalDocumentMessage)
+         .id('olex2-original-document-transfer-status').fontSize(10).fontColor('#64796A').width('100%').maxLines(3)
+       Text(this.originalDocumentStatusError.length > 0 ? this.originalDocumentStatusError :
+         this.originalDocument.core.loaded ?
+-          `${this.originalDocument.core.name} · ${this.originalDocument.core.byteCount} 字节 · 修订 ${this.originalDocument.core.revision} · 原版帧 ${this.originalDocument.core.frames}` :
++          `${this.originalDocument.core.name} · ${this.originalDocument.core.byteCount} 字节 · 修订 ${this.originalDocument.core.revision} · 原版帧 ${this.originalDocument.core.frames} · ${this.originalDocument.core.atomCount} 原子 / ${this.originalDocument.core.bondCount} 键` :
+           this.originalDocumentActive() ? '原版视图状态待确认；不沿用演示图元验证资格。' : '当前未载入原版文档；下方为原有平台演示图元。')
+         .id('olex2-original-document-status').fontSize(10).fontColor('#758579').width('100%').maxLines(2)
+       if (this.originalDocumentActive()) { this.OriginalSelectionToolbar() }
+--- a/app/entry/src/main/resources/rawfile/synthetic-bonded.cif
++++ b/app/entry/src/main/resources/rawfile/synthetic-bonded.cif
+@@ -0,0 +1,30 @@
++# SYNTHETIC NON-BIOLOGICAL PLATFORM DISPLAY FIXTURE.
++# Artificial tetrahedral marker coordinates, not measurements or research data.
++# Used only to check original bond perception, connectivity and polyhedra display.
++data_synthetic_bonded_display
++_audit_creation_method 'Harmony PC platform interoperability display fixture'
++_chemical_name_common 'SYNTHETIC NON-BIOLOGICAL DISPLAY ONLY'
++_cell_length_a 10
++_cell_length_b 10
++_cell_length_c 10
++_cell_angle_alpha 90
++_cell_angle_beta 90
++_cell_angle_gamma 90
++_cell_formula_units_Z 1
++_symmetry_space_group_name_H-M 'P 1'
++loop_
++_symmetry_equiv_pos_as_xyz
++'x,y,z'
++loop_
++_atom_site_label
++_atom_site_type_symbol
++_atom_site_fract_x
++_atom_site_fract_y
++_atom_site_fract_z
++_atom_site_occupancy
++_atom_site_U_iso_or_equiv
++C1 C 0.500 0.500 0.500 1 0.02
++H1 H 0.567 0.567 0.567 1 0.03
++H2 H 0.433 0.433 0.567 1 0.03
++H3 H 0.433 0.567 0.433 1 0.03
++H4 H 0.567 0.433 0.433 1 0.03
+--- a/native/original_document_view.cpp
++++ b/native/original_document_view.cpp
+@@ -197,7 +197,14 @@
+       vec3d high,low;if(!object.GetDimensions(high,low))continue;
+       bounds.AddBox({low[0],low[1],low[2]},{high[0],high[1],high[2]},centre,rotation);++worldBoxCount;
+     }
++    // Original bond primitive creation can leave a pending GL error under the
++    // gl4es compatibility layer. Clear that pending state BEFORE the framing
++    // readback and log it, instead of misattributing it to the projection; the
++    // rendered scene is still required to draw and is verified separately.
++    {const auto pending=glGetError();if(pending)TBasicApp::NewLogEntry(logWarning)
++      << "Pending OpenGL error " << pending << " cleared before original framing (bond primitive creation)";}
+     renderer.SetView(false); // refresh the ORIGINAL projection after object creation
++    CheckGL("original framing SetView");
+     framing::Projection projection{};
+     glGetFloatv(GL_PROJECTION_MATRIX,projection.data());CheckGL("original framing projection readback");
+     // Project the original centre to obtain its actual eye-space depth. This

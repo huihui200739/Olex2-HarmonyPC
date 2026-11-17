@@ -1,0 +1,13 @@
+--- a/native/original_document_view.cpp
++++ b/native/original_document_view.cpp
+@@ -295,6 +295,10 @@
+     action="show-all";
+   }else if(request.operation==Olex2DocumentOperation::CenterModel){
+     if(!DispatchHarmonyMainGuiAction(app,"center-model"))throw std::runtime_error("Harmony main-form center action is unavailable");
++    // The original action changes only the camera centre. Keep the neutral
++    // reference centre in sync so subsequent camera snapshots remain
++    // representable without baking the current yaw/pitch into that reference.
++    state.centredBasis.SetCenter(app.GetRenderer().GetBasis().GetCenter());
+     action="center-model";
+   }
+   ++state.selectionSequence;state.pickHit=hit;state.lastPickedCollection=std::move(collection);state.selectionAction=std::move(action);

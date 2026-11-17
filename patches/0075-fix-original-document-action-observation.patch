@@ -1,0 +1,21 @@
+--- a/native/original_document_view.cpp
++++ b/native/original_document_view.cpp
+@@ -234,11 +234,13 @@
+   return op==Olex2DocumentOperation::Pick||op==Olex2DocumentOperation::ClearSelection||
+     op==Olex2DocumentOperation::SelectAll||op==Olex2DocumentOperation::InvertSelection||
+     op==Olex2DocumentOperation::ToggleCellVisibility||op==Olex2DocumentOperation::ToggleBasisVisibility||
+-    op==Olex2DocumentOperation::ToggleFrameVisibility||op==Olex2DocumentOperation::ShowAllVisible||
+-    op==Olex2DocumentOperation::CenterModel||op==Olex2DocumentOperation::ViewAlong100||
+-    op==Olex2DocumentOperation::ViewAlong010||op==Olex2DocumentOperation::ViewAlong001||
+-    op==Olex2DocumentOperation::ViewAlong110||op==Olex2DocumentOperation::ViewAlong101||
+-    op==Olex2DocumentOperation::ViewAlong011||op==Olex2DocumentOperation::ViewAlong111;
++    op==Olex2DocumentOperation::ToggleFrameVisibility||op==Olex2DocumentOperation::ToggleGridVisibility||
++    op==Olex2DocumentOperation::ShowAllVisible||op==Olex2DocumentOperation::CenterModel||
++    op==Olex2DocumentOperation::HideSelection||op==Olex2DocumentOperation::ViewAlongSelection||
++    op==Olex2DocumentOperation::ViewAlong100||op==Olex2DocumentOperation::ViewAlong010||
++    op==Olex2DocumentOperation::ViewAlong001||op==Olex2DocumentOperation::ViewAlong110||
++    op==Olex2DocumentOperation::ViewAlong101||op==Olex2DocumentOperation::ViewAlong011||
++    op==Olex2DocumentOperation::ViewAlong111;
+ }
+ void ResetSelectionObservation(OriginalDocumentState& state){
+   state.selectionSequence=0;state.originalPickingCalls=0;state.pickHit=false;

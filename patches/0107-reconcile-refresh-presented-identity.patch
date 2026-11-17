@@ -1,0 +1,21 @@
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1212,6 +1212,18 @@
+   }
+ 
+   private reconcileOriginalSessionNative(): void {
++    // A restored/refreshed session can keep the same stable source (name, format,
++    // bytes, revision, source) while volatile presentation fields (selection,
++    // render inventories) drift. Refresh the presented identity in that case so
++    // the document toolbar is not disabled; genuinely changed sources still fail
++    // the stable check and are invalidated below.
++    if (this.originalDocumentStatusError.length === 0 &&
++      this.originalDocumentSessions.getStatus().nativeSessionId.length > 0 &&
++      !this.originalDocumentSessions.matchesNative(this.originalDocument) &&
++      this.originalDocumentSessions.matchesNativeSourceIdentity(this.originalDocument) &&
++      originalDocumentPresented(this.originalDocument)) {
++      this.originalDocumentSessions.refreshPresentedIdentity(this.originalDocument);
++    }
+     if (this.originalDocumentSessions.getStatus().nativeSessionId.length > 0 &&
+       (this.originalDocumentStatusError.length > 0 ||
+         (!this.originalDocumentSessions.matchesNative(this.originalDocument) &&

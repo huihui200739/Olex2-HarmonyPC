@@ -1,0 +1,123 @@
+--- a/glib/gltexture.cpp
++++ b/glib/gltexture.cpp
+@@ -7,6 +7,7 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ #include "gltexture.h"
++#include "glpixelstorescope.h"
+ 
+ //.............................................................................
+ TGlTexture::TGlTexture(GLuint id, uint32_t type, GLint level,
+@@ -279,7 +280,8 @@
+   if (!rv.data) {
+     throw TOutOfMemoryException(__OlxSourceInfo);
+   }
+-  olx_gl::pixelStore(GL_PACK_ALIGNMENT, 4);
++  olex2_harmony::ScopedPackedPixels<olx_gl> pack(
++    GL_PACK_ALIGNMENT, GL_PACK_ROW_LENGTH, GL_PACK_SKIP_ROWS, GL_PACK_SKIP_PIXELS);
+   olx_gl::getTexImage(tex.GetType(), tex.GetLevel(), GL_RGBA,
+     GL_UNSIGNED_BYTE, rv.data);
+   return rv;
+@@ -290,7 +292,8 @@
+     return;
+   }
+   olx_gl::bindTexture(tex.GetType(), tex.GetId());
+-  olx_gl::pixelStore(GL_UNPACK_ALIGNMENT, 4);
++  olex2_harmony::ScopedPackedPixels<olx_gl> unpack(
++    GL_UNPACK_ALIGNMENT, GL_UNPACK_ROW_LENGTH, GL_UNPACK_SKIP_ROWS, GL_UNPACK_SKIP_PIXELS);
+   if (data.height != 0) {
+     olx_gl::texImage(tex.GetType(), tex.GetLevel(), 4,
+       data.width, data.height, data.border,
+@@ -318,11 +321,16 @@
+   GLsizei width, GLsizei height, GLint border, GLenum format,
+   const GLvoid *pixels)
+ {
++  if (format != GL_RGB && format != GL_RGBA) {
++    throw TInvalidArgumentException(__OlxSourceInfo,
++      olxstr("format=") << (int)format);
++  }
+   GLuint texId = 0;
+   olx_gl::genTextures(1, &texId);
+   olx_gl::bindTexture(GL_TEXTURE_2D, texId);
+ 
+-  olx_gl::pixelStore(GL_UNPACK_ALIGNMENT, 4);
++  olex2_harmony::ScopedPackedPixels<olx_gl> unpack(
++    GL_UNPACK_ALIGNMENT, GL_UNPACK_ROW_LENGTH, GL_UNPACK_SKIP_ROWS, GL_UNPACK_SKIP_PIXELS);
+   if (format == GL_RGB) {
+     olx_gl::texImage(GL_TEXTURE_2D, level, 3, width, height, border,
+       format, GL_UNSIGNED_BYTE, pixels);
+@@ -331,10 +339,6 @@
+     olx_gl::texImage(GL_TEXTURE_2D, level, 4, width, height, border,
+       format, GL_UNSIGNED_BYTE, pixels);
+   }
+-  else {
+-    throw TInvalidArgumentException(__OlxSourceInfo,
+-      olxstr("format=") << (int)format);
+-  }
+   TGlTexture* tex = new TGlTexture(texId, tpt2D, level, name);
+   Textures.Add(texId, tex);
+   return texId;
+@@ -344,10 +348,15 @@
+   GLsizei width, GLsizei height, GLint border, GLenum format,
+   const GLvoid *pixels)
+ {
++  if (format != GL_RGB && format != GL_RGBA) {
++    throw TInvalidArgumentException(__OlxSourceInfo,
++      olxstr("format=") << (int)format);
++  }
+   GLuint texId = tex.GetId();
+-  olx_gl::deleteTextures(1, &texId);
++  // Update the existing object; retain its name, ID and sampler state.
+   olx_gl::bindTexture(GL_TEXTURE_2D, texId);
+-  olx_gl::pixelStore(GL_UNPACK_ALIGNMENT, 4);
++  olex2_harmony::ScopedPackedPixels<olx_gl> unpack(
++    GL_UNPACK_ALIGNMENT, GL_UNPACK_ROW_LENGTH, GL_UNPACK_SKIP_ROWS, GL_UNPACK_SKIP_PIXELS);
+   if (format == GL_RGB) {
+     olx_gl::texImage(GL_TEXTURE_2D, level, 3, width, height, border,
+       format, GL_UNSIGNED_BYTE, pixels);
+@@ -355,10 +364,6 @@
+   else if (format == GL_RGBA) {
+     olx_gl::texImage(GL_TEXTURE_2D, level, 4, width, height, border,
+       format, GL_UNSIGNED_BYTE, pixels);
+-  }
+-  else {
+-    throw TInvalidArgumentException(__OlxSourceInfo,
+-      olxstr("format=") << (int)format);
+   }
+ }
+ //.............................................................................
+--- /dev/null
++++ b/glib/glpixelstorescope.h
+@@ -0,0 +1,32 @@
++#ifndef OLEX2_HARMONY_GL_PIXEL_STORE_SCOPE_H
++#define OLEX2_HARMONY_GL_PIXEL_STORE_SCOPE_H
++
++// Packed 2D unsigned-byte transfer state only. No claim about binding, active
++// unit, 3D image layout, context lifetime or all other GL transfer parameters.
++namespace olex2_harmony {
++template<class GLApi> class ScopedPixelStore {
++  unsigned int parameter_;
++  int previous_=0;
++public:
++  ScopedPixelStore(unsigned int parameter,int desired):parameter_(parameter) {
++    GLApi::get(parameter_,&previous_);
++    GLApi::pixelStore(parameter_,desired);
++  }
++  ~ScopedPixelStore() noexcept {GLApi::pixelStore(parameter_,previous_);}
++  ScopedPixelStore(const ScopedPixelStore&)=delete;
++  ScopedPixelStore& operator=(const ScopedPixelStore&)=delete;
++};
++// Canonical packed 2D layout. Clear row length/skips while transferring and
++// restore every caller value in reverse order, including on C++ scope exit.
++template<class GLApi> class ScopedPackedPixels {
++  ScopedPixelStore<GLApi> alignment_, rowLength_, skipRows_, skipPixels_;
++public:
++  ScopedPackedPixels(unsigned int alignment,unsigned int rowLength,
++                    unsigned int skipRows,unsigned int skipPixels)
++    :alignment_(alignment,1),rowLength_(rowLength,0),
++     skipRows_(skipRows,0),skipPixels_(skipPixels,0) {}
++  ScopedPackedPixels(const ScopedPackedPixels&)=delete;
++  ScopedPackedPixels& operator=(const ScopedPackedPixels&)=delete;
++};
++}
++#endif

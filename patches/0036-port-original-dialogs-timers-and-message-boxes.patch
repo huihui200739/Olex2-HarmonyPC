@@ -1,0 +1,236 @@
+diff --git a/olex/ctrls.h b/olex/ctrls.h
+--- a/olex/ctrls.h
++++ b/olex/ctrls.h
+@@ -7,6 +7,56 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#pragma once
++#include "actions.h"
++#include "ctrls/olxctrlbase.h"
++#include "native_dialog.h"
++class olxCommandEvent:public IOlxObject {
++  olxstr cmd;int id;
++public:
++  olxCommandEvent(const olxCommandEvent&)=default;
++  explicit olxCommandEvent(const olxstr& command,int eventId=-1):cmd(command),id(eventId){}
++  olxCommandEvent* Clone()const{return new olxCommandEvent(*this);}
++  const olxstr& GetCommand()const{return cmd;}
++  void SetCommand(const olxstr& command){cmd=command;}
++  int GetId()const{return id;}
++  void SetId(int value){id=value;}
++};
++class olxCommandAction:public IOlxAction {
++  olxstr cmd;
++public:
++  explicit olxCommandAction(const olxstr& command):cmd(command){}
++  bool Run()override;
++};
++namespace ctrl_ext {
++class TDialog:public olex2::harmony::ui::DialogWindow,public AOlxCtrl {
++  TActionQList DialogActions;
++public:
++  TDialog(olex2::harmony::ui::NodeBackend&,std::shared_ptr<olex2::harmony::ui::DialogBackend>,
++    std::shared_ptr<olex2::harmony::ui::UiScheduler>,olex2::harmony::ui::Widget* parent,
++    const olxstr& title,const olxstr& className,olex2::harmony::ui::DialogGeometry geometry={},
++    std::shared_ptr<olex2::harmony::ui::DialogPositionStore> positions={},bool resizable=true);
++  ~TDialog()override;
++  TActionQueue& OnResize;
++};
++class TTimer:public IOlxObject {
++  struct State;std::shared_ptr<State> state_;
++  TActionQList Actions;
++public:
++  explicit TTimer(std::shared_ptr<olex2::harmony::ui::UiScheduler>);
++  ~TTimer()override;
++  bool Start(int milliseconds=-1,bool oneShot=false);
++  void Stop();
++  bool IsRunning()const;
++  bool IsOneShot()const;
++  int GetInterval()const;
++  TActionQueue& OnTimer;
++};
++}
++using namespace ctrl_ext;
++
++#else
+ #ifndef __olx_ctrl_H
+ #define __olx_ctrl_H
+ #include "actions.h"
+@@ -98,3 +148,5 @@
+ #include "ctrls/colorext.h"
+ 
+ #endif
++
++#endif // native dialog/timer / original wx
+diff --git a/olex/ctrls.cpp b/olex/ctrls.cpp
+--- a/olex/ctrls.cpp
++++ b/olex/ctrls.cpp
+@@ -7,6 +7,38 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "ctrls.h"
++#include "eutf8.h"
++using namespace olex2::harmony::ui;
++using namespace ctrl_ext;
++namespace {
++std::string DialogText(const olxstr& text){auto bytes=TUtf8::Encode(text);std::string result(bytes.c_str(),bytes.Length());if(result.find('\0')!=std::string::npos)throw std::invalid_argument("Dialog text contains an embedded NUL");return result;}
++}
++TDialog::TDialog(NodeBackend& nodes,std::shared_ptr<DialogBackend> dialogs,std::shared_ptr<UiScheduler> scheduler,Widget* parent,const olxstr& title,const olxstr& className,DialogGeometry geometry,std::shared_ptr<DialogPositionStore> positions,bool resizable)
++ :DialogWindow(nodes,std::move(dialogs),std::move(scheduler),parent,DialogText(title),DialogText(className),geometry,std::move(positions),resizable),AOlxCtrl(&Window()),OnResize(DialogActions.New("OnResize")){
++  SetResizeReceiver([this]{OnResize.Execute(this,nullptr);});
++}
++TDialog::~TDialog(){SetResizeReceiver({});}
++struct TTimer::State {
++  std::shared_ptr<UiScheduler> scheduler;UiScheduler::Ticket ticket=0;
++  int interval=-1;bool oneShot=false;std::function<void()> notify;
++};
++TTimer::TTimer(std::shared_ptr<UiScheduler> scheduler):state_(std::make_shared<State>()),OnTimer(Actions.New("ONTIMER")){
++  if(!scheduler)throw std::invalid_argument("Original timer requires its UI scheduler");state_->scheduler=std::move(scheduler);state_->notify=[this]{OnTimer.Execute(this,nullptr);};
++}
++TTimer::~TTimer(){state_->notify={};try{Stop();}catch(...){/* weak callback never dispatches to the ended original owner */}}
++bool TTimer::Start(int milliseconds,bool oneShot){
++  auto state=state_;if(milliseconds==-1)milliseconds=state->interval;if(milliseconds<=0)throw std::out_of_range("Original UI timer interval must be positive");Stop();std::weak_ptr<State> weak=state;
++  const auto ticket=state->scheduler->Start(static_cast<uint64_t>(milliseconds),oneShot,[weak]{if(auto current=weak.lock()){if(current->oneShot)current->ticket=0;auto notify=current->notify;if(notify)notify();}});
++  state->interval=milliseconds;state->oneShot=oneShot;state->ticket=ticket;return true;
++}
++void TTimer::Stop(){auto state=state_;if(state->ticket){state->scheduler->Stop(state->ticket);state->ticket=0;}}
++bool TTimer::IsRunning()const{return state_->ticket&&state_->scheduler->IsActive(state_->ticket);}
++bool TTimer::IsOneShot()const{return state_->oneShot;}
++int TTimer::GetInterval()const{return state_->interval;}
++
++#else
+ #include "ctrls.h"
+ #include "integration.h"
+ 
+@@ -80,3 +112,5 @@
+   return true;
+ }
+ 
++
++#endif // native dialog/timer / original wx
+diff --git a/olex/msgbox.h b/olex/msgbox.h
+--- a/olex/msgbox.h
++++ b/olex/msgbox.h
+@@ -7,6 +7,53 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#pragma once
++#include "ctrls.h"
++#include "ctrls/checkboxext.h"
++#include "native_message_icons.h"
++// Explicit native flags, not wx headers or pretend wx objects.
++enum NativeMessageFlag:uint32_t {
++  MessageOk=1u<<0,MessageYes=1u<<1,MessageNo=1u<<2,MessageCancel=1u<<3,
++  MessageExclamation=1u<<4,MessageHand=1u<<5,MessageError=1u<<6,
++  MessageInformation=1u<<7,MessageQuestion=1u<<8
++};
++enum NativeMessageResult:int {MessageResultOk=1,MessageResultYes=2,MessageResultNo=3,MessageResultCancel=olex2::harmony::ui::DialogCancelled};
++class TdlgMsgBox:public TDialog,public AEventsDispatcher {
++  struct Alive;
++  struct Button {int result;olxstr caption;std::shared_ptr<olex2::harmony::ui::EventWidget> node;};
++  std::shared_ptr<Alive> alive_;
++  std::shared_ptr<olex2::harmony::ui::UiScheduler> scheduler_;
++  std::unique_ptr<TTimer> timer_;
++  std::shared_ptr<TCheckBox> cbRemember;
++  std::vector<Button> buttons;
++  std::vector<std::shared_ptr<olex2::harmony::ui::Widget>> buttonRows_;
++  std::shared_ptr<olex2::harmony::ui::Widget> scroll_,column_,messageRow_,image_,message_;
++  uint64_t SelfTimeout=0,ShownAt=0;int SelfTimeoutId=0;
++  void LayoutMessage();void BeginTimeout();void UpdateCountdown();
++  bool Dispatch(int,short,const IOlxObject*,const IOlxObject*,TActionQueue*)override;
++public:
++  TdlgMsgBox(olex2::harmony::ui::NodeBackend&,std::shared_ptr<olex2::harmony::ui::DialogBackend>,
++    std::shared_ptr<olex2::harmony::ui::UiScheduler>,olex2::harmony::ui::Widget* parent,
++    const olxstr& message,const olxstr& title,const olxstr& tickBoxMessage="Remember my decision",
++    uint32_t flags=MessageOk|MessageInformation,bool showRemember=false,long selfTimeout=0,int selfTimeoutId=0,
++    std::shared_ptr<olex2::harmony::ui::DialogPositionStore> positions={});
++  ~TdlgMsgBox()override;
++  bool IsChecked()const{return cbRemember&&cbRemember->IsChecked();}
++  void SetChecked(bool);
++  bool Show(bool show=true);
++  void ShowModalEx(bool manageParent,std::function<void(int)> completion);
++  void SetSize(olex2::harmony::ui::Size);
++  olxstr Result(int result)const;
++  static std::shared_ptr<TdlgMsgBox> Execute(olex2::harmony::ui::NodeBackend&,
++    std::shared_ptr<olex2::harmony::ui::DialogBackend>,std::shared_ptr<olex2::harmony::ui::UiScheduler>,
++    olex2::harmony::ui::Widget* parent,const olxstr& message,const olxstr& title,
++    std::function<void(const olxstr&)> completion,const olxstr& tickBoxMessage="Remember my decision",
++    uint32_t flags=MessageOk|MessageInformation,bool showRemember=false,long selfTimeout=0,int selfTimeoutId=0,
++    std::shared_ptr<olex2::harmony::ui::DialogPositionStore> positions={});
++};
++
++#else
+ #ifndef __olx_dlg_msgbox_H
+ #define __olx_dlg_msgbox_H
+ #include "ctrls.h"
+@@ -33,3 +80,5 @@
+     long selfTimeout=0, wxWindowID selfTimeoutId=0);
+ };
+ #endif
++
++#endif // native message box / original wx
+diff --git a/olex/msgbox.cpp b/olex/msgbox.cpp
+--- a/olex/msgbox.cpp
++++ b/olex/msgbox.cpp
+@@ -7,6 +7,49 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "msgbox.h"
++#include "eutf8.h"
++#include <algorithm>
++#include <limits>
++using namespace olex2::harmony::ui;
++namespace {
++constexpr int ButtonEvent=1,TimerEvent=2,SizeEvent=3;
++std::string MessageText(const olxstr& value){auto text=TUtf8::Encode(value);return {text.c_str(),text.Length()};}
++MessageIcon IconFor(uint32_t flags){if(flags&MessageExclamation)return MessageIcon::Exclamation;if(flags&MessageHand)return MessageIcon::Hand;if(flags&MessageError)return MessageIcon::Error;if(flags&MessageInformation)return MessageIcon::Information;if(flags&MessageQuestion)return MessageIcon::Question;return MessageIcon::None;}
++}
++struct TdlgMsgBox::Alive{TdlgMsgBox* owner=nullptr;};
++TdlgMsgBox::TdlgMsgBox(NodeBackend& nodes,std::shared_ptr<DialogBackend> dialogs,std::shared_ptr<UiScheduler> scheduler,Widget* parent,const olxstr& message,const olxstr& title,const olxstr& tickBoxMessage,uint32_t flags,bool showRemember,long selfTimeout,int selfTimeoutId,std::shared_ptr<DialogPositionStore> positions)
++ :TDialog(nodes,std::move(dialogs),scheduler,parent,title,"TdlgMsgBox",{},std::move(positions)),alive_(std::make_shared<Alive>()),scheduler_(std::move(scheduler)),SelfTimeoutId(selfTimeoutId){
++  if(flags&~uint32_t((1u<<9)-1))throw std::invalid_argument("Unknown native message-box flags");if(selfTimeout<0)throw std::invalid_argument("Message-box timeout cannot be negative");if(static_cast<uint64_t>(selfTimeout)>std::numeric_limits<uint64_t>::max()/1000)throw std::out_of_range("Message-box timeout is too large");SelfTimeout=static_cast<uint64_t>(selfTimeout);alive_->owner=this;std::weak_ptr<Alive> weak=alive_;
++  auto retain=[&](const std::shared_ptr<Widget>& node){Retain(node);};
++  scroll_=std::make_shared<Widget>(nodes,NodeKind::Scroll,&Body());retain(scroll_);column_=std::make_shared<Widget>(nodes,NodeKind::Column,scroll_.get());retain(column_);column_->SetNumber(Property::RowSpacing,10);
++  messageRow_=std::make_shared<Widget>(nodes,NodeKind::Row,column_.get());retain(messageRow_);messageRow_->SetNumber(Property::RowSpacing,10);
++  const auto icon=OriginalIcon(IconFor(flags));if(icon.png){auto decoded=nodes.DecodeImage(std::vector<uint8_t>(icon.png,icon.png+icon.bytes));if(!decoded)throw std::runtime_error("Original message icon could not be decoded");image_=std::make_shared<Widget>(nodes,NodeKind::Image,messageRow_.get());retain(image_);image_->SetWidth(32);image_->SetHeight(32);image_->SetImage(decoded);image_->SetText(TextProperty::Accessibility,"消息提示图标");}
++  message_=std::make_shared<Widget>(nodes,NodeKind::Text,messageRow_.get());retain(message_);message_->SetText(TextProperty::Content,MessageText(message));message_->SetNumber(Property::FontSize,16);
++  if(showRemember){cbRemember=std::make_shared<TCheckBox>(nodes,column_.get(),-1,tickBoxMessage);retain(cbRemember);cbRemember->SetHeight(28);}
++  const struct {uint32_t flag;int result;const char* caption;} definitions[]={{MessageOk,MessageResultOk,"OK"},{MessageYes,MessageResultYes,"Yes"},{MessageNo,MessageResultNo,"No"},{MessageCancel,MessageResultCancel,"Cancel"}};
++  for(const auto& definition:definitions){if(!(flags&definition.flag))continue;if(buttons.size()%2==0){auto row=std::make_shared<Widget>(nodes,NodeKind::Row,column_.get());row->SetNumber(Property::RowSpacing,8);row->SetHeight(40);retain(row);buttonRows_.push_back(row);}const int result=definition.result;
++    auto node=std::make_shared<EventWidget>(nodes,NodeKind::Button,buttonRows_.back().get(),std::vector<EventKind>{EventKind::Click},[weak,result](const NodeEvent&){if(auto state=weak.lock())if(state->owner)state->owner->Dispatch(ButtonEvent,static_cast<short>(result),state->owner,nullptr,nullptr);});retain(node);node->SetText(TextProperty::Content,definition.caption);node->SetNumber(Property::Focusable,1);node->SetHeight(36);buttons.push_back({result,olxstr(definition.caption),node});
++  }
++  timer_=std::make_unique<TTimer>(scheduler_);timer_->OnTimer.Add(this,TimerEvent,msiExecute);OnResize.Add(this,SizeEvent,msiExecute);LayoutMessage();
++}
++TdlgMsgBox::~TdlgMsgBox(){alive_->owner=nullptr;OnResize.Remove(this);if(timer_){timer_->OnTimer.Remove(this);try{timer_->Stop();}catch(...){}}}
++void TdlgMsgBox::LayoutMessage(){const int width=std::max(100,GetWidth()-24),height=std::max(40,GetHeight()-88);scroll_->SetWidth(width);scroll_->SetHeight(height);column_->SetWidth(width);messageRow_->SetWidth(width);message_->SetWidth(width-(image_?42:0));if(cbRemember)cbRemember->SetWidth(width);for(size_t i=0;i<buttonRows_.size();++i){buttonRows_[i]->SetWidth(width);const size_t count=std::min<size_t>(2,buttons.size()-i*2);const int buttonWidth=(width-(count==2?8:0))/static_cast<int>(count);for(size_t j=0;j<count;++j)buttons[i*2+j].node->SetWidth(buttonWidth);}}
++void TdlgMsgBox::BeginTimeout(){ShownAt=scheduler_->NowMs();if(SelfTimeout&&IsShown()&&!IsClosing()){UpdateCountdown();timer_->Start(200,false);}}
++void TdlgMsgBox::UpdateCountdown(){if(!SelfTimeout)return;const auto now=scheduler_->NowMs();const auto elapsed=now>=ShownAt?now-ShownAt:0;const auto total=SelfTimeout*1000;if(elapsed>total){EndModal(SelfTimeoutId);timer_->Stop();return;}const auto remaining=(total-elapsed)/1000;for(auto& button:buttons)if(button.result==SelfTimeoutId){olxstr label=button.caption;label<<" ("<<remaining<<')';button.node->SetText(TextProperty::Content,MessageText(label));break;}}
++bool TdlgMsgBox::Dispatch(int message,short subId,const IOlxObject*,const IOlxObject*,TActionQueue*){if(message==ButtonEvent){if(IsClosing()||!IsShown())return true;EndModal(subId);timer_->Stop();}else if(message==TimerEvent){if(!IsShown()||IsClosing())timer_->Stop();else UpdateCountdown();}else if(message==SizeEvent)LayoutMessage();return true;}
++void TdlgMsgBox::SetChecked(bool value){if(!cbRemember){if(value)throw std::logic_error("This message box has no remember checkbox");return;}cbRemember->SetChecked(value);}
++bool TdlgMsgBox::Show(bool show){const bool changed=TDialog::Show(show);if(changed&&show)BeginTimeout();else if(changed&&!show)timer_->Stop();return changed;}
++void TdlgMsgBox::ShowModalEx(bool manageParent,std::function<void(int)> completion){std::weak_ptr<Alive> weak=alive_;TDialog::ShowModalEx(manageParent,[weak,completion=std::move(completion)](int result){if(auto state=weak.lock())if(state->owner){state->owner->timer_->Stop();if(completion)completion(result);}});BeginTimeout();}
++void TdlgMsgBox::SetSize(Size size){TDialog::SetSize(size);LayoutMessage();}
++olxstr TdlgMsgBox::Result(int result)const{olxstr output;if(IsChecked())output='R';if(result==MessageResultOk)output<<'O';else if(result==MessageResultYes)output<<'Y';else if(result==MessageResultNo)output<<'N';else if(result==MessageResultCancel)output<<'C';return output;}
++std::shared_ptr<TdlgMsgBox> TdlgMsgBox::Execute(NodeBackend& nodes,std::shared_ptr<DialogBackend> dialogs,std::shared_ptr<UiScheduler> scheduler,Widget* parent,const olxstr& message,const olxstr& title,std::function<void(const olxstr&)> completion,const olxstr& tickBoxMessage,uint32_t flags,bool showRemember,long selfTimeout,int selfTimeoutId,std::shared_ptr<DialogPositionStore> positions){
++  auto dialog=std::make_shared<TdlgMsgBox>(nodes,std::move(dialogs),std::move(scheduler),parent,message,title,tickBoxMessage,flags,showRemember,selfTimeout,selfTimeoutId,std::move(positions));
++  dialog->ShowModalEx(true,[dialog,completion=std::move(completion)](int result){if(completion)completion(dialog->Result(result));});return dialog;
++}
++
++#else
+ #include "msgbox.h"
+ #include "icons/exception.xpm"
+ #include "icons/exclamation.xpm"
+@@ -171,3 +214,5 @@
+   }
+   return rv;
+ }
++
++#endif // native message box / original wx

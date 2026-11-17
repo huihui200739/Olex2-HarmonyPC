@@ -1,0 +1,11 @@
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -121,7 +121,7 @@
+          action!="toggle-cell"&&action!="toggle-basis"&&action!="toggle-frame"&&action!="show-all"&&action!="center-model"&&
+         action!="view-along-100"&&action!="view-along-010"&&action!="view-along-001"&&action!="view-along-110"&&
+         action!="view-along-101"&&action!="view-along-011"&&action!="view-along-111"))
+-      return reject("Action must be pick, clear-selection, select-all, invert-selection, toggle-cell, toggle-basis, toggle-frame, show-all or center-model");
++      return reject("Allowed: pick, clear-selection, select-all, invert-selection, toggles, show-all, center-model; view-along 100/010/001/110/101/011/111");
+     double x=0,y=0,mode=0;
+     if(napi_get_value_double(env,args[1],&x)!=napi_ok||napi_get_value_double(env,args[2],&y)!=napi_ok||
+         napi_get_value_double(env,args[3],&mode)!=napi_ok||!std::isfinite(x)||!std::isfinite(y)||

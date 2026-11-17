@@ -1,0 +1,259 @@
+--- a/repository/wxzipfs.h
++++ b/repository/wxzipfs.h
+@@ -10,6 +10,8 @@
+ #ifndef __olx_wxzip_fs_H
+ #define __olx_wxzip_fs_H
+ 
++#include "zipurl.h"
++
+ #ifdef __WXWIDGETS__
+ #include "fsext.h"
+ #include <wx/wx.h>
+@@ -17,11 +19,6 @@
+ #include <wx/mstream.h>
+ #include <wx/wfstream.h>
+ #include "zipfs.h"
+-
+-struct TZipEntry  {
+-  olxstr ZipName;
+-  olxstr EntryName;
+-};
+ 
+ class TZipWrapper  {
+   wxZipInputStream *FInputStream;
+@@ -36,8 +33,7 @@
+   bool Break;
+ public:
+   static const olxstr& ZipUrlSignature_() {
+-    static olxstr sig = "@zip:";
+-    return sig;
++    return TZipUrl::ZipUrlSignature_();
+   }
+ 
+   TZipWrapper(const olxstr &zipName, bool useCache);
+--- a/repository/wxzipfs.cpp
++++ b/repository/wxzipfs.cpp
+@@ -176,66 +176,23 @@
+   return res;
+ }
+ //..............................................................................
+-bool TZipWrapper::IsValidFileName(const olxstr &FN) {
+-  size_t zi = FN.IndexOf(ZipUrlSignature_());
+-  if (zi != InvalidIndex) {
+-    if (TEFile::Exists(ExtractZipName(FN))) {
+-      return true;
+-    }
+-    return false;
+-  }
+-  return TEFile::Exists(FN);
+-}
+-//..............................................................................
+-bool TZipWrapper::IsZipFile(const olxstr &FN) {
+-  size_t ind = FN.IndexOf(ZipUrlSignature_());
+-  return ind != InvalidIndex && ind != 0;
+-}
+-//..............................................................................
+-olxstr TZipWrapper::ExtractZipName(const olxstr &FN) {
+-  size_t zi = FN.IndexOf(ZipUrlSignature_());
+-  if (zi != InvalidIndex && zi > 0) {
+-    return FN.SubStringTo(zi);
+-  }
+-  return EmptyString();
+-}
+-//..............................................................................
+-olxstr TZipWrapper::ExtractZipEntryName(const olxstr &FN) {
+-  size_t zi = FN.IndexOf(ZipUrlSignature_());
+-  if (zi != InvalidIndex && zi > 0) {
+-    return FN.SubStringFrom(zi + ZipUrlSignature_().Length());
+-  }
+-  return EmptyString();
+-}
+-//..............................................................................
++bool TZipWrapper::IsValidFileName(const olxstr& FN) {
++  return TZipUrl::IsValidFileName(FN);
++}
++bool TZipWrapper::IsZipFile(const olxstr& FN) {
++  return TZipUrl::IsZipFile(FN);
++}
++olxstr TZipWrapper::ExtractZipName(const olxstr& FN) {
++  return TZipUrl::ExtractZipName(FN);
++}
++olxstr TZipWrapper::ExtractZipEntryName(const olxstr& FN) {
++  return TZipUrl::ExtractZipEntryName(FN);
++}
+ bool TZipWrapper::SplitZipUrl(const olxstr& fullName, TZipEntry& ZE) {
+-  size_t zi = fullName.IndexOf(ZipUrlSignature_());
+-  if (zi == InvalidIndex) {
+-    return false;
+-  }
+-  ZE.ZipName = fullName.SubStringTo(zi);
+-  ZE.ZipName = TEFile::UnixPath(ZE.ZipName);
+-  ZE.EntryName = fullName.SubStringFrom(zi + ZipUrlSignature_().Length());
+-  ZE.EntryName = TEFile::UnixPath(ZE.EntryName);
+-  return true;
+-}
+-//..............................................................................
+-olxstr TZipWrapper::ComposeFileName(const olxstr& ZipFileNameA,
+-  const olxstr& FNA)
+-{
+-  size_t zi = ZipFileNameA.IndexOf(ZipUrlSignature_());
+-  if (zi == InvalidIndex) {
+-    return FNA;
+-  }
+-  olxstr ZipFileName = TEFile::WinPath(ZipFileNameA),
+-    FN = TEFile::WinPath(FNA);
+-  olxstr zipPart = ZipFileName.SubStringTo(zi + ZipUrlSignature_().Length());
+-  olxstr zipPath = TEFile::ExtractFilePath(zipPart);
+-  TEFile::AddPathDelimeterI(zipPath);
+-  if (FN.StartsFrom(zipPath)) {
+-    return zipPart + TEFile::UnixPath(FN.SubStringFrom(zipPath.Length()));
+-  }
+-  return FNA;
++  return TZipUrl::SplitZipUrl(fullName, ZE);
++}
++olxstr TZipWrapper::ComposeFileName(const olxstr& zip, const olxstr& entry) {
++  return TZipUrl::ComposeFileName(zip, entry);
+ }
+ /*____________________________________________________________________________*/
+ 
+--- a/repository/zipurl.h
++++ b/repository/zipurl.h
+@@ -0,0 +1,91 @@
++/******************************************************************************
++* Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
++*                                                                             *
++* This file is part of the OlexSys Development Framework.                     *
++*                                                                             *
++* This source file is distributed under the terms of the licence located in   *
++* the root folder.                                                            *
++******************************************************************************/
++
++#ifndef __olx_zip_url_H
++#define __olx_zip_url_H
++#include "efile.h"
++
++// ZIP URI operations do not depend on an archive stream or GUI toolkit.
++struct TZipEntry {
++  olxstr ZipName;
++  olxstr EntryName;
++};
++
++class TZipUrl {
++public:
++  static const olxstr& ZipUrlSignature_() {
++    static olxstr sig = "@zip:";
++    return sig;
++  }
++  static bool IsValidFileName(const olxstr& FN);
++  static bool IsZipFile(const olxstr& FN);
++  static olxstr ExtractZipName(const olxstr& FN);
++  static olxstr ExtractZipEntryName(const olxstr& FN);
++  static bool SplitZipUrl(const olxstr& fullName, TZipEntry& ZE);
++  static olxstr ComposeFileName(const olxstr& ZipFileNameA, const olxstr& FNA);
++};
++
++inline bool TZipUrl::IsValidFileName(const olxstr &FN) {
++  size_t zi = FN.IndexOf(ZipUrlSignature_());
++  if (zi != InvalidIndex) {
++    if (TEFile::Exists(ExtractZipName(FN))) {
++      return true;
++    }
++    return false;
++  }
++  return TEFile::Exists(FN);
++}
++inline bool TZipUrl::IsZipFile(const olxstr &FN) {
++  size_t ind = FN.IndexOf(ZipUrlSignature_());
++  return ind != InvalidIndex && ind != 0;
++}
++inline olxstr TZipUrl::ExtractZipName(const olxstr &FN) {
++  size_t zi = FN.IndexOf(ZipUrlSignature_());
++  if (zi != InvalidIndex && zi > 0) {
++    return FN.SubStringTo(zi);
++  }
++  return EmptyString();
++}
++inline olxstr TZipUrl::ExtractZipEntryName(const olxstr &FN) {
++  size_t zi = FN.IndexOf(ZipUrlSignature_());
++  if (zi != InvalidIndex && zi > 0) {
++    return FN.SubStringFrom(zi + ZipUrlSignature_().Length());
++  }
++  return EmptyString();
++}
++inline bool TZipUrl::SplitZipUrl(const olxstr& fullName, TZipEntry& ZE) {
++  size_t zi = fullName.IndexOf(ZipUrlSignature_());
++  if (zi == InvalidIndex) {
++    return false;
++  }
++  ZE.ZipName = fullName.SubStringTo(zi);
++  ZE.ZipName = TEFile::UnixPath(ZE.ZipName);
++  ZE.EntryName = fullName.SubStringFrom(zi + ZipUrlSignature_().Length());
++  ZE.EntryName = TEFile::UnixPath(ZE.EntryName);
++  return true;
++}
++inline olxstr TZipUrl::ComposeFileName(const olxstr& ZipFileNameA,
++  const olxstr& FNA)
++{
++  size_t zi = ZipFileNameA.IndexOf(ZipUrlSignature_());
++  if (zi == InvalidIndex) {
++    return FNA;
++  }
++  olxstr ZipFileName = TEFile::WinPath(ZipFileNameA),
++    FN = TEFile::WinPath(FNA);
++  olxstr zipPart = ZipFileName.SubStringTo(zi + ZipUrlSignature_().Length());
++  olxstr zipPath = TEFile::ExtractFilePath(zipPart);
++  TEFile::AddPathDelimeterI(zipPath);
++  if (FN.StartsFrom(zipPath)) {
++    return zipPart + TEFile::UnixPath(FN.SubStringFrom(zipPath.Length()));
++  }
++  return FNA;
++}
++
++#endif
+--- a/olex/html/htmlswitch.cpp
++++ b/olex/html/htmlswitch.cpp
+@@ -13,7 +13,7 @@
+ #include "utf8file.h"
+ #include "htmlprep.h"
+ #include "fsext.h"
+-#include "wxzipfs.h"
++#include "zipurl.h"
+ #include "integration.h"
+ 
+ void THtmlSwitch::Clear() {
+@@ -134,7 +134,7 @@
+       }
+     } // end of parameter replacement
+   }
+-  ParentHtml->CheckForSwitches(*this, TZipWrapper::IsZipFile(FN));
++  ParentHtml->CheckForSwitches(*this, TZipUrl::IsZipFile(FN));
+   for (size_t i = 0; i < Switches.Count(); i++) {
+     Switches[i].UpdateFileIndex();
+   }
+--- a/olex/html/htmlprep.cpp
++++ b/olex/html/htmlprep.cpp
+@@ -11,7 +11,8 @@
+ #include "htmlswitch.h"
+ #include "olex2app.h"
+ #include "integration.h"
+-#include "wxzipfs.h"
++#include "zipurl.h"
++#include "fsext.h"
+ #include "eutf8.h"
+ 
+ void THtmlPreprocessor::CheckForSwitches(THtmlSwitch& Sender, bool isZip) {
+@@ -115,12 +116,12 @@
+ 
+       for (size_t j = 0; j < Toks.Count() - 1; j++) {
+         if (Toks[j].FirstIndexOf('=') == InvalidIndex) {
+-          if (isZip && !TZipWrapper::IsZipFile(Toks[j])) {
++          if (isZip && !TZipUrl::IsZipFile(Toks[j])) {
+             if (Toks[j].StartsFrom('\\') || Toks[j].StartsFrom('/')) {
+               tmp = Toks[j].SubStringFrom(1);
+             }
+             else {
+-              tmp = TZipWrapper::ComposeFileName(
++              tmp = TZipUrl::ComposeFileName(
+                 Sender.GetFile(Sender.GetFileIndex()), Toks[j]);
+             }
+           }

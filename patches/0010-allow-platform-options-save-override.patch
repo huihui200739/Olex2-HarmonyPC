@@ -1,0 +1,13 @@
+diff --git a/sdl/bapp.h b/sdl/bapp.h
+index 5b81092..b816944 100644
+--- a/sdl/bapp.h
++++ b/sdl/bapp.h
+@@ -89,7 +89,7 @@ public:
+   consequently will update the values
+   */
+   void ReadOptions(const olxstr &fn);
+-  void SaveOptions() const;
++  virtual void SaveOptions() const;
+   template <typename T>
+   void UpdateOption(const T &name, const olxstr &value) {
+     Options.AddParam(name, value);

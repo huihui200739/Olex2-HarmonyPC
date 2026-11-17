@@ -1,0 +1,138 @@
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -121,8 +121,8 @@
+          action!="toggle-cell"&&action!="toggle-basis"&&action!="toggle-frame"&&action!="toggle-grid"&&action!="show-all"&&action!="center-model"&&
+         action!="view-along-100"&&action!="view-along-010"&&action!="view-along-001"&&action!="view-along-110"&&
+         action!="view-along-101"&&action!="view-along-011"&&action!="view-along-111"&&action!="view-along-selection"&&
+-        action!="hide-selection"))
+-      return reject("Allowed: pick, clear-selection, select-all, invert-selection, toggle-cell, toggle-basis, toggle-frame, toggle-grid, show-all, center-model, hide-selection, view-along-100/010/001/110/101/011/111/selection");
++        action!="hide-selection"&&action!="quality-1"&&action!="quality-2"&&action!="quality-3"))
++      return reject("Allowed: pick, clear-selection, select-all, invert-selection, toggle-cell, toggle-basis, toggle-frame, toggle-grid, show-all, center-model, hide-selection, quality-1/2/3, view-along-100/010/001/110/101/011/111/selection");
+     double x=0,y=0,mode=0;
+     if(napi_get_value_double(env,args[1],&x)!=napi_ok||napi_get_value_double(env,args[2],&y)!=napi_ok||
+         napi_get_value_double(env,args[3],&mode)!=napi_ok||!std::isfinite(x)||!std::isfinite(y)||
+--- a/app/entry/src/main/cpp/renderer.cpp
++++ b/app/entry/src/main/cpp/renderer.cpp
+@@ -691,6 +691,9 @@
+   else if(action=="view-along-111")request.operation=Olex2DocumentOperation::ViewAlong111;
+   else if(action=="view-along-selection")request.operation=Olex2DocumentOperation::ViewAlongSelection;
+   else if(action=="hide-selection")request.operation=Olex2DocumentOperation::HideSelection;
++  else if(action=="quality-1")request.operation=Olex2DocumentOperation::SetDrawingQualityLow;
++  else if(action=="quality-2")request.operation=Olex2DocumentOperation::SetDrawingQualityMedium;
++  else if(action=="quality-3")request.operation=Olex2DocumentOperation::SetDrawingQualityHigh;
+   else return reject("Unknown original document interaction action");
+   if(!std::isfinite(x)||!std::isfinite(y)||x<0||x>1||y<0||y>1||mode>2)
+     return reject("Expected finite normalized viewport coordinates in [0,1] and selection mode 0, 1 or 2");
+--- a/app/entry/src/main/cpp/types/libolex2native/index.d.ts
++++ b/app/entry/src/main/cpp/types/libolex2native/index.d.ts
+@@ -108,7 +108,7 @@
+ // Private candidate38 ABI: JSON envelopes are parsed/validated by the document UI.
+ export const openOriginalDocument: (name: string, bytes: Uint8Array) => string;
+ // Existing original viewport only. x/y: finite normalized top-left [0,1].
+-// action: pick | clear-selection | select-all | invert-selection | toggle-cell | toggle-basis | toggle-frame | toggle-grid | show-all | center-model | hide-selection | view-along-100/010/001/110/101/011/111/selection.
++// action: pick | clear-selection | select-all | invert-selection | toggle-cell | toggle-basis | toggle-frame | toggle-grid | show-all | center-model | hide-selection | quality-1/2/3 | view-along-100/010/001/110/101/011/111/selection.
+ // mode: integer 0 replace, 1 add, 2 toggle; all four arguments are required.
+ // Returns the actual document/core/presentation envelope (including failures).
+ export const interactOriginalDocument: (action: string, x: number, y: number, mode: number) => string;
+--- a/app/entry/src/main/ets/model/OriginalViewportInput.ts
++++ b/app/entry/src/main/ets/model/OriginalViewportInput.ts
+@@ -10,7 +10,7 @@
+ export function originalSelectionRequest(action: string, x: number, y: number, mode: number): OriginalSelectionRequest {
+   if ((action !== 'pick' && action !== 'clear-selection' && action !== 'select-all' && action !== 'invert-selection' && action !== 'toggle-cell' && action !== 'toggle-basis' && action !== 'toggle-frame' && action !== 'show-all' && action !== 'center-model' && action !== 'view-along-100' && action !== 'view-along-010' &&
+       action !== 'view-along-001' && action !== 'view-along-110' && action !== 'view-along-101' &&
+-      action !== 'view-along-011' && action !== 'view-along-111' && action !== 'view-along-selection' && action !== 'hide-selection' && action !== 'toggle-grid') ||
++      action !== 'view-along-011' && action !== 'view-along-111' && action !== 'view-along-selection' && action !== 'hide-selection' && action !== 'toggle-grid' && action !== 'quality-1' && action !== 'quality-2' && action !== 'quality-3') ||
+     !Number.isFinite(x) || !Number.isFinite(y) || x < 0 || x > 1 || y < 0 || y > 1 ||
+     !Number.isInteger(mode) || mode < 0 || mode > 2) {
+     throw new Error('选择动作、视口坐标或选择模式不合法');
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -530,8 +530,10 @@
+         validated.action === 'clear-selection' ? '已清除选择' : validated.action === 'select-all' ? '已全选' :
+         validated.action === 'invert-selection' ? '已反选' : validated.action === 'toggle-cell' ? '已切换晶胞显示' :
+           validated.action === 'toggle-basis' ? '已切换基矢显示' : validated.action === 'toggle-frame' ? '已切换包围框显示' :
+-            validated.action === 'toggle-grid' ? '已切换网格显示' : validated.action === 'center-model' ? '模型已居中' : validated.action === 'hide-selection' ? '已隐藏所选图形' :
+-              validated.action === 'view-along-selection' ? '已沿所选键/平面调整视向' : validated.action.startsWith('view-along-') ?
++            validated.action === 'toggle-grid' ? '已切换网格显示' : validated.action === 'center-model' ? '模型已居中' :
++              validated.action === 'hide-selection' ? '已隐藏所选图形' : validated.action === 'quality-1' ? '已切换至低绘图质量' :
++                validated.action === 'quality-2' ? '已切换至中绘图质量' : validated.action === 'quality-3' ? '已切换至高绘图质量' :
++                  validated.action === 'view-along-selection' ? '已沿所选键/平面调整视向' : validated.action.startsWith('view-along-') ?
+             `视向已切换至 ${validated.action.substring('view-along-'.length)}` : '已显示全部分子并重新居中';
+       this.originalSelectionMessage = `${actionLabel} · 选中 ${core.selectedObjectCount} · 选择序号 ${core.selectionSequence}` +
+         (core.lastPickedCollection.length > 0 ? ` · 集合 ${core.lastPickedCollection}` : '');
+@@ -2688,6 +2690,16 @@
+         Button('切换网格').id('olex2-original-toggle-grid').height(25).fontSize(10)
+           .enabled(this.originalSelectionEnabled()).onClick(() => this.selectOriginalDocument('toggle-grid'))
+         Text('需先载入晶体学网格数据').fontSize(10).fontColor('#758579').layoutWeight(1)
++      }.width('100%')
++      Row({ space: 5 }) {
++        Button('绘图质量').id('olex2-original-drawing-quality').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled())
++          .bindMenu([
++            { value: '低（原版 1 档）', action: () => this.selectOriginalDocument('quality-1') },
++            { value: '中（原版 2 档）', action: () => this.selectOriginalDocument('quality-2') },
++            { value: '高（原版 3 档）', action: () => this.selectOriginalDocument('quality-3') }
++          ])
++        Text('原版 TGXApp 图元细分质量').fontSize(10).fontColor('#758579').layoutWeight(1)
+       }.width('100%')
+       Text(this.originalSelectionBusy ? '正在处理原版选择…' : this.originalSelectionMessage)
+         .id('olex2-original-selection-result').fontSize(10).fontColor('#64796A').width('100%').maxLines(3)
+--- a/native/original_document_view.cpp
++++ b/native/original_document_view.cpp
+@@ -240,7 +240,8 @@
+     op==Olex2DocumentOperation::ViewAlong100||op==Olex2DocumentOperation::ViewAlong010||
+     op==Olex2DocumentOperation::ViewAlong001||op==Olex2DocumentOperation::ViewAlong110||
+     op==Olex2DocumentOperation::ViewAlong101||op==Olex2DocumentOperation::ViewAlong011||
+-    op==Olex2DocumentOperation::ViewAlong111;
++    op==Olex2DocumentOperation::ViewAlong111||op==Olex2DocumentOperation::SetDrawingQualityLow||
++    op==Olex2DocumentOperation::SetDrawingQualityMedium||op==Olex2DocumentOperation::SetDrawingQualityHigh;
+ }
+ void ResetSelectionObservation(OriginalDocumentState& state){
+   state.selectionSequence=0;state.originalPickingCalls=0;state.pickHit=false;
+@@ -306,6 +307,13 @@
+     if(!DispatchHarmonyMainGuiAction(app,"hide-selection"))
+       throw std::runtime_error("Select one or more objects before hiding the selection");
+     action="hide-selection";
++  }else if(request.operation==Olex2DocumentOperation::SetDrawingQualityLow||
++      request.operation==Olex2DocumentOperation::SetDrawingQualityMedium||
++      request.operation==Olex2DocumentOperation::SetDrawingQualityHigh){
++    action=request.operation==Olex2DocumentOperation::SetDrawingQualityLow?"quality-1":
++      request.operation==Olex2DocumentOperation::SetDrawingQualityMedium?"quality-2":"quality-3";
++    if(!DispatchHarmonyMainGuiAction(app,action))
++      throw std::runtime_error("Harmony main-form drawing quality action is unavailable");
+   }else if(request.operation==Olex2DocumentOperation::CenterModel){
+     if(!DispatchHarmonyMainGuiAction(app,"center-model"))throw std::runtime_error("Harmony main-form center action is unavailable");
+     // The original action changes only the camera centre. Keep the neutral
+@@ -392,6 +400,8 @@
+   else if(state.selectionAction=="show-all")interactionSource="original TMainForm::OnShowAll/GXLibMacros::macFmol";
+   else if(state.selectionAction=="center-model")interactionSource="original TMainForm::OnModelCenter/GXLibMacros::macCenter";
+   else if(state.selectionAction=="hide-selection")interactionSource="original TMainForm::OnGraphics/GXLibMacros::macHide";
++  else if(state.selectionAction=="quality-1"||state.selectionAction=="quality-2"||state.selectionAction=="quality-3")
++    interactionSource="original TMainForm::OnDrawQChange/GXLibMacros::macQual/TGXApp::Quality";
+   else if(state.selectionAction.rfind("view-along-",0)==0)interactionSource=state.selectionAction=="view-along-selection"?
+     "original TMainForm::OnBond/OnPlane/GXLibMacros::macSetView":"original TMainForm::OnViewAlong/GXLibMacros::macMatr";
+   std::ostringstream out;out<<"{\"passed\":"<<(passed?"true":"false")<<",\"loaded\":"<<(state.loaded?"true":"false")
+--- a/native/original_renderer_host.h
++++ b/native/original_renderer_host.h
+@@ -5,7 +5,7 @@
+ #include "display_font_metrics.h"
+ // Private same-build document-view request; both DSOs use the same libc++.
+ // This is not a stable third-party plugin ABI or a security sandbox.
+-enum class Olex2DocumentOperation { Render, Open, Close, Export, ResetView, Pick, ClearSelection, SelectAll, InvertSelection, CaptureViewport, RestoreViewport, ToggleCellVisibility, ToggleBasisVisibility, ToggleFrameVisibility, ToggleGridVisibility, ShowAllVisible, CenterModel, ViewAlong100, ViewAlong010, ViewAlong001, ViewAlong110, ViewAlong101, ViewAlong011, ViewAlong111, ViewAlongSelection, HideSelection };
++enum class Olex2DocumentOperation { Render, Open, Close, Export, ResetView, Pick, ClearSelection, SelectAll, InvertSelection, CaptureViewport, RestoreViewport, ToggleCellVisibility, ToggleBasisVisibility, ToggleFrameVisibility, ToggleGridVisibility, ShowAllVisible, CenterModel, ViewAlong100, ViewAlong010, ViewAlong001, ViewAlong110, ViewAlong101, ViewAlong011, ViewAlong111, ViewAlongSelection, HideSelection, SetDrawingQualityLow, SetDrawingQualityMedium, SetDrawingQualityHigh };
+ struct Olex2DocumentRequest {
+   Olex2DocumentOperation operation=Olex2DocumentOperation::Render;
+   std::string name,bytes;
+--- a/upstream/olex/main_gui.cpp
++++ b/upstream/olex/main_gui.cpp
+@@ -18,6 +18,10 @@
+ }
+ }
+ bool DispatchHarmonyMainGuiAction(gxlib::TGXApp& app, const std::string& action) {
++  // Preserve TMainForm::OnDrawQChange / GXLibMacros::macQual 1..3 semantics.
++  if (action == "quality-1") { app.Quality(qaLow); return true; }
++  if (action == "quality-2") { app.Quality(qaMedium); return true; }
++  if (action == "quality-3") { app.Quality(qaHigh); return true; }
+   if (action == "toggle-cell") {
+     app.SetCellVisible(!app.IsCellVisible());
+     NotifyHarmonyVisibilityStateChange(app.stateCellVisible, app.IsCellVisible());

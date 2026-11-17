@@ -1,0 +1,63 @@
+--- a/app/entry/src/main/ets/model/OriginalDocumentSessions.ts
++++ b/app/entry/src/main/ets/model/OriginalDocumentSessions.ts
+@@ -328,6 +328,24 @@
+     try {
+       const session: OriginalDocumentSessionRecord = this.requireSession(this.activeId);
+       return presentedIdentity(checkedPresented(document)) === session.identity;
++    } catch (_) { return false; }
++  }
++  // An ordinary main-frame action can fail (for example the original grid handler
++  // refusing a fixture without a crystallographic map) while the same source is
++  // still loaded in the native session. That failure must not invalidate the
++  // session ownership binding. Compare only the stable source/ownership fields,
++  // never the operation outcome or transient observation fields, and fail closed
++  // when the document is no longer loaded or was replaced/modified.
++  matchesNativeSourceIdentity(document: OriginalDocumentEnvelope): boolean {
++    if (this.activeId === '' || this.nativeSessionId !== this.activeId) return false;
++    try {
++      const session: OriginalDocumentSessionRecord = this.requireSession(this.activeId);
++      const stored: OriginalDocumentStableIdentity = JSON.parse(session.identity) as OriginalDocumentStableIdentity;
++      const core = document.core;
++      return core.loaded === true && core.modelMayHaveChanged === false &&
++        core.name === stored.name && core.format === stored.format &&
++        core.byteCount === stored.byteCount && core.sha256 === stored.sha256 &&
++        core.revision === stored.revision && core.source === stored.source;
+     } catch (_) { return false; }
+   }
+ 
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1176,7 +1176,9 @@
+ 
+   private reconcileOriginalSessionNative(): void {
+     if (this.originalDocumentSessions.getStatus().nativeSessionId.length > 0 &&
+-      (this.originalDocumentStatusError.length > 0 || !this.originalDocumentSessions.matchesNative(this.originalDocument))) {
++      (this.originalDocumentStatusError.length > 0 ||
++        (!this.originalDocumentSessions.matchesNative(this.originalDocument) &&
++          !this.originalDocumentSessions.matchesNativeSourceIdentity(this.originalDocument)))) {
+       this.originalDocumentSessions.invalidateNative();
+     }
+     this.syncOriginalDocumentSessions();
+@@ -1538,8 +1540,20 @@
+   }
+ 
+   private originalDocumentViewPresented(): boolean {
+-    return this.originalDocumentStatusError.length === 0 && originalDocumentPresented(this.originalDocument) &&
+-      this.originalDocumentSessions.matchesNative(this.originalDocument) && this.graphics.originalDocumentView === true && this.graphics.error.length === 0;
++    if (this.originalDocumentStatusError.length > 0 || !this.graphics.surfaceReady || !this.graphics.initialized) return false;
++    if (originalDocumentPresented(this.originalDocument)) {
++      return this.originalDocumentSessions.matchesNative(this.originalDocument) &&
++        this.graphics.originalDocumentView === true && this.graphics.error.length === 0;
++    }
++    // An ordinary main-frame action (for example the original grid handler
++    // refusing a fixture without a map) can report a native action error while the
++    // same source is still loaded. Keep the document toolbar usable and the error
++    // visible instead of orphaning the document. Nothing is inferred when the
++    // source is no longer loaded or has been replaced/modified.
++    const core: OriginalDocumentCoreStatus = this.originalDocument.core;
++    return core.loaded && core.error.length > 0 && core.name.length > 0 && core.byteCount > 0 &&
++      core.frames > 0 && /^[0-9a-f]{64}$/i.test(core.sha256) &&
++      this.originalDocumentSessions.matchesNativeSourceIdentity(this.originalDocument);
+   }
+ 
+   private acceptOriginalDocumentResult(result: OriginalDocumentTransferResult,

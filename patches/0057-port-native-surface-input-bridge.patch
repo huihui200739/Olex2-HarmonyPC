@@ -1,0 +1,196 @@
+--- a/upstream/olex/xglcanv.h
++++ b/upstream/olex/xglcanv.h
+@@ -6,7 +6,61 @@
+ * This source file is distributed under the terms of the licence located in   *
+ * the root folder.                                                            *
+ ******************************************************************************/
++#if defined(__OHOS__) && !defined(__WXWIDGETS__)
++#ifndef __olx_xglCanvas_H
++#define __olx_xglCanvas_H
++#include "gxapp.h"
++#include <cstdint>
+ 
++// Native-surface event bridge for the original TGXApp. The caller owns the
++// ArkUI/EGL surface and must make its context current before Render/Resize or
++// pointer dispatch. The host translates menu, wheel, and key events to ArkUI.
++enum class TGlCanvasEventKind {
++  PointerDown, PointerUp, PointerMove, PointerCancel, ContextMenu,
++  ObjectChanged, Wheel, DoubleClick, KeyDown, KeyUp, Character, Resize
++};
++struct TGlCanvasEvent {
++  TGlCanvasEventKind kind;
++  int x=0, y=0, screenX=0, screenY=0;
++  short modifiers=0, buttons=0;
++  double wheelDelta=0;
++  uint32_t keyCode=0, unicode=0;
++  bool shift=false, control=false, alt=false, meta=false;
++  class AGDrawObject* object=nullptr; // borrowed until Dispatch returns
++};
++class TGlCanvasHost {
++public:
++  virtual ~TGlCanvasHost()=default;
++  virtual bool Dispatch(const TGlCanvasEvent& event)=0;
++};
++class TGlCanvas {
++  TGXApp* app_=nullptr;              // borrowed original application
++  TGlCanvasHost* host_=nullptr;      // borrowed ArkUI event bridge
++  int pressX_=0, pressY_=0;
++  short buttons_=0;
++  bool hasPress_=false;
++  bool Send(TGlCanvasEvent event) const;
++  void PublishMouseObject();
++public:
++  TGlCanvas(TGXApp& app,TGlCanvasHost& host);
++  ~TGlCanvas()=default; // surface/context ownership remains with Harmony host
++  TGlCanvas(const TGlCanvas&)=delete;
++  TGlCanvas& operator=(const TGlCanvas&)=delete;
++  TGXApp* GetXApp() const { return app_; }
++  void XApp(TGXApp& app);
++  uint64_t Render();
++  uint64_t Resize(int width,int height);
++  bool PointerDown(int x,int y,short modifiers,short pressedButtons,int screenX,int screenY);
++  bool PointerUp(int x,int y,short modifiers,short remainingButtons,int screenX,int screenY);
++  bool PointerMove(int x,int y,short modifiers,int screenX,int screenY);
++  void PointerCancel(int x,int y,short modifiers=0);
++  bool Wheel(int x,int y,double delta,short modifiers=0);
++  bool DoubleClick(int x,int y,short modifiers=0);
++  bool Key(uint32_t keyCode,uint32_t unicode,bool down,bool character,
++    bool shift,bool control,bool alt,bool meta);
++};
++#endif // __olx_xglCanvas_H
++#else
+ #ifndef __olx_xglCanvas_H
+ #define __olx_xglCanvas_H
+ #include "gxapp.h"
+@@ -54,3 +108,4 @@
+   DECLARE_CLASS(wxGLCanvas)
+ };
+ #endif
++#endif // Harmony native surface bridge / original wxGLCanvas
+--- a/upstream/olex/xglcanv.cpp
++++ b/upstream/olex/xglcanv.cpp
+@@ -1,12 +1,100 @@
+-/******************************************************************************
+-* Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
+-*                                                                             *
+-* This file is part of the OlexSys Development Framework.                     *
+-*                                                                             *
+-* This source file is distributed under the terms of the licence located in   *
+-* the root folder.                                                            *
+-******************************************************************************/
+-
++#if defined(__OHOS__) && !defined(__WXWIDGETS__)
++#include "xglcanv.h"
++#include "glgroup.h"
++#include <cmath>
++#include <stdexcept>
++
++TGlCanvas::TGlCanvas(TGXApp& app,TGlCanvasHost& host):app_(&app),host_(&host) {}
++bool TGlCanvas::Send(TGlCanvasEvent event) const {
++  if(host_==nullptr) return false;
++  return host_->Dispatch(event);
++}
++void TGlCanvas::PublishMouseObject() {
++  AGDrawObject* object=app_==nullptr?nullptr:app_->GetMouseObject();
++  if(object!=nullptr) {
++    if(TGlGroup* group=app_->FindObjectGroup(*object)) object=group;
++  }
++  TGlCanvasEvent event{TGlCanvasEventKind::ObjectChanged};event.object=object;
++  Send(event);
++}
++void TGlCanvas::XApp(TGXApp& app) {
++  if(app_!=&app) {
++    if(app_!=nullptr&&hasPress_) app_->ResetMouseState(static_cast<short>(pressX_),static_cast<short>(pressY_));
++    buttons_=0;hasPress_=false;app_=&app;
++  }
++}
++uint64_t TGlCanvas::Render() {
++  if(app_==nullptr) throw std::runtime_error("Native canvas has no original TGXApp");
++  return app_->Draw();
++}
++uint64_t TGlCanvas::Resize(int width,int height) {
++  if(app_==nullptr||width<=0||height<=0) throw std::invalid_argument("Native canvas requires a live TGXApp and positive surface dimensions");
++  app_->Resize(width,height);
++  TGlCanvasEvent event{TGlCanvasEventKind::Resize};event.x=width;event.y=height;Send(event);
++  return app_->Draw();
++}
++bool TGlCanvas::PointerDown(int x,int y,short modifiers,short pressedButtons,int screenX,int screenY) {
++  if(app_==nullptr) throw std::runtime_error("Native canvas has no original TGXApp");
++  if(pressedButtons==0) throw std::invalid_argument("Native pointer-down requires at least one pressed mouse button");
++  buttons_=pressedButtons;pressX_=x;pressY_=y;hasPress_=true;
++  TGlCanvasEvent event{TGlCanvasEventKind::PointerDown};event.x=x;event.y=y;event.screenX=screenX;event.screenY=screenY;event.modifiers=modifiers;event.buttons=buttons_;
++  const bool handled=Send(event);
++  const bool appHandled=app_->MouseDown(x,y,modifiers,buttons_);
++  PublishMouseObject();
++  return handled||appHandled;
++}
++bool TGlCanvas::PointerUp(int x,int y,short modifiers,short remainingButtons,int screenX,int screenY) {
++  if(app_==nullptr) throw std::runtime_error("Native canvas has no original TGXApp");
++  const short released=static_cast<short>(buttons_^remainingButtons);
++  AGDrawObject* pressedObject=app_->GetMouseObject();
++  TGlCanvasEvent event{TGlCanvasEventKind::PointerUp};event.x=x;event.y=y;event.screenX=screenX;event.screenY=screenY;event.modifiers=modifiers;event.buttons=released;
++  bool handled=Send(event);
++  if(!handled) handled=app_->MouseUp(x,y,modifiers,released);
++  const bool contextClick=hasPress_&&std::abs(x-pressX_)<=4&&std::abs(y-pressY_)<=4&&released==smbRight&&modifiers==0;
++  if(!handled&&contextClick) {
++    if(pressedObject!=nullptr) if(TGlGroup* group=app_->FindObjectGroup(*pressedObject)) pressedObject=group;
++    TGlCanvasEvent context{TGlCanvasEventKind::ContextMenu};context.x=pressX_;context.y=pressY_;context.screenX=screenX;context.screenY=screenY;context.modifiers=modifiers;context.buttons=released;context.object=pressedObject;
++    handled=Send(context);
++  }
++  app_->Draw();
++  app_->ResetMouseState(static_cast<short>(x),static_cast<short>(y),modifiers,remainingButtons);
++  buttons_=remainingButtons;hasPress_=remainingButtons!=0;
++  if(!hasPress_) PublishMouseObject();
++  return handled;
++}
++bool TGlCanvas::PointerMove(int x,int y,short modifiers,int screenX,int screenY) {
++  if(app_==nullptr) throw std::runtime_error("Native canvas has no original TGXApp");
++  TGlCanvasEvent event{TGlCanvasEventKind::PointerMove};event.x=x;event.y=y;event.screenX=screenX;event.screenY=screenY;event.modifiers=modifiers;event.buttons=buttons_;
++  Send(event);
++  const bool changed=app_->MouseMove(x,y,modifiers);
++  if(changed) app_->Draw();
++  return changed;
++}
++void TGlCanvas::PointerCancel(int x,int y,short modifiers) {
++  if(app_==nullptr) return;
++  TGlCanvasEvent event{TGlCanvasEventKind::PointerCancel};event.x=x;event.y=y;event.modifiers=modifiers;event.buttons=buttons_;Send(event);
++  app_->ResetMouseState(static_cast<short>(x),static_cast<short>(y),modifiers,0);
++  buttons_=0;hasPress_=false;PublishMouseObject();
++}
++bool TGlCanvas::Wheel(int x,int y,double delta,short modifiers) {
++  if(!std::isfinite(delta)) throw std::invalid_argument("Native wheel delta must be finite");
++  TGlCanvasEvent event{TGlCanvasEventKind::Wheel};event.x=x;event.y=y;event.modifiers=modifiers;event.wheelDelta=delta;
++  return Send(event);
++}
++bool TGlCanvas::DoubleClick(int x,int y,short modifiers) {
++  if(app_==nullptr) throw std::runtime_error("Native canvas has no original TGXApp");
++  if(app_->DblClick()) return true;
++  TGlCanvasEvent event{TGlCanvasEventKind::DoubleClick};event.x=x;event.y=y;event.modifiers=modifiers;event.buttons=buttons_;
++  return Send(event);
++}
++bool TGlCanvas::Key(uint32_t keyCode,uint32_t unicode,bool down,bool character,
++    bool shift,bool control,bool alt,bool meta) {
++  TGlCanvasEvent event{character?TGlCanvasEventKind::Character:(down?TGlCanvasEventKind::KeyDown:TGlCanvasEventKind::KeyUp)};
++  event.keyCode=keyCode;event.unicode=unicode;event.shift=shift;event.control=control;event.alt=alt;event.meta=meta;
++  if(control) event.modifiers|=sssCtrl;if(shift) event.modifiers|=sssShift;if(alt) event.modifiers|=sssAlt;
++  return Send(event);
++}
++#else
+ #include "xglcanv.h"
+ #include "mainform.h"
+ #include "glgroup.h"
+@@ -279,3 +367,4 @@
+   glAttrib[idx++] = 0;
+   return glAttrib;
+ }
++#endif // Harmony native input bridge / original wxGLCanvas implementation
+--- a/cmake/Olex2NativeWidgets.cmake
++++ b/cmake/Olex2NativeWidgets.cmake
+@@ -12,6 +12,7 @@
+     "${project_root}/upstream/olex/ptable.cpp"
+     "${project_root}/upstream/olex/nui/nui.cpp"
+     "${project_root}/upstream/olex/nui/skeleton.cpp"
++    "${project_root}/upstream/olex/xglcanv.cpp"
+     "${project_root}/upstream/olex/tasks.cpp"
+     "${project_root}/upstream/olex/edit.cpp"
+     "${project_root}/upstream/olex/updateth.cpp"

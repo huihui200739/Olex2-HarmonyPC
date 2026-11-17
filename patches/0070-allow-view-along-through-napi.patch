@@ -1,0 +1,13 @@
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -118,7 +118,9 @@
+     }
+     if(!ReadString(env,args[0],32,action)||
+         (action!="pick"&&action!="clear-selection"&&action!="select-all"&&action!="invert-selection"&&
+-         action!="toggle-cell"&&action!="toggle-basis"&&action!="toggle-frame"&&action!="show-all"&&action!="center-model"))
++         action!="toggle-cell"&&action!="toggle-basis"&&action!="toggle-frame"&&action!="show-all"&&action!="center-model"&&
++        action!="view-along-100"&&action!="view-along-010"&&action!="view-along-001"&&action!="view-along-110"&&
++        action!="view-along-101"&&action!="view-along-011"&&action!="view-along-111"))
+       return reject("Action must be pick, clear-selection, select-all, invert-selection, toggle-cell, toggle-basis, toggle-frame, show-all or center-model");
+     double x=0,y=0,mode=0;
+     if(napi_get_value_double(env,args[1],&x)!=napi_ok||napi_get_value_double(env,args[2],&y)!=napi_ok||

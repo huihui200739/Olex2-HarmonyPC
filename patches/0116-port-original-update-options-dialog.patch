@@ -1,0 +1,156 @@
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -557,7 +557,48 @@
+   Number(env,out,"mask",mask);Number(env,out,"level",level);
+   Property(env,out,"error",String(env,readError));
+   return out;
++}
++struct UpdateOptionsDialogState {
++  std::mutex mutex;void* handle=nullptr;bool done=false;int result=0;
++};
++UpdateOptionsDialogState& UpdateOptionsDialog(){static auto* state=new UpdateOptionsDialogState;return *state;}
++int UpdateOptionsDialogCompleted(void*,int result,const char*){
++  auto& state=UpdateOptionsDialog();std::lock_guard<std::mutex> lock(state.mutex);
++  state.done=true;state.result=result;return 0;
+ }
++napi_value OpenOriginalUpdateOptionsDialog(napi_env env,napi_callback_info){
++  napi_value out;napi_create_object(env,&out);
++  auto& owner=Runtime();std::lock_guard<std::mutex> ownerLock(owner.mutex);
++  auto& state=UpdateOptionsDialog();
++  {
++    std::lock_guard<std::mutex> lock(state.mutex);
++    if(!owner.runtime){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,"Original application runtime is not initialized"));return out;}
++    if(state.handle){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,"An update options dialog is already open"));return out;}
++    char error[512]={};
++    void* handle=olex2_native_update_options_create(env,UpdateOptionsDialogCompleted,nullptr,error,sizeof(error));
++    if(!handle){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,error[0]?error:"Original update options dialog could not be created"));return out;}
++    state.handle=handle;state.done=false;state.result=0;
++  }
++  char error[512]={};
++  if(olex2_native_dialog_show(state.handle,true,error,sizeof(error))!=0){
++    std::lock_guard<std::mutex> lock(state.mutex);
++    char releaseError[512]={};olex2_native_dialog_release(state.handle,releaseError,sizeof(releaseError));state.handle=nullptr;
++    Boolean(env,out,"opened",false);Property(env,out,"error",String(env,error[0]?error:"Original update options dialog could not be shown"));return out;
++  }
++  Boolean(env,out,"opened",true);Property(env,out,"error",String(env,""));return out;
++}
++napi_value PollOriginalUpdateOptionsDialog(napi_env env,napi_callback_info){
++  napi_value out;napi_create_object(env,&out);
++  auto& state=UpdateOptionsDialog();std::lock_guard<std::mutex> lock(state.mutex);
++  if(!state.handle){Property(env,out,"state",String(env,"none"));Property(env,out,"error",String(env,""));return out;}
++  if(!state.done){Property(env,out,"state",String(env,"open"));Property(env,out,"error",String(env,""));return out;}
++  char error[512]={};olex2_native_dialog_release(state.handle,error,sizeof(error));
++  state.handle=nullptr;state.done=false;
++  Property(env,out,"state",String(env,"done"));
++  Boolean(env,out,"accepted",state.result==1);
++  Property(env,out,"error",String(env,error[0]?error:""));
++  return out;
++}
+ napi_value OriginalLogsObject(napi_env env,const olex2::harmony::OriginalLogSnapshot& s,const std::string& error){
+   napi_value out,entries;napi_create_object(env,&out);napi_create_array_with_length(env,s.entries.size(),&entries);
+   Boolean(env,out,"attached",s.attached);Number(env,out,"posted",s.posted);Number(env,out,"dropped",s.dropped);Number(env,out,"truncated",s.truncated);Number(env,out,"captureFailures",s.captureFailures);Number(env,out,"clearCount",s.clearCount);Number(env,out,"clearedEntries",s.clearedEntries);Number(env,out,"entryCount",s.entries.size());Number(env,out,"retainedBytes",s.retainedBytes);
+@@ -863,6 +904,8 @@
+     {"openOriginalGradientDialog",nullptr,OpenOriginalGradientDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"pollOriginalGradientDialog",nullptr,PollOriginalGradientDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"openOriginalPrimitiveDialog",nullptr,OpenOriginalPrimitiveDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
++    {"openOriginalUpdateOptionsDialog",nullptr,OpenOriginalUpdateOptionsDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
++    {"pollOriginalUpdateOptionsDialog",nullptr,PollOriginalUpdateOptionsDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"pollOriginalPrimitiveDialog",nullptr,PollOriginalPrimitiveDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"getOriginalLogs",nullptr,GetOriginalLogs,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"clearOriginalLogs",nullptr,ClearOriginalLogs,nullptr,nullptr,nullptr,napi_default,nullptr},
+--- a/app/entry/src/main/cpp/types/libolex2native/index.d.ts
++++ b/app/entry/src/main/cpp/types/libolex2native/index.d.ts
+@@ -131,6 +131,14 @@
+ // Original primitives dialog for the current selection; OK applies the mask.
+ export const openOriginalPrimitiveDialog: () => { opened: boolean; error: string };
+ export const pollOriginalPrimitiveDialog: () => OriginalPrimitiveDialogReport;
++export interface OriginalUpdateOptionsDialogReport {
++  state: 'none' | 'open' | 'done';
++  accepted?: boolean;
++  error: string;
++}
++// Original update options dialog; Cancel closes without changing settings.
++export const openOriginalUpdateOptionsDialog: () => { opened: boolean; error: string };
++export const pollOriginalUpdateOptionsDialog: () => OriginalUpdateOptionsDialogReport;
+ 
+ export interface ApplicationOptionsTransferReport {
+   passed: boolean; optionsChanged: boolean; importedOptions: number;
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1,4 +1,4 @@
+-import nativeBridge, { GraphicsStatus, UtilityReport, CheckResult, ApplicationRuntimeStatus, OriginalLogSnapshot, CoreCatalogReport, PythonRuntimeStatus, OriginalLinePathGpuProbe, PythonExecutionReport, ApplicationFunctionReport, OriginalCommandReport, OriginalGenerateDialogReport, OriginalPeriodicTableReport, OriginalMaterialDialogReport, OriginalSceneDialogReport, OriginalGradientDialogReport, OriginalPrimitiveDialogReport, DesktopCommandReport } from 'libolex2native.so';
++import nativeBridge, { GraphicsStatus, UtilityReport, CheckResult, ApplicationRuntimeStatus, OriginalLogSnapshot, CoreCatalogReport, PythonRuntimeStatus, OriginalLinePathGpuProbe, PythonExecutionReport, ApplicationFunctionReport, OriginalCommandReport, OriginalGenerateDialogReport, OriginalPeriodicTableReport, OriginalMaterialDialogReport, OriginalSceneDialogReport, OriginalGradientDialogReport, OriginalPrimitiveDialogReport, OriginalUpdateOptionsDialogReport, DesktopCommandReport } from 'libolex2native.so';
+ import { fileIo } from '@kit.CoreFileKit';
+ import { common } from '@kit.AbilityKit';
+ import { OptionsDocumentTransfer, OptionsDocumentStatus, OptionsDocumentBackend, emptyOptionsDocumentStatus } from '../model/OptionsDocumentTransfer';
+@@ -243,6 +243,8 @@
+   private originalTextApplyRebindPending: boolean = false;
+   private gradientDialogTimer: number = -1;
+   private gradientDialogOpen: boolean = false;
++  private updateOptionsDialogTimer: number = -1;
++  private updateOptionsDialogOpen: boolean = false;
+   private primitiveDialogTimer: number = -1;
+   private primitiveDialogOpen: boolean = false;
+   @State private commandMessage: string = '原版解析器已接入视图命令；完整命令库未接通';
+@@ -426,6 +428,8 @@
+     this.gradientDialogTimer = -1;
+     if (this.primitiveDialogTimer >= 0) clearInterval(this.primitiveDialogTimer);
+     this.primitiveDialogTimer = -1;
++    if (this.updateOptionsDialogTimer >= 0) clearInterval(this.updateOptionsDialogTimer);
++    this.updateOptionsDialogTimer = -1;
+   }
+ 
+   private submitCommand(): void {
+@@ -2282,6 +2286,39 @@
+     }
+   }
+ 
++  private openOriginalUpdateOptionsDialog(): void {
++    if (this.updateOptionsDialogOpen) return;
++    try {
++      const opened = nativeBridge.openOriginalUpdateOptionsDialog();
++      if (!opened.opened) {
++        this.originalSelectionMessage = opened.error || '原版更新选项未打开';
++        return;
++      }
++      this.updateOptionsDialogOpen = true;
++      this.originalSelectionMessage = '已打开原版更新选项…';
++      if (this.updateOptionsDialogTimer < 0) {
++        this.updateOptionsDialogTimer = setInterval(() => { this.pollOriginalUpdateOptionsDialog(); }, 400);
++      }
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版更新选项调用失败';
++    }
++  }
++
++  private pollOriginalUpdateOptionsDialog(): void {
++    if (!this.updateOptionsDialogOpen) return;
++    try {
++      const report: OriginalUpdateOptionsDialogReport = nativeBridge.pollOriginalUpdateOptionsDialog();
++      if (report.state === 'open') return;
++      if (this.updateOptionsDialogTimer >= 0) clearInterval(this.updateOptionsDialogTimer);
++      this.updateOptionsDialogTimer = -1;
++      this.updateOptionsDialogOpen = false;
++      if (report.state !== 'done') return;
++      this.originalSelectionMessage = report.accepted ? '原版更新选项已应用' : '已取消原版更新选项';
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版更新选项轮询失败';
++    }
++  }
++
+   private openOriginalPrimitiveDialog(): void {
+     if (this.primitiveDialogOpen || !this.originalSelectionEnabled()) return;
+     try {
+@@ -3469,6 +3506,12 @@
+           .enabled(this.originalDocumentViewPresented() && !this.originalDocumentOperationBusy() && !this.gradientDialogOpen)
+           .onClick(() => this.openOriginalGradientDialog())
+         Text('原版背景渐变对话框').fontSize(10).fontColor('#758579').layoutWeight(1)
++      }.width('100%')
++      Row({ space: 5 }) {
++        Button('更新选项…').id('olex2-original-update-options').height(25).fontSize(10)
++          .enabled(!this.updateOptionsDialogOpen)
++          .onClick(() => this.openOriginalUpdateOptionsDialog())
++        Text('原版更新设置对话框（取消不改变设置）').fontSize(10).fontColor('#758579').layoutWeight(1)
+       }.width('100%')
+       Row({ space: 5 }) {
+         Button('球棍').id('olex2-original-style-pers').height(25).fontSize(10)

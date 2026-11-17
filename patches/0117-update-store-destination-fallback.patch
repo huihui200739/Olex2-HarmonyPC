@@ -1,0 +1,21 @@
+--- a/native/original_update_options_store.cpp
++++ b/native/original_update_options_store.cpp
+@@ -24,11 +24,17 @@
+     return result;
+   }
+   void Save(const UpdateOptionsValues& values)override{
++    try{SaveChecked(values);}catch(const std::exception& e){TBasicApp::NewLogEntry(logError)<<"update-options save failed: "<<e.what();throw;}
++  }
++  void SaveChecked(const UpdateOptionsValues& values){
+     auto& original=api_.GetSettings();updater::SettingsFile candidate=original;
+     candidate.proxy=values.proxy;candidate.repository=api_.TrimTagPart(values.repository);candidate.update_interval=values.interval;candidate.ask_for_update=values.askForUpdate;
+-    const olxstr destination=original.source_file;
++    // A settings file that did not exist yet leaves source_file empty; fall back
++    // to the original settings path so the first save can create it.
++    const olxstr destination=original.source_file.IsEmpty()?updater::UpdateAPI::GetSettingsFileName():original.source_file;
+     SaveUpdateOptionsAtomically(Bytes(destination),[&](const std::string& temporary){candidate.source_file=TUtf8::Decode(temporary.c_str());return candidate.Save();});
+     // Only publish the new in-memory settings after actual atomic replacement.
++    original.source_file=destination;
+     original.proxy=values.proxy;original.repository=api_.TrimTagPart(values.repository);original.update_interval=values.interval;original.ask_for_update=values.askForUpdate;
+   }
+ };

@@ -1,0 +1,365 @@
+--- a/native/application_runtime.h
++++ b/native/application_runtime.h
+@@ -41,6 +41,9 @@
+ // Only LstMac/LstFun metadata macros are exposed via a separate core.* catalog interpreter.
+ // Font, original UI and complete Olex2 entry point remain unfinished.
+ // The ability supplies its own filesDir and the packaged original licence.
++struct ApplicationSelectionLabelResult {
++  bool passed=false;size_t objectCount=0;std::string text,error;
++};
+ struct ApplicationBondRadiusResult {
+   bool passed=false;double radius=0;std::string error;
+ };
+@@ -69,6 +72,8 @@
+   // Original bond-radius style change (TXBond::Settings), outside the command
+   // interpreter so a pure display-style update cannot disturb the document.
+   ApplicationBondRadiusResult SetBondRadius(double radius);
++  // Original TMainForm ID_SelLabel: create a text label at the selection centroid.
++  ApplicationSelectionLabelResult CreateSelectionLabel(const std::string& text);
+   // Only real LstMac/LstFun clones are attached under core.*, never the full
+   // scientific registry. They print metadata through the original TLog bus.
+   CoreCatalogResult RunCoreCatalog(const std::string& command);
+--- a/native/application_runtime.cpp
++++ b/native/application_runtime.cpp
+@@ -1,6 +1,8 @@
+ #include "application_runtime.h"
++#include <sstream>
+ #include "olxstate.h"
+ #include "xbond.h"
++#include "xatom.h"
+ #include "original_file_formats.h"
+ #include "gradient_options.h"
+ #include "original_display_options.h"
+@@ -270,6 +272,28 @@
+   if(r.output.size()>65536)r.output.resize(65536);
+   if(!r.passed && r.error.empty())r.error="Original command was not accepted";
+   r.runtime=impl_->Status();return r;
++}
++ApplicationSelectionLabelResult ApplicationRuntime::CreateSelectionLabel(const std::string& text){
++  std::lock_guard<std::mutex> lock(impl_->mutex);OriginalInterpreterGuard guard;
++  ApplicationSelectionLabelResult r;
++  try{
++    if(!impl_->app||!TBasicApp::HasInstance()||&TGXApp::GetInstance()!=impl_->app.get())
++      throw std::runtime_error("Original document owner is unavailable");
++    auto& selection=impl_->app->GetRenderer().GetSelection();
++    vec3d centre;size_t count=0;
++    for(size_t i=0;i<selection.Count();++i){
++      auto& item=selection[i];
++      if(item.Is<TXAtom>()){centre+=static_cast<TXAtom&>(item).crd();++count;}
++      else if(item.Is<TXBond>()){centre+=static_cast<TXBond&>(item).GetCenter();++count;}
++    }
++    if(count==0)throw std::runtime_error("Select original objects before creating a selection label");
++    centre/=static_cast<double>(count);
++    std::string caption=text;
++    if(caption.empty()){std::ostringstream out;out<<"选中 "<<count<<" 个原版对象";caption=out.str();}
++    impl_->app->CreateLabel(centre,Text(caption),4);
++    r.passed=true;r.objectCount=count;r.text=caption;
++  }catch(const std::exception& e){r.error=e.what();}catch(...){r.error="Original selection label creation failed";}
++  return r;
+ }
+ ApplicationBondRadiusResult ApplicationRuntime::SetBondRadius(double radius){
+   std::lock_guard<std::mutex> lock(impl_->mutex);OriginalInterpreterGuard guard;
+--- a/native/native_dialog_factory.h
++++ b/native/native_dialog_factory.h
+@@ -17,6 +17,8 @@
+ extern "C" {
+ // Creates the real original update-options window; reuse dialog show/close/release.
+ void* olex2_native_update_options_create(void* napiEnvironment,Olex2NativeDialogCompleted,void* context,char* error,std::size_t);
++void* olex2_native_bond_length_create(void* napiEnvironment,Olex2NativeDialogCompleted,void* context,char* error,std::size_t);
++int olex2_native_bond_length_result(void* handle,double* length,int* applied,char* error,std::size_t);
+ // Original generation-options dialog (Structure -> Generate...). Values are read
+ // by the caller before release: [accepted, AFrom, ATo, BFrom, BTo, CFrom, CTo].
+ void* olex2_native_generate_create(void* napiEnvironment,Olex2NativeDialogCompleted,void* context,char* error,std::size_t);
+--- a/native/native_dialog_factory.cpp
++++ b/native/native_dialog_factory.cpp
+@@ -1,4 +1,5 @@
+ #include "updateoptions.h"
++#include "edit.h"
+ #include "dgenopt.h"
+ #include "ptable.h"
+ #include "matprop.h"
+@@ -7,6 +8,7 @@
+ #include "primtvs.h"
+ #include "xatom.h"
+ #include "xbond.h"
++#include "xline.h"
+ #include "gxapp.h"
+ #include "glgroup.h"
+ #include "native_dialog_factory.h"
+@@ -230,6 +232,42 @@
+     if(applied)*applied=1;
+     return 0;
+   }catch(const std::exception& e){Error(error,errorCapacity,e.what());}catch(...){Error(error,errorCapacity,"Primitive result read failed");}
++  return -1;
++}
++extern "C" void* olex2_native_bond_length_create(void* environment,Olex2NativeDialogCompleted completed,void* context,char* error,std::size_t capacity){
++  try{
++    Error(error,capacity,"");if(!environment)throw std::invalid_argument("Bond length dialog requires its UI environment");
++    auto& selection=TGXApp::GetInstance().GetRenderer().GetSelection();
++    TXLine* bond=nullptr;
++    for(size_t i=0;i<selection.Count();++i)if(selection[i].Is<TXLine>()){bond=reinterpret_cast<TXLine*>(&selection[i]);break;}
++    if(!bond)throw std::invalid_argument("Select an original line (TXLine) first");
++    auto owner=std::make_shared<Owner>();owner->scheduler=CreateNapiUiScheduler(environment);owner->backend=CreateArkUiDialogBackend(owner->scheduler);owner->completed=completed;owner->context=context;
++    auto dialog=std::make_unique<TdlgEdit>(ArkUiBackend(),owner->backend,owner->scheduler,nullptr,false,Positions());
++    dialog->SetTitle("Please input the line length");
++    dialog->SetText(bond->GetLength());
++    owner->dialog=std::move(dialog);
++    auto& registry=Owners();std::lock_guard<std::mutex> lock(registry.mutex);
++    if(registry.next==std::numeric_limits<uintptr_t>::max())throw std::overflow_error("Native dialog handles exhausted");
++    auto key=reinterpret_cast<void*>(++registry.next);registry.owners.emplace(key,std::move(owner));return key;
++  }catch(const std::exception& e){Error(error,capacity,e.what());}catch(...){Error(error,capacity,"Original bond length dialog failed");}
++  return nullptr;
++}
++extern "C" int olex2_native_bond_length_result(void* key,double* length,int* applied,char* error,std::size_t errorCapacity){
++  try{
++    Error(error,errorCapacity,"");auto owner=Find(key);auto* dialog=dynamic_cast<TdlgEdit*>(owner->dialog.get());
++    if(!dialog)throw std::invalid_argument("Native dialog is not a bond length dialog");
++    if(!dialog->ResultAccepted()){if(applied)*applied=0;return 0;}
++    const olxstr text=dialog->GetText();const double value=text.ToDouble();
++    if(!(value>0)||!(value<1000))throw std::invalid_argument("Bond length must be a positive number below 1000");
++    auto& app=TGXApp::GetInstance();auto& selection=app.GetRenderer().GetSelection();
++    TXLine* bond=nullptr;
++    for(size_t i=0;i<selection.Count();++i)if(selection[i].Is<TXLine>()){bond=reinterpret_cast<TXLine*>(&selection[i]);break;}
++    if(!bond)throw std::invalid_argument("Select an original line (TXLine) first");
++    bond->SetLength(value);bond->UpdateLabel();
++    if(length)*length=value;
++    if(applied)*applied=1;
++    return 0;
++  }catch(const std::exception& e){Error(error,errorCapacity,e.what());}catch(...){Error(error,errorCapacity,"Bond length result read failed");}
+   return -1;
+ }
+ extern "C" void* olex2_native_update_options_create(void* environment,Olex2NativeDialogCompleted completed,void* context,char* error,std::size_t capacity){
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -564,8 +564,53 @@
+ UpdateOptionsDialogState& UpdateOptionsDialog(){static auto* state=new UpdateOptionsDialogState;return *state;}
+ int UpdateOptionsDialogCompleted(void*,int result,const char*){
+   auto& state=UpdateOptionsDialog();std::lock_guard<std::mutex> lock(state.mutex);
++  state.done=true;state.result=result;return 0;
++}
++struct BondLengthDialogState {
++  std::mutex mutex;void* handle=nullptr;bool done=false;int result=0;
++};
++BondLengthDialogState& BondLengthDialog(){static auto* state=new BondLengthDialogState;return *state;}
++int BondLengthDialogCompleted(void*,int result,const char*){
++  auto& state=BondLengthDialog();std::lock_guard<std::mutex> lock(state.mutex);
+   state.done=true;state.result=result;return 0;
++}
++napi_value OpenOriginalBondLengthDialog(napi_env env,napi_callback_info){
++  napi_value out;napi_create_object(env,&out);
++  auto& owner=Runtime();std::lock_guard<std::mutex> ownerLock(owner.mutex);
++  auto& state=BondLengthDialog();
++  {
++    std::lock_guard<std::mutex> lock(state.mutex);
++    if(!owner.runtime){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,"Original application runtime is not initialized"));return out;}
++    if(state.handle){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,"A bond length dialog is already open"));return out;}
++    char error[512]={};
++    void* handle=olex2_native_bond_length_create(env,BondLengthDialogCompleted,nullptr,error,sizeof(error));
++    if(!handle){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,error[0]?error:"Original bond length dialog could not be created"));return out;}
++    state.handle=handle;state.done=false;state.result=0;
++  }
++  char error[512]={};
++  if(olex2_native_dialog_show(state.handle,true,error,sizeof(error))!=0){
++    std::lock_guard<std::mutex> lock(state.mutex);
++    char releaseError[512]={};olex2_native_dialog_release(state.handle,releaseError,sizeof(releaseError));state.handle=nullptr;
++    Boolean(env,out,"opened",false);Property(env,out,"error",String(env,error[0]?error:"Original bond length dialog could not be shown"));return out;
++  }
++  Boolean(env,out,"opened",true);Property(env,out,"error",String(env,""));return out;
+ }
++napi_value PollOriginalBondLengthDialog(napi_env env,napi_callback_info){
++  napi_value out;napi_create_object(env,&out);
++  auto& state=BondLengthDialog();std::lock_guard<std::mutex> lock(state.mutex);
++  if(!state.handle){Property(env,out,"state",String(env,"none"));Property(env,out,"error",String(env,""));return out;}
++  if(!state.done){Property(env,out,"state",String(env,"open"));Property(env,out,"error",String(env,""));return out;}
++  double length=0;int applied=0;char error[512]={};
++  olex2_native_bond_length_result(state.handle,&length,&applied,error,sizeof(error));
++  char releaseError[512]={};olex2_native_dialog_release(state.handle,releaseError,sizeof(releaseError));
++  state.handle=nullptr;state.done=false;
++  Property(env,out,"state",String(env,"done"));
++  Boolean(env,out,"accepted",state.result==1);
++  Boolean(env,out,"applied",applied==1);
++  Number(env,out,"length",length);
++  Property(env,out,"error",String(env,error[0]?error:""));
++  return out;
++}
+ napi_value OpenOriginalUpdateOptionsDialog(napi_env env,napi_callback_info){
+   napi_value out;napi_create_object(env,&out);
+   auto& owner=Runtime();std::lock_guard<std::mutex> ownerLock(owner.mutex);
+@@ -598,6 +643,23 @@
+   Boolean(env,out,"accepted",state.result==1);
+   Property(env,out,"error",String(env,error[0]?error:""));
+   return out;
++}
++napi_value CreateOriginalSelectionLabel(napi_env env,napi_callback_info info){
++  napi_value out;napi_create_object(env,&out);
++  std::string text;
++  std::size_t argc=1;napi_value argv[1]={};
++  if(napi_get_cb_info(env,info,&argc,argv,nullptr,nullptr)==napi_ok&&argc>=1){
++    std::size_t length=0;
++    if(napi_get_value_string_utf8(env,argv[0],nullptr,0,&length)==napi_ok){
++      std::vector<char> buffer(length+1,0);
++      if(napi_get_value_string_utf8(env,argv[0],buffer.data(),buffer.size(),&length)==napi_ok)text.assign(buffer.data(),length);
++    }
++  }
++  auto& owner=Runtime();std::lock_guard<std::mutex> ownerLock(owner.mutex);
++  if(!owner.runtime){Boolean(env,out,"passed",false);Property(env,out,"error",String(env,"Original application runtime is not initialized"));return out;}
++  const olex2::harmony::ApplicationSelectionLabelResult result=owner.runtime->CreateSelectionLabel(text);
++  Boolean(env,out,"passed",result.passed);Number(env,out,"objectCount",static_cast<double>(result.objectCount));
++  Property(env,out,"text",String(env,result.text));Property(env,out,"error",String(env,result.error));return out;
+ }
+ napi_value SetOriginalBondRadius(napi_env env,napi_callback_info info){
+   napi_value out;napi_create_object(env,&out);
+@@ -922,6 +984,9 @@
+     {"openOriginalPrimitiveDialog",nullptr,OpenOriginalPrimitiveDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"openOriginalUpdateOptionsDialog",nullptr,OpenOriginalUpdateOptionsDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"setOriginalBondRadius",nullptr,SetOriginalBondRadius,nullptr,nullptr,nullptr,napi_default,nullptr},
++    {"createOriginalSelectionLabel",nullptr,CreateOriginalSelectionLabel,nullptr,nullptr,nullptr,napi_default,nullptr},
++    {"openOriginalBondLengthDialog",nullptr,OpenOriginalBondLengthDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
++    {"pollOriginalBondLengthDialog",nullptr,PollOriginalBondLengthDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"pollOriginalUpdateOptionsDialog",nullptr,PollOriginalUpdateOptionsDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"pollOriginalPrimitiveDialog",nullptr,PollOriginalPrimitiveDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"getOriginalLogs",nullptr,GetOriginalLogs,nullptr,nullptr,nullptr,napi_default,nullptr},
+--- a/app/entry/src/main/cpp/types/libolex2native/index.d.ts
++++ b/app/entry/src/main/cpp/types/libolex2native/index.d.ts
+@@ -141,6 +141,19 @@
+ export interface OriginalBondRadiusReport { passed: boolean; radius: number; error: string; }
+ // Sets the original bond radius style (TXBond::Settings) without commands.
+ export const setOriginalBondRadius: (radius: number) => OriginalBondRadiusReport;
++export interface OriginalSelectionLabelReport { passed: boolean; objectCount: number; text: string; error: string; }
++// Original ID_SelLabel: create a text label at the original selection centroid.
++export const createOriginalSelectionLabel: (text: string) => OriginalSelectionLabelReport;
++export interface OriginalBondLengthDialogReport {
++  state: 'none' | 'open' | 'done';
++  accepted?: boolean;
++  applied?: boolean;
++  length?: number;
++  error: string;
++}
++// Original TdlgEdit bond length dialog (prefilled with the selected bond length).
++export const openOriginalBondLengthDialog: () => { opened: boolean; error: string };
++export const pollOriginalBondLengthDialog: () => OriginalBondLengthDialogReport;
+ export const pollOriginalUpdateOptionsDialog: () => OriginalUpdateOptionsDialogReport;
+ 
+ export interface ApplicationOptionsTransferReport {
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1,4 +1,4 @@
+-import nativeBridge, { GraphicsStatus, UtilityReport, CheckResult, ApplicationRuntimeStatus, OriginalLogSnapshot, CoreCatalogReport, PythonRuntimeStatus, OriginalLinePathGpuProbe, PythonExecutionReport, ApplicationFunctionReport, OriginalCommandReport, OriginalGenerateDialogReport, OriginalPeriodicTableReport, OriginalMaterialDialogReport, OriginalSceneDialogReport, OriginalGradientDialogReport, OriginalPrimitiveDialogReport, OriginalUpdateOptionsDialogReport, OriginalBondRadiusReport, DesktopCommandReport } from 'libolex2native.so';
++import nativeBridge, { GraphicsStatus, UtilityReport, CheckResult, ApplicationRuntimeStatus, OriginalLogSnapshot, CoreCatalogReport, PythonRuntimeStatus, OriginalLinePathGpuProbe, PythonExecutionReport, ApplicationFunctionReport, OriginalCommandReport, OriginalGenerateDialogReport, OriginalPeriodicTableReport, OriginalMaterialDialogReport, OriginalSceneDialogReport, OriginalGradientDialogReport, OriginalPrimitiveDialogReport, OriginalUpdateOptionsDialogReport, OriginalBondRadiusReport, OriginalBondLengthDialogReport, OriginalSelectionLabelReport, DesktopCommandReport } from 'libolex2native.so';
+ import { fileIo } from '@kit.CoreFileKit';
+ import { common } from '@kit.AbilityKit';
+ import { OptionsDocumentTransfer, OptionsDocumentStatus, OptionsDocumentBackend, emptyOptionsDocumentStatus } from '../model/OptionsDocumentTransfer';
+@@ -244,6 +244,25 @@
+   private originalTextApplyRebindPending: boolean = false;
+   private gradientDialogTimer: number = -1;
+   private gradientDialogOpen: boolean = false;
++  private createOriginalSelectionLabel(): void {
++    if (!this.originalSelectionEnabled()) return;
++    try {
++      const result: OriginalSelectionLabelReport = nativeBridge.createOriginalSelectionLabel('');
++      if (!result.passed) {
++        this.originalSelectionMessage = result.error || '原版选择组标签未创建';
++        return;
++      }
++      this.originalSelectionMessage = `已创建原版选择组标签：${result.text}`;
++      try { nativeBridge.redrawOriginalDocument(); } catch (redrawError) { this.originalLog = nativeBridge.getOriginalLogs(); }
++      this.readOriginalDocumentStatus();
++      this.refreshGraphics();
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版选择组标签调用失败';
++    }
++  }
++
++  private bondLengthDialogTimer: number = -1;
++  private bondLengthDialogOpen: boolean = false;
+   private updateOptionsDialogTimer: number = -1;
+   private updateOptionsDialogOpen: boolean = false;
+   private primitiveDialogTimer: number = -1;
+@@ -431,6 +450,8 @@
+     this.primitiveDialogTimer = -1;
+     if (this.updateOptionsDialogTimer >= 0) clearInterval(this.updateOptionsDialogTimer);
+     this.updateOptionsDialogTimer = -1;
++    if (this.bondLengthDialogTimer >= 0) clearInterval(this.bondLengthDialogTimer);
++    this.bondLengthDialogTimer = -1;
+   }
+ 
+   private submitCommand(): void {
+@@ -2333,6 +2354,46 @@
+     }
+   }
+ 
++  private openOriginalBondLengthDialog(): void {
++    if (this.bondLengthDialogOpen) return;
++    try {
++      const opened = nativeBridge.openOriginalBondLengthDialog();
++      if (!opened.opened) {
++        this.originalSelectionMessage = opened.error || '原版键长未打开';
++        return;
++      }
++      this.bondLengthDialogOpen = true;
++      this.originalSelectionMessage = '已打开原版键长…';
++      if (this.bondLengthDialogTimer < 0) {
++        this.bondLengthDialogTimer = setInterval(() => { this.pollOriginalBondLengthDialog(); }, 400);
++      }
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版键长调用失败';
++    }
++  }
++
++  private pollOriginalBondLengthDialog(): void {
++    if (!this.bondLengthDialogOpen) return;
++    try {
++      const report: OriginalBondLengthDialogReport = nativeBridge.pollOriginalBondLengthDialog();
++      if (report.state === 'open') return;
++      if (this.bondLengthDialogTimer >= 0) clearInterval(this.bondLengthDialogTimer);
++      this.bondLengthDialogTimer = -1;
++      this.bondLengthDialogOpen = false;
++      if (report.state !== 'done') return;
++      if (report.applied) {
++        this.originalSelectionMessage = `原版键长已修改：${report.length}`;
++        try { nativeBridge.redrawOriginalDocument(); } catch (redrawError) { this.originalLog = nativeBridge.getOriginalLogs(); }
++        this.readOriginalDocumentStatus();
++        this.refreshGraphics();
++      } else {
++        this.originalSelectionMessage = report.error ? (report.error || '原版键长未应用') : '已取消原版键长';
++      }
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版键长轮询失败';
++    }
++  }
++
+   private openOriginalUpdateOptionsDialog(): void {
+     if (this.updateOptionsDialogOpen) return;
+     try {
+@@ -3600,6 +3661,12 @@
+         TextInput({ text: this.originalBondRadiusText, placeholder: '键半径' }).id('olex2-bond-radius-input')
+           .width(70).height(25).fontSize(10).backgroundColor('#E7EEE9').type(InputType.Normal)
+           .onChange((value: string) => { this.originalBondRadiusText = value; })
++        Button('选择组标签').id('olex2-original-selection-label').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled())
++          .onClick(() => this.createOriginalSelectionLabel())
++        Button('键长…').id('olex2-original-bond-length-dialog').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled() && !this.bondLengthDialogOpen)
++          .onClick(() => this.openOriginalBondLengthDialog())
+         Button('应用键半径').id('olex2-bond-radius-apply').height(25).fontSize(10)
+           .enabled(this.originalSelectionEnabled())
+           .onClick(() => { this.applyOriginalBondRadius(); })
+--- a/cmake/original_renderer.exports
++++ b/cmake/original_renderer.exports
+@@ -4,6 +4,8 @@
+   olex2_native_frame_request;
+   olex2_native_frame_unmount;
+   olex2_native_update_options_create;
++  olex2_native_bond_length_create;
++  olex2_native_bond_length_result;
+   olex2_native_generate_create;
+   olex2_native_generate_values;
+   olex2_native_periodic_table_create;
+@@ -161,6 +163,7 @@
+   _ZN5olex27harmony18ApplicationRuntime13ImportOptionsERKNSt4__n112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE;
+   _ZN5olex27harmony18ApplicationRuntime14ExecuteCommandERKNSt4__n112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE;
+   _ZN5olex27harmony18ApplicationRuntime13SetBondRadiusEd;
++  _ZN5olex27harmony18ApplicationRuntime20CreateSelectionLabelERKNSt4__n112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE;
+   _ZN5olex27harmony18ApplicationRuntime14RunCoreCatalogERKNSt4__n112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE;
+   _ZN5olex27harmony18ApplicationRuntime17ClearOriginalLogsEv;
+   _ZN5olex27harmony18ApplicationRuntime26ReadOriginalDocumentSourceEv;

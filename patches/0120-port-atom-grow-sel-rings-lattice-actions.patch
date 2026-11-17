@@ -1,0 +1,21 @@
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -3561,6 +3561,18 @@
+         Button('解组').id('olex2-original-individualise').height(25).fontSize(10)
+           .enabled(this.originalSelectionEnabled())
+           .onClick(() => { this.runOriginalSelectionCommand('individualise'); this.originalSelectionMessage = this.commandPassed ? '已执行原版解组（individualise）' : (this.commandError || '原版解组未通过'); })
++        Button('生长').id('olex2-original-atom-grow').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled())
++          .onClick(() => { this.runOriginalSelectionCommand('grow'); this.originalSelectionMessage = this.commandPassed ? '已执行原版生长（grow）' : (this.commandError || '原版生长未通过'); })
++        Button('选环').id('olex2-original-sel-rings').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled())
++          .onClick(() => { this.runOriginalSelectionCommand('sel ring'); this.originalSelectionMessage = this.commandPassed ? '已执行原版选环（sel ring）' : (this.commandError || '原版选环未通过'); })
++        Button('固定').id('olex2-original-lattice-fix').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled())
++          .onClick(() => { this.runOriginalSelectionCommand('fix c'); this.originalSelectionMessage = this.commandPassed ? '已执行原版晶格固定（fix c）' : (this.commandError || '原版晶格固定未通过'); })
++        Button('释放').id('olex2-original-lattice-free').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled())
++          .onClick(() => { this.runOriginalSelectionCommand('free cs'); this.originalSelectionMessage = this.commandPassed ? '已执行原版晶格释放（free cs）' : (this.commandError || '原版晶格释放未通过'); })
+         TextInput({ text: this.originalBondRadiusText, placeholder: '键半径' }).id('olex2-bond-radius-input')
+           .width(70).height(25).fontSize(10).backgroundColor('#E7EEE9').type(InputType.Normal)
+           .onChange((value: string) => { this.originalBondRadiusText = value; })

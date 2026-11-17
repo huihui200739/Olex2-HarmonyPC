@@ -1,0 +1,260 @@
+--- a/upstream/olex/html/imgcellext.h
++++ b/upstream/olex/html/imgcellext.h
+@@ -9,6 +9,72 @@
+ 
+ #ifndef __olx_image_cell_ext_H
+ #define __olx_image_cell_ext_H
++#if defined(__OHOS__) && !defined(__WXWIDGETS__)
++// Harmony-native HTML image cell. The ArkUI backend owns image decoding and
++// the displayed drawable; this class owns only model data and native nodes.
++#include "native_widget.h"
++#include <functional>
++#include <string>
++#include <vector>
++
++struct THtmlImageMapLink {
++  std::string href;
++  std::string target;
++};
++
++class THtmlImageCell {
++  struct Shape {
++    enum class Kind { Rectangle, Circle } kind;
++    double a=0,b=0,c=0,d=0;
++    THtmlImageMapLink link;
++  };
++  olex2::harmony::ui::NodeBackend& backend_;
++  olex2::harmony::ui::Widget root_;
++  olex2::harmony::ui::EventWidget image_;
++  olex2::harmony::ui::ImageRef imageAsset_;
++  std::vector<Shape> shapes_;
++  std::string source_,text_;
++  int requestedWidth_=-1,requestedHeight_=-1;
++  int renderedWidth_=0,renderedHeight_=0;
++  double scale_=1.0;
++  bool widthPercent_=false,heightPercent_=false,showFrame_=false;
++  std::function<void(const THtmlImageMapLink&)> linkHandler_;
++  void OnPointer(const olex2::harmony::ui::NodeEvent& event);
++  static int CheckedDimension(double value);
++public:
++  explicit THtmlImageCell(olex2::harmony::ui::NodeBackend& backend,
++    olex2::harmony::ui::Widget* parent=nullptr);
++  THtmlImageCell(const THtmlImageCell&)=delete;
++  THtmlImageCell& operator=(const THtmlImageCell&)=delete;
++  olex2::harmony::ui::NodeHandle NativeNode() const { return root_.Handle(); }
++  olex2::harmony::ui::NodeHandle ImageNode() const { return image_.Handle(); }
++  void SetImageData(const std::vector<uint8_t>& encoded,const std::string& source={});
++  bool OnFileChange(const std::vector<uint8_t>& replacement);
++  void SetText(const std::string& text);
++  const std::string& GetText() const { return text_; }
++  void SetSource(const std::string& source) { source_=source; }
++  const std::string& GetSource() const { return source_; }
++  void SetRequestedSize(int width,int height,double scale=1.0,
++    bool widthInPercent=false,bool heightInPercent=false);
++  void SetShowFrame(bool value);
++  void SetLinkHandler(std::function<void(const THtmlImageMapLink&)> handler);
++  void AddRect(double left,double top,double right,double bottom,
++    const std::string& href,const std::string& target={});
++  void AddCircle(double x,double y,double radius,const std::string& href,
++    const std::string& target={});
++  bool GetLink(double x,double y,THtmlImageMapLink& link) const;
++  void Layout(int parentWidth,int parentHeight);
++  int GetWidth() const { return renderedWidth_; }
++  int GetHeight() const { return renderedHeight_; }
++};
++
++class THtmlWidgetCell {
++  int height_=0;
++public:
++  void SetHeight(int height);
++  int GetHeight() const { return height_; }
++};
++#else // OLEX2_HTML_IMAGE_WX_BRANCH
+ #include "estrlist.h"
+ #include "emath.h"
+ #include "wx/wxhtml.h"
+@@ -118,4 +184,5 @@
+ };
+ #endif
+ 
++#endif // OLEX2_HTML_IMAGE_PLATFORM_BRANCH
+ #endif
+--- a/upstream/olex/html/imgcellext.cpp
++++ b/upstream/olex/html/imgcellext.cpp
+@@ -7,6 +7,161 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(__OHOS__) && !defined(__WXWIDGETS__)
++#include "imgcellext.h"
++#include <algorithm>
++#include <cmath>
++#include <stdexcept>
++#include <utility>
++using namespace olex2::harmony::ui;
++
++THtmlImageCell::THtmlImageCell(NodeBackend& backend,Widget* parent)
++  :backend_(backend),root_(backend,NodeKind::Column,parent),
++   image_(backend,NodeKind::Image,&root_,{EventKind::Pointer},
++     [this](const NodeEvent& event){OnPointer(event);}) {
++  image_.SetNumber(Property::ImageStretch,0);
++}
++int THtmlImageCell::CheckedDimension(double value) {
++  if(!std::isfinite(value)||value<0||value>32768)
++    throw std::invalid_argument("HTML image dimension is outside the native layout range");
++  return static_cast<int>(std::ceil(value));
++}
++void THtmlImageCell::SetImageData(const std::vector<uint8_t>& encoded,const std::string& source) {
++  if(encoded.empty())throw std::invalid_argument("HTML image data is empty");
++  ImageRef decoded=backend_.DecodeImage(encoded);
++  if(!decoded)throw std::runtime_error("Native image decoder returned no image");
++  if(decoded->width>32768||decoded->height>32768)
++    throw std::invalid_argument("Decoded HTML image exceeds the native layout range");
++  std::string stagedSource=source.empty()?source_:source;
++  const ImageRef previous=imageAsset_;
++  const int oldWidth=renderedWidth_,oldHeight=renderedHeight_;
++  const bool natural=requestedWidth_<0&&requestedHeight_<0&&!widthPercent_&&!heightPercent_;
++  const int naturalWidth=natural?CheckedDimension(decoded->width*scale_):oldWidth;
++  const int naturalHeight=natural?CheckedDimension(decoded->height*scale_):oldHeight;
++  try {
++    image_.SetImage(decoded);
++    if(natural) {
++      root_.SetWidth(naturalWidth);root_.SetHeight(naturalHeight);
++      image_.SetWidth(naturalWidth);image_.SetHeight(naturalHeight);
++    }
++    image_.SetText(TextProperty::Accessibility,text_);
++  }
++  catch(...) {
++    try { image_.SetImage(previous); } catch(...) {}
++    try { root_.SetWidth(oldWidth);root_.SetHeight(oldHeight);image_.SetWidth(oldWidth);image_.SetHeight(oldHeight); } catch(...) {}
++    throw;
++  }
++  imageAsset_=std::move(decoded);
++  renderedWidth_=natural?naturalWidth:oldWidth;
++  renderedHeight_=natural?naturalHeight:oldHeight;
++  source_=std::move(stagedSource);
++}
++bool THtmlImageCell::OnFileChange(const std::vector<uint8_t>& replacement) {
++  if(replacement.empty())return false;
++  try { SetImageData(replacement,source_);return true; }
++  catch(...) { return false; }
++}
++void THtmlImageCell::SetText(const std::string& text) {
++  if(text.find('\0')!=std::string::npos)throw std::invalid_argument("HTML image text contains an embedded NUL");
++  std::string staged=text;
++  image_.SetText(TextProperty::Accessibility,staged);
++  text_=std::move(staged);
++}
++void THtmlImageCell::SetRequestedSize(int width,int height,double scale,
++    bool widthInPercent,bool heightInPercent) {
++  if(width==0||height==0||width < -1||height < -1)
++    throw std::invalid_argument("HTML image size must be positive or intrinsic");
++  if((widthInPercent&&width<1)||(heightInPercent&&height<1))
++    throw std::invalid_argument("Percent-sized HTML images require explicit percentages");
++  if((widthInPercent&&width>1000)||(heightInPercent&&height>1000))
++    throw std::invalid_argument("HTML image percentage is outside the supported range");
++  if(!std::isfinite(scale)||scale<=0||scale>16)
++    throw std::invalid_argument("HTML image scale must be finite and between 0 and 16");
++  requestedWidth_=width;requestedHeight_=height;scale_=scale;
++  widthPercent_=widthInPercent;heightPercent_=heightInPercent;
++}
++void THtmlImageCell::SetShowFrame(bool value) {
++  if(value==showFrame_)return;
++  root_.SetNumber(Property::BorderWidth,value?1:0);
++  if(value)root_.SetNumber(Property::BorderColor,0xff000000u);
++  showFrame_=value;
++}
++void THtmlImageCell::SetLinkHandler(std::function<void(const THtmlImageMapLink&)> handler) {
++  linkHandler_=std::move(handler);
++}
++void THtmlImageCell::AddRect(double left,double top,double right,double bottom,
++    const std::string& href,const std::string& target) {
++  if(!std::isfinite(left)||!std::isfinite(top)||!std::isfinite(right)||!std::isfinite(bottom)||
++      left>right||top>bottom||href.empty())
++    throw std::invalid_argument("Invalid HTML image-map rectangle");
++  shapes_.push_back({Shape::Kind::Rectangle,left,top,right,bottom,{href,target}});
++}
++void THtmlImageCell::AddCircle(double x,double y,double radius,const std::string& href,
++    const std::string& target) {
++  if(!std::isfinite(x)||!std::isfinite(y)||!std::isfinite(radius)||radius<=0||href.empty())
++    throw std::invalid_argument("Invalid HTML image-map circle");
++  shapes_.push_back({Shape::Kind::Circle,x,y,radius,0,{href,target}});
++}
++bool THtmlImageCell::GetLink(double x,double y,THtmlImageMapLink& link) const {
++  if(!imageAsset_||renderedWidth_<=0||renderedHeight_<=0||!std::isfinite(x)||!std::isfinite(y)||
++      x<0||y<0||x>=renderedWidth_||y>=renderedHeight_)return false;
++  const double fit=std::min(static_cast<double>(renderedWidth_)/imageAsset_->width,
++    static_cast<double>(renderedHeight_)/imageAsset_->height);
++  const double contentWidth=imageAsset_->width*fit,contentHeight=imageAsset_->height*fit;
++  const double offsetX=(renderedWidth_-contentWidth)/2,offsetY=(renderedHeight_-contentHeight)/2;
++  if(x<offsetX||y<offsetY||x>=offsetX+contentWidth||y>=offsetY+contentHeight)return false;
++  const double imageX=(x-offsetX)/fit;
++  const double imageY=(y-offsetY)/fit;
++  for(auto it=shapes_.rbegin();it!=shapes_.rend();++it) {
++    bool inside=false;
++    if(it->kind==Shape::Kind::Rectangle)
++      inside=imageX>=it->a&&imageX<=it->c&&imageY>=it->b&&imageY<=it->d;
++    else {const double dx=imageX-it->a,dy=imageY-it->b;inside=dx*dx+dy*dy<=it->c*it->c;}
++    if(inside){link=it->link;return true;}
++  }
++  return false;
++}
++void THtmlImageCell::Layout(int parentWidth,int parentHeight) {
++  if(!imageAsset_)throw std::logic_error("Cannot lay out an HTML image before decoding it");
++  if(parentWidth<=0||parentHeight<=0)throw std::invalid_argument("HTML image parent size must be positive");
++  const double intrinsicWidth=imageAsset_->width,intrinsicHeight=imageAsset_->height;
++  double width=requestedWidth_>0?requestedWidth_:intrinsicWidth;
++  double height=requestedHeight_>0?requestedHeight_:intrinsicHeight;
++  if(widthPercent_)width=parentWidth*static_cast<double>(requestedWidth_)/100.0;
++  if(heightPercent_)height=parentHeight*static_cast<double>(requestedHeight_)/100.0;
++  if(widthPercent_&&requestedHeight_<0)height=width*intrinsicHeight/intrinsicWidth;
++  if(heightPercent_&&requestedWidth_<0)width=height*intrinsicWidth/intrinsicHeight;
++  if(requestedWidth_>0&&requestedHeight_<0&&!widthPercent_)height=width*intrinsicHeight/intrinsicWidth;
++  if(requestedHeight_>0&&requestedWidth_<0&&!heightPercent_)width=height*intrinsicWidth/intrinsicHeight;
++  const int newWidth=CheckedDimension(width*scale_),newHeight=CheckedDimension(height*scale_);
++  if(newWidth<=0||newHeight<=0)throw std::invalid_argument("HTML image layout collapsed to zero size");
++  const int oldRootWidth=root_.GetWidth(),oldRootHeight=root_.GetHeight();
++  const int oldImageWidth=image_.GetWidth(),oldImageHeight=image_.GetHeight();
++  try {
++    root_.SetWidth(newWidth);root_.SetHeight(newHeight);
++    image_.SetWidth(newWidth);image_.SetHeight(newHeight);
++  }
++  catch(...) {
++    try { root_.SetWidth(oldRootWidth); } catch(...) {}
++    try { root_.SetHeight(oldRootHeight); } catch(...) {}
++    try { image_.SetWidth(oldImageWidth); } catch(...) {}
++    try { image_.SetHeight(oldImageHeight); } catch(...) {}
++    throw;
++  }
++  renderedWidth_=newWidth;renderedHeight_=newHeight;
++}
++void THtmlImageCell::OnPointer(const NodeEvent& event) {
++  if(event.kind!=EventKind::Pointer||event.pointer==nullptr||
++      event.pointer->phase!=PointerPhase::Up||!event.pointer->inside||!linkHandler_)return;
++  THtmlImageMapLink link;
++  if(GetLink(event.pointer->x,event.pointer->y,link))linkHandler_(link);
++}
++void THtmlWidgetCell::SetHeight(int height) {
++  if(height<0||height>32768)throw std::invalid_argument("HTML widget height is outside the native layout range");
++  height_=height;
++}
++
++#else // OLEX2_HTML_IMAGE_WX_BRANCH
+ #include "imgcellext.h"
+ #include "widgetcellext.h"
+ #include "bapp.h"
+@@ -306,3 +461,4 @@
+   m_Height = h;
+ }
+ //..............................................................................
++#endif // OLEX2_HTML_IMAGE_PLATFORM_BRANCH
+--- a/cmake/Olex2NativeWidgets.cmake
++++ b/cmake/Olex2NativeWidgets.cmake
+@@ -13,6 +13,7 @@
+     "${project_root}/upstream/olex/nui/nui.cpp"
+     "${project_root}/upstream/olex/nui/skeleton.cpp"
+     "${project_root}/upstream/olex/xglcanv.cpp"
++    "${project_root}/upstream/olex/html/imgcellext.cpp"
+     "${project_root}/upstream/olex/tasks.cpp"
+     "${project_root}/upstream/olex/edit.cpp"
+     "${project_root}/upstream/olex/updateth.cpp"

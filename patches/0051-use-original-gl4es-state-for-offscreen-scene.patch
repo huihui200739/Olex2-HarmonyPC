@@ -1,0 +1,12 @@
+--- a/native/gles_offscreen_target.cpp
++++ b/native/gles_offscreen_target.cpp
+@@ -1,5 +1,9 @@
+ #include "gles_offscreen_target.h"
++#if defined(OLEX2_GLES_OFFSCREEN_HOST_TEST)
+ #include <GLES3/gl3.h>
++#else
++#include <GL/gl.h> // Keep GL4ES wrapper state coherent with the original renderer.
++#endif
+ #include <stdexcept>
+ #include <string>
+ #include <type_traits>

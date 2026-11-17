@@ -1,0 +1,225 @@
+--- a/app/entry/src/main/cpp/application_view.cpp
++++ b/app/entry/src/main/cpp/application_view.cpp
+@@ -93,7 +93,16 @@
+         // The current core uses -1 only for not-yet-picked pixel coordinates.
+         // Keep every existing counter unsigned; do not accept general negatives.
+         else if(scalar.value=="-1"&&(key=="lastPickPixelX"||key=="lastPickPixelY"))scalar.kind='i';
+-        else {scalar.kind='n';Require(!scalar.value.empty(),"Empty original status value");Require(scalar.value=="0"||scalar.value[0]!='0',"Invalid original status number");for(char c:scalar.value)Require(c>='0'&&c<='9',"Non-integer original status field");}}
++        else {scalar.kind='n';Require(!scalar.value.empty(),"Empty original status value");
++          if(key=="bondRadius"){
++            // The original bond radius is a real number (e.g. 0.2). Keep the
++            // strict scalar grammar but allow one decimal point for this field.
++            size_t dots=0,digits=0;for(char c:scalar.value){if(c=='.'){++dots;}else{Require(c>='0'&&c<='9',"Invalid original bond radius");++digits;}}
++            Require(dots<=1 && digits>0 && scalar.value.front()!='.' && scalar.value.back()!='.',"Invalid original bond radius");
++            Require(scalar.value=="0"||scalar.value[0]!='0'||scalar.value.size()>1,"Invalid original bond radius");
++          }else{
++            Require(scalar.value=="0"||scalar.value[0]!='0',"Invalid original status number");for(char c:scalar.value)Require(c>='0'&&c<='9',"Non-integer original status field");
++          }}}
+       Require(fields.emplace(std::move(key),std::move(scalar)).second,"Duplicate original status field");
+       Space();char c=Take();if(c=='}')break;Require(c==',',"Invalid original status separator");
+     }
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -148,7 +148,7 @@
+   auto& owner=Runtime();std::lock_guard<std::mutex> lock(owner.mutex);std::string json;
+   try{if(!owner.runtime)throw std::runtime_error("Original application runtime is not initialized");
+     json=Renderer::Instance().RedrawOriginalDocument(owner.runtime.get());}
+-  catch(const std::exception& e){json=Renderer::Instance().RejectOriginalDocumentOperation(e.what());}
++  catch(const std::exception& e){json=Renderer::Instance().ReportOriginalDocumentError(e.what());}
+   return String(env,json);
+ }
+ napi_value GetOriginalDocumentStatus(napi_env env,napi_callback_info) {
+@@ -599,6 +599,22 @@
+   Property(env,out,"error",String(env,error[0]?error:""));
+   return out;
+ }
++napi_value SetOriginalBondRadius(napi_env env,napi_callback_info info){
++  napi_value out;napi_create_object(env,&out);
++  std::size_t argc=1;napi_value argv[1]={};
++  if(napi_get_cb_info(env,info,&argc,argv,nullptr,nullptr)!=napi_ok||argc<1){
++    Boolean(env,out,"passed",false);Property(env,out,"error",String(env,"Bond radius argument is required"));return out;
++  }
++  double radius=0;
++  if(napi_get_value_double(env,argv[0],&radius)!=napi_ok){
++    Boolean(env,out,"passed",false);Property(env,out,"error",String(env,"Bond radius must be a number"));return out;
++  }
++  auto& owner=Runtime();std::lock_guard<std::mutex> ownerLock(owner.mutex);
++  if(!owner.runtime){Boolean(env,out,"passed",false);Property(env,out,"error",String(env,"Original application runtime is not initialized"));return out;}
++  const olex2::harmony::ApplicationBondRadiusResult result=owner.runtime->SetBondRadius(radius);
++  Boolean(env,out,"passed",result.passed);Number(env,out,"radius",result.radius);
++  Property(env,out,"error",String(env,result.error));return out;
++}
+ napi_value OriginalLogsObject(napi_env env,const olex2::harmony::OriginalLogSnapshot& s,const std::string& error){
+   napi_value out,entries;napi_create_object(env,&out);napi_create_array_with_length(env,s.entries.size(),&entries);
+   Boolean(env,out,"attached",s.attached);Number(env,out,"posted",s.posted);Number(env,out,"dropped",s.dropped);Number(env,out,"truncated",s.truncated);Number(env,out,"captureFailures",s.captureFailures);Number(env,out,"clearCount",s.clearCount);Number(env,out,"clearedEntries",s.clearedEntries);Number(env,out,"entryCount",s.entries.size());Number(env,out,"retainedBytes",s.retainedBytes);
+@@ -905,6 +921,7 @@
+     {"pollOriginalGradientDialog",nullptr,PollOriginalGradientDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"openOriginalPrimitiveDialog",nullptr,OpenOriginalPrimitiveDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"openOriginalUpdateOptionsDialog",nullptr,OpenOriginalUpdateOptionsDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
++    {"setOriginalBondRadius",nullptr,SetOriginalBondRadius,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"pollOriginalUpdateOptionsDialog",nullptr,PollOriginalUpdateOptionsDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"pollOriginalPrimitiveDialog",nullptr,PollOriginalPrimitiveDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"getOriginalLogs",nullptr,GetOriginalLogs,nullptr,nullptr,nullptr,napi_default,nullptr},
+--- a/app/entry/src/main/cpp/renderer.h
++++ b/app/entry/src/main/cpp/renderer.h
+@@ -111,6 +111,9 @@
+   std::string CaptureOriginalDocumentViewport(void* runtime); // throws; snapshot JSON
+   std::string RestoreOriginalDocumentViewport(void* runtime,const std::string& snapshot); // throws on failure; presentation envelope
+   std::string RejectOriginalDocumentOperation(const std::string& error);
++  // Best-effort errors must not replace the retained document status with a
++  // failure envelope; only the graphics error is updated.
++  std::string ReportOriginalDocumentError(const std::string& error);
+   bool ExportOriginalDocument(std::string& bytes,std::string& error);
+   // Caller holds RuntimeOwner::mutex. Failure retains the owner for deferred cleanup.
+   bool ForgetOriginalDocumentRuntime(void* runtime,std::string& error);
+--- a/app/entry/src/main/cpp/renderer.cpp
++++ b/app/entry/src/main/cpp/renderer.cpp
+@@ -637,13 +637,22 @@
+   std::lock_guard<std::mutex> lock(mutex_);
+   const auto result=originalView_.Failure(error);originalStatus_=result.json;status_.error=error;return originalStatus_;
+ }
++std::string Renderer::ReportOriginalDocumentError(const std::string& error) {
++  std::lock_guard<std::mutex> lock(mutex_);
++  status_.error=error;
++  return originalStatus_;
++}
+ std::string Renderer::GetOriginalDocumentStatus() {
+   std::lock_guard<std::mutex> lock(mutex_);return originalStatus_;
+ }
+ std::string Renderer::RedrawOriginalDocument(void* runtime) {
+   std::lock_guard<std::mutex> lock(mutex_);
++  // A best-effort redraw must never replace the retained document status with a
++  // failure envelope: the document itself is still loaded and the page would
++  // otherwise report it as unloaded. Report the error through the graphics
++  // status only.
+   auto reject=[&](const std::string& error){
+-    originalStatus_=originalView_.Failure(error).json;status_.error=error;return originalStatus_;
++    status_.error=error;return originalStatus_;
+   };
+   if(!runtime)return reject("Original application runtime is not initialized");
+   if(!originalRuntime_||!originalView_.HasContext()||originalDirectory_.empty())
+--- a/app/entry/src/main/cpp/types/libolex2native/index.d.ts
++++ b/app/entry/src/main/cpp/types/libolex2native/index.d.ts
+@@ -138,6 +138,9 @@
+ }
+ // Original update options dialog; Cancel closes without changing settings.
+ export const openOriginalUpdateOptionsDialog: () => { opened: boolean; error: string };
++export interface OriginalBondRadiusReport { passed: boolean; radius: number; error: string; }
++// Sets the original bond radius style (TXBond::Settings) without commands.
++export const setOriginalBondRadius: (radius: number) => OriginalBondRadiusReport;
+ export const pollOriginalUpdateOptionsDialog: () => OriginalUpdateOptionsDialogReport;
+ 
+ export interface ApplicationOptionsTransferReport {
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1,4 +1,4 @@
+-import nativeBridge, { GraphicsStatus, UtilityReport, CheckResult, ApplicationRuntimeStatus, OriginalLogSnapshot, CoreCatalogReport, PythonRuntimeStatus, OriginalLinePathGpuProbe, PythonExecutionReport, ApplicationFunctionReport, OriginalCommandReport, OriginalGenerateDialogReport, OriginalPeriodicTableReport, OriginalMaterialDialogReport, OriginalSceneDialogReport, OriginalGradientDialogReport, OriginalPrimitiveDialogReport, OriginalUpdateOptionsDialogReport, DesktopCommandReport } from 'libolex2native.so';
++import nativeBridge, { GraphicsStatus, UtilityReport, CheckResult, ApplicationRuntimeStatus, OriginalLogSnapshot, CoreCatalogReport, PythonRuntimeStatus, OriginalLinePathGpuProbe, PythonExecutionReport, ApplicationFunctionReport, OriginalCommandReport, OriginalGenerateDialogReport, OriginalPeriodicTableReport, OriginalMaterialDialogReport, OriginalSceneDialogReport, OriginalGradientDialogReport, OriginalPrimitiveDialogReport, OriginalUpdateOptionsDialogReport, OriginalBondRadiusReport, DesktopCommandReport } from 'libolex2native.so';
+ import { fileIo } from '@kit.CoreFileKit';
+ import { common } from '@kit.AbilityKit';
+ import { OptionsDocumentTransfer, OptionsDocumentStatus, OptionsDocumentBackend, emptyOptionsDocumentStatus } from '../model/OptionsDocumentTransfer';
+@@ -230,6 +230,7 @@
+   @State private commandText: string = 'pc.help';
+   @State private commandHistory: string[] = [];
+   private commandHistoryIndex: number = -1;
++  @State private originalBondRadiusText: string = '0.2';
+   @State private originalRecentLabels: string[] = [];
+   private originalRecentList: OriginalRecentDocument[] = [];
+   private generateDialogTimer: number = -1;
+@@ -1990,6 +1991,28 @@
+     }
+   }
+ 
++  private applyOriginalBondRadius(): void {
++    if (!this.originalSelectionEnabled()) return;
++    const value: number = Number(this.originalBondRadiusText.trim());
++    if (!Number.isFinite(value) || value <= 0 || value > 5) {
++      this.originalSelectionMessage = '键半径应为 0-5 之间的数字；未调用原版键半径设置';
++      return;
++    }
++    try {
++      const result: OriginalBondRadiusReport = nativeBridge.setOriginalBondRadius(value);
++      if (!result.passed) {
++        this.originalSelectionMessage = result.error || '原版键半径设置未通过';
++        return;
++      }
++      this.originalSelectionMessage = `原版键半径已设置：${result.radius}`;
++      try { nativeBridge.redrawOriginalDocument(); } catch (redrawError) { this.originalLog = nativeBridge.getOriginalLogs(); }
++      this.readOriginalDocumentStatus();
++      this.refreshGraphics();
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版键半径设置调用失败';
++    }
++  }
++
+   private recordOriginalRecent(name: string, bytes: Uint8Array): void {
+     const key: string = name + ':' + originalDocumentSha256(bytes);
+     if (this.originalRecentList.some((item) => item.key === key)) return;
+@@ -3538,6 +3561,12 @@
+         Button('解组').id('olex2-original-individualise').height(25).fontSize(10)
+           .enabled(this.originalSelectionEnabled())
+           .onClick(() => { this.runOriginalSelectionCommand('individualise'); this.originalSelectionMessage = this.commandPassed ? '已执行原版解组（individualise）' : (this.commandError || '原版解组未通过'); })
++        TextInput({ text: this.originalBondRadiusText, placeholder: '键半径' }).id('olex2-bond-radius-input')
++          .width(70).height(25).fontSize(10).backgroundColor('#E7EEE9').type(InputType.Normal)
++          .onChange((value: string) => { this.originalBondRadiusText = value; })
++        Button('应用键半径').id('olex2-bond-radius-apply').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled())
++          .onClick(() => { this.applyOriginalBondRadius(); })
+         Button('图元…').id('olex2-original-primitive').height(25).fontSize(10)
+           .enabled(this.originalSelectionEnabled() && this.originalDocument.core.selectedObjectCount !== undefined &&
+             this.originalDocument.core.selectedObjectCount > 0 && !this.primitiveDialogOpen)
+--- a/cmake/original_renderer.exports
++++ b/cmake/original_renderer.exports
+@@ -160,6 +160,7 @@
+   _ZN5olex27harmony17CoreCatalogResultD2Ev;
+   _ZN5olex27harmony18ApplicationRuntime13ImportOptionsERKNSt4__n112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE;
+   _ZN5olex27harmony18ApplicationRuntime14ExecuteCommandERKNSt4__n112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE;
++  _ZN5olex27harmony18ApplicationRuntime13SetBondRadiusEd;
+   _ZN5olex27harmony18ApplicationRuntime14RunCoreCatalogERKNSt4__n112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE;
+   _ZN5olex27harmony18ApplicationRuntime17ClearOriginalLogsEv;
+   _ZN5olex27harmony18ApplicationRuntime26ReadOriginalDocumentSourceEv;
+--- a/native/application_runtime.cpp
++++ b/native/application_runtime.cpp
+@@ -270,6 +270,20 @@
+   if(r.output.size()>65536)r.output.resize(65536);
+   if(!r.passed && r.error.empty())r.error="Original command was not accepted";
+   r.runtime=impl_->Status();return r;
++}
++ApplicationBondRadiusResult ApplicationRuntime::SetBondRadius(double radius){
++  std::lock_guard<std::mutex> lock(impl_->mutex);OriginalInterpreterGuard guard;
++  ApplicationBondRadiusResult r;
++  try{
++    if(!(radius>0) || radius>5)throw std::invalid_argument("Bond radius must be between 0 and 5");
++    if(!impl_->app||!TBasicApp::HasInstance()||&TGXApp::GetInstance()!=impl_->app.get())
++      throw std::runtime_error("Original document owner is unavailable");
++    TXBond::Settings& settings=TXBond::GetSettings(impl_->app->GetRenderer());
++    settings.SetRadius(radius);
++    r.radius=settings.GetRadius();
++    r.passed=true;
++  }catch(const std::exception& e){r.error=e.what();}catch(...){r.error="Original bond radius update failed";}
++  return r;
+ }
+ CoreCatalogResult ApplicationRuntime::RunCoreCatalog(const std::string& input){
+   std::lock_guard<std::mutex> lock(impl_->mutex);OriginalInterpreterGuard guard;
+--- a/native/application_runtime.h
++++ b/native/application_runtime.h
+@@ -41,6 +41,9 @@
+ // Only LstMac/LstFun metadata macros are exposed via a separate core.* catalog interpreter.
+ // Font, original UI and complete Olex2 entry point remain unfinished.
+ // The ability supplies its own filesDir and the packaged original licence.
++struct ApplicationBondRadiusResult {
++  bool passed=false;double radius=0;std::string error;
++};
+ class ApplicationRuntime {
+   struct Impl;std::unique_ptr<Impl> impl_;
+ public:
+@@ -63,6 +66,9 @@
+   // into a bounded interpreter instance, and the Harmony main-form library is
+   // attached so ported main-frame actions are callable by command name.
+   ApplicationCommandResult ExecuteCommand(const std::string& command);
++  // Original bond-radius style change (TXBond::Settings), outside the command
++  // interpreter so a pure display-style update cannot disturb the document.
++  ApplicationBondRadiusResult SetBondRadius(double radius);
+   // Only real LstMac/LstFun clones are attached under core.*, never the full
+   // scientific registry. They print metadata through the original TLog bus.
+   CoreCatalogResult RunCoreCatalog(const std::string& command);

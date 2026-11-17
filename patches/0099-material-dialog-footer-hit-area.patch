@@ -1,0 +1,11 @@
+--- a/upstream/olex/matprop.cpp
++++ b/upstream/olex/matprop.cpp
+@@ -71,7 +71,7 @@
+ }
+ void TdlgMatProp::Layout() {
+   if(!scroll_||!content_||!footer_) return;
+-  const int width=std::max(320,GetWidth()-24);scroll_->SetWidth(width);scroll_->SetHeight(std::max(180,GetHeight()-82));content_->SetWidth(width);footer_->SetWidth(width);
++  const int width=std::max(320,GetWidth()-24);scroll_->SetWidth(width);scroll_->SetHeight(std::max(180,GetHeight()-130));content_->SetWidth(width);footer_->SetWidth(width);
+   int contentHeight=0;for(const auto& row:rows_)if(row)contentHeight+=row->GetHeight()+5;content_->SetHeight(std::max(180,contentHeight));
+   for(auto& button:buttons_) button->SetWidth(std::max(64,(width-40)/4));
+ }

@@ -1,0 +1,22 @@
+--- a/examples/cchnp/main.cpp
++++ b/examples/cchnp/main.cpp
+@@ -24,7 +24,7 @@
+     app.GetLog().AddStream(new TOutStream, true);
+     TStrObjList args("C12H22O11 C:40.1 H:6 N:0 H2O CCl3H", ' ');
+     TParamList params;
+-    TMacroError me;
++    TMacroData me;
+     ABasicFunction* macFitCHN = app.GetLibrary().FindMacro("FitCHN");
+     macFitCHN->Run(args, params, me);
+   }
+--- a/examples/io/example.cpp
++++ b/examples/io/example.cpp
+@@ -39,6 +39,8 @@
+   }
+   TBasicApp::NewLogEntry() << tab.CreateTXTList("Atoms", true, false, ' ');
+   xapp.NewLogEntry() << "Finished";
++#ifdef __WIN32__
+   system("PAUSE");
++#endif
+         return 0;
+ }

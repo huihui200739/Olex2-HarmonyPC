@@ -1,0 +1,184 @@
+--- a/repository/wxftpfs.h
++++ b/repository/wxftpfs.h
+@@ -12,6 +12,31 @@
+ #include "filesystem.h"
+ #include "url.h"
+ #include "wxzipfs.h"
++// HarmonyOS uses the real POSIX socket implementation, not a wx shim.
++#if defined(OLEX2_NATIVE_FTP) && !defined(__WXWIDGETS__)
++class TwxFtpFileSystem : public AFileSystem {
++  struct NativeState;
++  NativeState* state_;
++  TwxZipFileSystem* zip_;
++  olxstr NormaliseName(const olxstr&) const;
++protected:
++  olx_object_ptr<IInputStream> _DoOpenFile(const olxstr&) override;
++  bool _DoesExist(const olxstr&, bool) override;
++  bool _DoDelFile(const olxstr&) override;
++  bool _DoDelDir(const olxstr&) override;
++  bool _DoAdoptFile(const TFSItem&) override;
++  bool _DoAdoptStream(IInputStream&, const olxstr&) override;
++  bool _DoNewDir(const olxstr&) override;
++public:
++  explicit TwxFtpFileSystem(const TUrl&, TwxZipFileSystem* = 0);
++  ~TwxFtpFileSystem() override;
++  TwxFtpFileSystem(const TwxFtpFileSystem&) = delete;
++  TwxFtpFileSystem& operator=(const TwxFtpFileSystem&) = delete;
++  olx_object_ptr<TEFile> SaveFile(const olxstr&);
++  void SetZipFS(TwxZipFileSystem*);
++  bool ChangeDir(const olxstr&);
++};
++#else
+ #include "wx/protocol/ftp.h"
+ #include "ememstream.h"
+ 
+@@ -233,4 +258,5 @@
+ 
+ };
+ 
++#endif // native FTP or original wx FTP
+ #endif
+--- a/repository/updateapi.cpp
++++ b/repository/updateapi.cpp
+@@ -19,7 +19,7 @@
+ #include "cdsfs.h"
+ #include "zipfs.h"
+ 
+-#ifdef __WXWIDGETS__
++#if defined(__WXWIDGETS__) || defined(OLEX2_NATIVE_FTP)
+   #include "wxftpfs.h"
+ #endif
+ 
+@@ -502,7 +502,7 @@
+         }
+         FS = _fs;
+     }
+-#ifdef __WXWIDGETS__
++#if defined(__WXWIDGETS__) || defined(OLEX2_NATIVE_FTP)
+       else if (url.GetProtocol() == "ftp") {
+         FS = new TwxFtpFileSystem(url);
+       }
+--- a/unirun/main.cpp
++++ b/unirun/main.cpp
+@@ -18,7 +18,9 @@
+ #include "settingsfile.h"
+ #include "datafile.h"
+ #include "dataitem.h"
++#if defined(__WXWIDGETS__) || defined(OLEX2_NATIVE_FTP)
+ #include "wxftpfs.h"
++#endif
+ #include "updateapi.h"
+ #include "patchapi.h"
+ #include "shellutil.h"
+@@ -27,7 +29,13 @@
+ #include "wxzipfs.h"
+ 
+ #include <stdio.h>
++#ifdef __WXWIDGETS__
+ #include "wx/app.h"
++#endif
++#ifdef OLEX2_NATIVE_LAUNCHER
++#include "unirun_process.h"
++#include "eutf8.h"
++#endif
+ 
+ using namespace std;
+ 
+@@ -102,6 +110,19 @@
+ //---------------------------------------------------------------------------
+ void DoRun();
+ void DoLaunch(const TStrList &args);
++#ifdef OLEX2_NATIVE_LAUNCHER
++static int NativeExec(const olxstr& executable, const TStrList& arguments) {
++  std::vector<std::string> values;
++  for (size_t i=0; i<arguments.Count(); ++i) {
++    const olxcstr bytes = TUtf8::Encode(arguments[i]);
++    values.emplace_back(bytes.c_str(), bytes.Length());
++  }
++  const olxcstr path = TUtf8::Encode(executable);
++  olex2::harmony::UnirunProcessArguments owned(std::move(values));
++  return olex2::harmony::UnirunReplaceProcess(
++    std::string(path.c_str(), path.Length()), owned);
++}
++#else
+ char **ListToArgs(TStrList &args_list) {
+   char **args = new char*[args_list.Count()+1];
+   args[args_list.Count()] = NULL;
+@@ -118,6 +139,8 @@
+   return args;
+ }
+ 
++#endif // native argv or legacy quoting
++#ifdef __WXWIDGETS__
+ class MyApp: public wxAppConsole {
+   virtual bool OnInit() {
+     return true;
+@@ -125,15 +148,24 @@
+   virtual int OnRun() {  return 0;  }
+ };
+ IMPLEMENT_APP_NO_MAIN(MyApp)
++#endif
+ int main(int argc, char** argv)  {
++#ifdef OLEX2_NATIVE_LAUNCHER
++  setlocale(LC_CTYPE, "C.UTF-8");
++#else
+   setlocale(LC_CTYPE, "utf-8");
++#endif
++#ifdef __WXWIDGETS__
+   MyApp app;
++#endif
+   int res = 0;
+   /* as soon as we create TBasicApp, this instance gets attached to it
+   */
++#ifdef __WXWIDGETS__
+   wxAppConsole::SetInstance(&app);
+   // ensure we end up with the same datadir!
+   app.SetAppName(wxT("olex2"));
++#endif
+   TEGC::Initialise();
+   TOutStream out;
+ #if defined(__WIN32__) && !defined(__WXWIDGETS__)
+@@ -349,18 +381,31 @@
+           }
+           TStrList args_list;
+           args_list << tmp_exe_name;
++#ifdef OLEX2_NATIVE_LAUNCHER
++          args_list << (olxstr("-basedir=") <<
++            TEFile::TrimPathDelimeter(TBasicApp::GetBaseDir()));
++#else
+           args_list << (olxstr("-basedir=").quote('"') <<
+             TEFile::TrimPathDelimeter(TBasicApp::GetBaseDir()));
++#endif
+           args_list << TBasicApp::GetInstance().GetArguments().SubListFrom(1);
+           for (size_t i=0; i < TBasicApp::GetInstance().GetOptions().Count(); i++) {
+             olxstr &l = args_list.Add(TBasicApp::GetInstance().GetOptions().GetName(i));
+             if (!TBasicApp::GetInstance().GetOptions().GetValue(i).IsEmpty()) {
++#ifdef OLEX2_NATIVE_LAUNCHER
++              l << '=' << TBasicApp::GetInstance().GetOptions().GetValue(i);
++#else
+               l << (olxstr('=').quote('"') <<
+                 TBasicApp::GetInstance().GetOptions().GetValue(i));
++#endif
+             }
+           }
++#ifdef OLEX2_NATIVE_LAUNCHER
++          NativeExec(tmp_exe_name, args_list);
++#else
+           char **args = ListToArgs(args_list);
+           execv(tmp_exe_name.ToMBStr().c_str(), args);
++#endif
+           TBasicApp::NewLogEntry(logError) <<
+             "Could not re-launch itself";
+           return;
+@@ -415,7 +460,11 @@
+   TStrList args_list;
+   args_list << cmdl;
+   args_list << args_;
++#ifdef OLEX2_NATIVE_LAUNCHER
++  NativeExec(cmdl, args_list);
++#else
+   char **args = ListToArgs(args_list);
+   execv(cmdl.ToMBStr().c_str(), args);
++#endif
+   TBasicApp::NewLogEntry(logError) << "Failed to launch '" << cmdl << '\'';
+ }

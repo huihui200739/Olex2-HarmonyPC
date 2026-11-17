@@ -1,0 +1,345 @@
+--- a/upstream/olex/scenep.h
++++ b/upstream/olex/scenep.h
+@@ -7,6 +7,62 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#pragma once
++#include "ctrls.h"
++#include "ctrls/frameext.h"
++#include "ctrls/checkboxext.h"
++#include "ctrls/spinctrlext.h"
++#include "ctrls/trackbarext.h"
++#include "ctrls/colorext.h"
++#include "ctrls/texteditext.h"
++#include "ctrls/btnext.h"
++#include "ctrls/choiceext.h"
++#include "gllightmodel.h"
++#include <array>
++#include <memory>
++#include <vector>
++namespace olex2::harmony::ui { class ApplicationRuntime; }
++class TdlgSceneProps: public TDialog, public AEventsDispatcher {
++  struct Alive;
++  std::shared_ptr<Alive> alive_;
++  TMainFrame* ParentFrame=nullptr;
++  TGlLightModel FLightModel, FOriginalModel;
++  int FCurrentLight=0;
++  std::shared_ptr<olex2::harmony::ui::Widget> scroll_,content_,footer_,status_;
++  std::shared_ptr<TChoice> cbLights,cbFonts;
++  std::shared_ptr<TButton> tbEditFont;
++  std::shared_ptr<TCheckBox> cbEnabled,cbUniform,cbLocalV,cbTwoSide,cbSmooth;
++  std::array<std::shared_ptr<TTrackBar>,4> position_;
++  std::array<std::shared_ptr<TTextEdit>,4> positionText_;
++  std::array<std::shared_ptr<TColorCtrl>,3> lightColors_;
++  std::array<std::shared_ptr<TSpinCtrl>,3> lightAlpha_;
++  std::shared_ptr<TSpinCtrl> scSCO,scSExp;
++  std::array<std::shared_ptr<TTextEdit>,6> lightValues_;
++  std::array<std::shared_ptr<TColorCtrl>,2> modelColors_;
++  std::vector<std::shared_ptr<olex2::harmony::ui::Widget>> rows_;
++  std::vector<std::shared_ptr<TButton>> buttons_;
++  bool helpVisible_=false;
++  void BuildControls(olex2::harmony::ui::NodeBackend&);
++  void Layout();
++  void InitLight(TGlLight&);
++  void UpdateLight(TGlLight&);
++  void InitLightModel(TGlLightModel&);
++  void UpdateLightModel(TGlLightModel&);
++  bool Dispatch(int,short,const IOlxObject*,const IOlxObject*,TActionQueue*) override;
++  void OnApply();void OnCancel();void OnOpen();void OnSave();void ToggleHelp();
++  void ShowStatus(const olxstr&);
++public:
++  TdlgSceneProps(olex2::harmony::ui::NodeBackend&,
++    std::shared_ptr<olex2::harmony::ui::DialogBackend>,
++    std::shared_ptr<olex2::harmony::ui::UiScheduler>,TMainFrame*,
++    std::shared_ptr<olex2::harmony::ui::DialogPositionStore> positions={});
++  ~TdlgSceneProps() override;
++  void LoadFromFile(TGlLightModel&,const olxstr&);
++  void SaveToFile(TGlLightModel&,const olxstr&);
++};
++
++#else
+ #ifndef __olx_dlg_scenep_H
+ #define __olx_dlg_scenep_H
+ #include "ctrls.h"
+@@ -48,3 +104,5 @@
+   void SaveToFile(TGlLightModel &FLM, const olxstr &FN);
+ };
+ #endif
++
++#endif // Harmony scene-parameters dialog / original wx dialog
+--- a/upstream/olex/scenep.cpp
++++ b/upstream/olex/scenep.cpp
+@@ -1,12 +1,246 @@
+-/******************************************************************************
+-* Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
+-*                                                                             *
+-* This file is part of the OlexSys Development Framework.                     *
+-*                                                                             *
+-* This source file is distributed under the terms of the licence located in   *
+-* the root folder.                                                            *
+-******************************************************************************/
+-
++/******************************************************************************
++* Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
++*                                                                             *
++* This file is part of the OlexSys Development Framework.                     *
++*                                                                             *
++* This source file is distributed under the terms of the licence located in   *
++* the root folder.                                                            *
++******************************************************************************/
++
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "scenep.h"
++#include "gxapp.h"
++#include "glfont.h"
++#include "glscene.h"
++#include "efile.h"
++#include "eutf8.h"
++#include <algorithm>
++#include <cmath>
++#include <stdexcept>
++
++using namespace olex2::harmony::ui;
++namespace {
++enum SceneEvent { SceneResize=1, SceneLightChoice, ScenePositionBase=10,
++  SceneApply=30, SceneCancel, SceneOpen, SceneSave, SceneFontEdit, SceneHelp,
++  SceneCutoff=40 };
++std::string SceneUtf8(const olxstr& value) {
++  const auto bytes=TUtf8::Encode(value);
++  std::string result(bytes.c_str(),bytes.Length());
++  if(result.find('\0')!=std::string::npos) throw std::invalid_argument("Scene value contains an embedded NUL");
++  return result;
++}
++Color SceneColor(const TGlOption& value) {
++  auto channel=[](float v){return static_cast<uint8_t>(std::lround(std::clamp(v,0.0f,1.0f)*255.0f));};
++  return {channel(value[0]),channel(value[1]),channel(value[2]),channel(value[3])};
++}
++TGlOption SceneOption(Color value, int alphaPercent=-1) {
++  const float alpha=alphaPercent<0?value.alpha/255.0f:std::clamp(alphaPercent,0,100)/100.0f;
++  return TGlOption(value.red/255.0f,value.green/255.0f,value.blue/255.0f,alpha);
++}
++}
++struct TdlgSceneProps::Alive { TdlgSceneProps* owner=nullptr; };
++
++TdlgSceneProps::TdlgSceneProps(NodeBackend& nodes,
++  std::shared_ptr<DialogBackend> dialogs,
++  std::shared_ptr<UiScheduler> scheduler,TMainFrame* parent,
++  std::shared_ptr<DialogPositionStore> positions)
++  :TDialog(nodes,std::move(dialogs),std::move(scheduler),parent,
++      "Scene Parameters","TdlgSceneProps",
++      DialogGeometry{Point{0,0},Size{900,760},true},std::move(positions)),
++    alive_(std::make_shared<Alive>()),ParentFrame(parent) {
++  if(!ParentFrame) throw std::invalid_argument("Scene dialog requires its owning main frame");
++  alive_->owner=this;
++  FLightModel=TGXApp::GetInstance().GetRenderer().LightModel;
++  FOriginalModel=FLightModel;
++  BuildControls(nodes);
++  OnResize.Add(this,SceneResize,msiExecute);
++  Layout();
++}
++
++void TdlgSceneProps::BuildControls(NodeBackend& nodes) {
++  scroll_=std::make_shared<Widget>(nodes,NodeKind::Scroll,&Body());Retain(scroll_);
++  content_=std::make_shared<Widget>(nodes,NodeKind::Column,scroll_.get());Retain(content_);
++  content_->SetNumber(Property::RowSpacing,7);
++  auto row=[&](const char* label)->std::shared_ptr<Widget>{
++    auto r=std::make_shared<Widget>(nodes,NodeKind::Row,content_.get());Retain(r);
++    r->SetNumber(Property::RowSpacing,7);r->SetHeight(46);
++    auto l=std::make_shared<Widget>(nodes,NodeKind::Text,r.get());Retain(l);
++    l->SetText(TextProperty::Content,label);l->SetWidth(132);l->SetHeight(40);
++    return r;
++  };
++  auto statusRow=std::make_shared<Widget>(nodes,NodeKind::Row,content_.get());Retain(statusRow);
++  statusRow->SetHeight(36);
++  status_=std::make_shared<Widget>(nodes,NodeKind::Text,statusRow.get());Retain(status_);
++  status_->SetText(TextProperty::Accessibility,"Scene settings status");status_->SetWidth(820);status_->SetHeight(32);status_->Hide();
++
++  auto fonts=row("Fonts");
++  cbFonts=std::make_shared<TChoice>(nodes,fonts.get());Retain(cbFonts);cbFonts->SetWidth(390);cbFonts->SetHeight(40);
++  auto& scene=TGXApp::GetInstance().GetRenderer().GetScene();
++  for(size_t i=0;i<scene.FontCount();++i) cbFonts->AddObject(scene._GetFont(i).GetName(),&scene._GetFont(i));
++  if(cbFonts->Count()>0) cbFonts->SetSelection(0);
++  tbEditFont=std::make_shared<TButton>(nodes,fonts.get(),-1,"Edit Font");Retain(tbEditFont);tbEditFont->SetWidth(150);tbEditFont->SetHeight(40);
++  tbEditFont->Enable(false); // A real Harmony font editor is not available yet.
++  tbEditFont->OnClick.Add(this,SceneFontEdit,msiExecute);
++
++  auto light=row("Light source");
++  cbLights=std::make_shared<TChoice>(nodes,light.get());Retain(cbLights);cbLights->SetWidth(240);cbLights->SetHeight(40);
++  for(int i=0;i<8;++i) cbLights->AddObject(olxstr("Light ")<<(i+1));
++  cbLights->SetSelection(0);cbLights->OnChange.Add(this,SceneLightChoice,msiExecute);
++  cbEnabled=std::make_shared<TCheckBox>(nodes,light.get(),-1,"Enabled");Retain(cbEnabled);cbEnabled->SetWidth(180);cbEnabled->SetHeight(40);
++
++  const char* axes[]={"X position","Y position","Z position","W position"};
++  for(size_t i=0;i<position_.size();++i){
++    auto r=row(axes[i]);
++    position_[i]=std::make_shared<TTrackBar>(nodes,r.get(),-1,0,i==3?-3:-100,i==3?3:100);
++    Retain(position_[i]);position_[i]->SetWidth(480);position_[i]->SetHeight(38);
++    position_[i]->OnChange.Add(this,static_cast<short>(ScenePositionBase+i),msiExecute);
++    positionText_[i]=std::make_shared<TTextEdit>(nodes,r.get(),-1,"0");Retain(positionText_[i]);
++    positionText_[i]->SetReadOnly(true);positionText_[i]->SetWidth(70);positionText_[i]->SetHeight(38);
++  }
++  const char* colorNames[]={"Ambient","Diffuse","Specular"};
++  for(size_t i=0;i<lightColors_.size();++i){
++    auto r=row(colorNames[i]);
++    lightColors_[i]=std::make_shared<TColorCtrl>(nodes,r.get());Retain(lightColors_[i]);
++    lightColors_[i]->SetWidth(220);lightColors_[i]->SetHeight(40);
++    lightAlpha_[i]=std::make_shared<TSpinCtrl>(nodes,r.get(),-1,"100");Retain(lightAlpha_[i]);
++    lightAlpha_[i]->SetRange(0,100);lightAlpha_[i]->SetWidth(140);lightAlpha_[i]->SetHeight(40);
++  }
++  auto exp=row("Spot exponent");
++  scSExp=std::make_shared<TSpinCtrl>(nodes,exp.get(),-1,"0");Retain(scSExp);scSExp->SetRange(0,128);scSExp->SetWidth(150);scSExp->SetHeight(40);
++  auto cutoff=row("Spot cutoff");
++  scSCO=std::make_shared<TSpinCtrl>(nodes,cutoff.get(),-1,"180");Retain(scSCO);scSCO->SetRange(1,180);scSCO->SetWidth(150);scSCO->SetHeight(40);
++  scSCO->OnChange.Add(this,SceneCutoff,msiExecute);
++  cbUniform=std::make_shared<TCheckBox>(nodes,cutoff.get(),-1,"Uniform");Retain(cbUniform);cbUniform->SetWidth(180);cbUniform->SetHeight(40);
++  const char* valueNames[]={"Attenuation constant","Attenuation linear","Attenuation quadratic","Spot direction X","Spot direction Y","Spot direction Z"};
++  for(size_t i=0;i<lightValues_.size();++i){
++    auto r=row(valueNames[i]);lightValues_[i]=std::make_shared<TTextEdit>(nodes,r.get(),-1,"0");Retain(lightValues_[i]);
++    lightValues_[i]->SetWidth(260);lightValues_[i]->SetHeight(40);
++  }
++  auto viewer=row("Light model");
++  cbLocalV=std::make_shared<TCheckBox>(nodes,viewer.get(),-1,"Local viewer");Retain(cbLocalV);cbLocalV->SetWidth(190);cbLocalV->SetHeight(40);
++  cbTwoSide=std::make_shared<TCheckBox>(nodes,viewer.get(),-1,"Two sided");Retain(cbTwoSide);cbTwoSide->SetWidth(170);cbTwoSide->SetHeight(40);
++  cbSmooth=std::make_shared<TCheckBox>(nodes,viewer.get(),-1,"Smooth shading");Retain(cbSmooth);cbSmooth->SetWidth(210);cbSmooth->SetHeight(40);
++  auto ambient=row("Model ambient color");
++  modelColors_[0]=std::make_shared<TColorCtrl>(nodes,ambient.get());Retain(modelColors_[0]);modelColors_[0]->SetWidth(220);modelColors_[0]->SetHeight(40);
++  auto background=row("Background color");
++  modelColors_[1]=std::make_shared<TColorCtrl>(nodes,background.get());Retain(modelColors_[1]);modelColors_[1]->SetWidth(220);modelColors_[1]->SetHeight(40);
++
++  footer_=std::make_shared<Widget>(nodes,NodeKind::Row,&Body());Retain(footer_);footer_->SetNumber(Property::RowSpacing,8);footer_->SetHeight(48);
++  std::weak_ptr<Alive> weak=alive_;
++  const char* labels[]={"Apply","Open","Save","Help","Cancel","OK"};
++  const int actions[]={SceneApply,SceneOpen,SceneSave,SceneHelp,SceneCancel,SceneApply};
++  for(size_t i=0;i<6;++i){
++    auto button=std::make_shared<TButton>(nodes,footer_.get(),-1,labels[i]);Retain(button);
++    button->SetHeight(42);button->SetNumber(Property::Focusable,1);
++    if(actions[i]==SceneOpen||actions[i]==SceneSave)button->Enable(false);
++    button->OnClick.Add(this,static_cast<short>(actions[i]),msiExecute);
++    buttons_.push_back(std::move(button));
++  }
++  (void)weak;
++  InitLight(FLightModel.GetLight(FCurrentLight));
++  InitLightModel(FLightModel);
++  ShowStatus("Scene file open/save and font editing are not available on Harmony yet.");
++}
++
++TdlgSceneProps::~TdlgSceneProps() {
++  alive_->owner=nullptr;OnResize.Remove(this);
++  if(cbLights)cbLights->OnChange.Clear();
++  if(scSCO)scSCO->OnChange.Clear();
++  for(auto& slider:position_)if(slider)slider->OnChange.Clear();
++  if(tbEditFont)tbEditFont->OnClick.Clear();
++  for(auto& button:buttons_)button->OnClick.Clear();
++}
++
++void TdlgSceneProps::Layout() {
++  const int width=std::max(320,GetWidth()-24);
++  scroll_->SetWidth(width);scroll_->SetHeight(std::max(120,GetHeight()-88));
++  content_->SetWidth(width);content_->SetHeight(1040);footer_->SetWidth(width);
++  for(auto& button:buttons_)button->SetWidth(std::max(42,(width-40)/6));
++}
++
++void TdlgSceneProps::ShowStatus(const olxstr& value) {
++  const auto text=SceneUtf8(value);status_->SetText(TextProperty::Content,text);status_->Show(!value.IsEmpty());
++}
++
++bool TdlgSceneProps::Dispatch(int event,short,const IOlxObject* sender,const IOlxObject*,TActionQueue*) {
++  if(event==SceneResize){Layout();return true;}
++  if(event>=ScenePositionBase&&event<ScenePositionBase+4){
++    const size_t i=static_cast<size_t>(event-ScenePositionBase);
++    if(sender==position_[i].get())positionText_[i]->SetText(position_[i]->GetValue());
++    return true;
++  }
++  if(event==SceneLightChoice&&sender==cbLights.get()){
++    if(FCurrentLight>=0&&FCurrentLight<8)UpdateLight(FLightModel.GetLight(static_cast<size_t>(FCurrentLight)));
++    const int selected=cbLights->GetSelection();
++    if(selected>=0&&selected<8){FCurrentLight=selected;InitLight(FLightModel.GetLight(static_cast<size_t>(selected)));}
++    return true;
++  }
++  if(event==SceneCutoff&&sender==scSCO.get()){cbUniform->SetChecked(scSCO->GetValue()>90);return true;}
++  if(event==SceneApply){OnApply();return true;}
++  if(event==SceneCancel){OnCancel();return true;}
++  if(event==SceneOpen){OnOpen();return true;}
++  if(event==SceneSave){OnSave();return true;}
++  if(event==SceneHelp){ToggleHelp();return true;}
++  if(event==SceneFontEdit){ShowStatus("The native font editor is not available on this target yet.");return true;}
++  return false;
++}
++
++void TdlgSceneProps::InitLightModel(TGlLightModel& model) {
++  cbLocalV->SetChecked(model.IsLocalViewer());cbTwoSide->SetChecked(model.IsTwoSides());cbSmooth->SetChecked(model.IsSmoothShade());
++  modelColors_[0]->SetValue(SceneColor(model.GetAmbientColor()));modelColors_[1]->SetValue(SceneColor(model.GetClearColor()));
++}
++void TdlgSceneProps::UpdateLightModel(TGlLightModel& model) {
++  model.SetLocalViewer(cbLocalV->IsChecked());model.SetTwoSides(cbTwoSide->IsChecked());model.SetSmoothShade(cbSmooth->IsChecked());
++  auto ambient=modelColors_[0]->GetValue(),background=modelColors_[1]->GetValue();
++  model.SetAmbientColor(SceneOption(ambient));model.SetClearColor(SceneOption(background));
++}
++void TdlgSceneProps::InitLight(TGlLight& light) {
++  for(size_t i=0;i<4;++i){const int value=static_cast<int>(light.GetPosition()[i]);position_[i]->SetValue(value);positionText_[i]->SetText(value);}
++  const TGlOption* colors[]={&light.GetAmbient(),&light.GetDiffuse(),&light.GetSpecular()};
++  for(size_t i=0;i<3;++i){lightColors_[i]->SetValue(SceneColor(*colors[i]));lightAlpha_[i]->SetValue(static_cast<int>(std::lround((*colors[i])[3]*100.0f)));}
++  const auto& attenuation=light.GetAttenuation();
++  lightValues_[0]->SetText(attenuation[0]);lightValues_[1]->SetText(attenuation[1]);lightValues_[2]->SetText(attenuation[2]);
++  const auto& direction=light.GetSpotDirection();
++  lightValues_[3]->SetText(direction[0]);lightValues_[4]->SetText(direction[1]);lightValues_[5]->SetText(direction[2]);
++  cbEnabled->SetChecked(light.IsEnabled());scSExp->SetValue(light.GetSpotExponent());scSCO->SetValue(light.GetSpotCutoff());cbUniform->SetChecked(light.GetSpotCutoff()==180);
++}
++void TdlgSceneProps::UpdateLight(TGlLight& light) {
++  light.SetPosition(TGlOption(position_[0]->GetValue(),position_[1]->GetValue(),position_[2]->GetValue(),position_[3]->GetValue()));
++  light.SetAmbient(SceneOption(lightColors_[0]->GetValue(),lightAlpha_[0]->GetValue()));
++  light.SetDiffuse(SceneOption(lightColors_[1]->GetValue(),lightAlpha_[1]->GetValue()));
++  light.SetSpecular(SceneOption(lightColors_[2]->GetValue(),lightAlpha_[2]->GetValue()));
++  light.SetAttenuation(TGlOption(lightValues_[0]->GetText().ToDouble(),lightValues_[1]->GetText().ToDouble(),lightValues_[2]->GetText().ToDouble()));
++  light.SetEnabled(cbEnabled->IsChecked());light.SetSpotExponent(scSExp->GetValue());
++  light.SetSpotCutoff(cbUniform->IsChecked()?180:scSCO->GetValue());
++  light.SetSpotDirection(TGlOption(lightValues_[3]->GetText().ToDouble(),lightValues_[4]->GetText().ToDouble(),lightValues_[5]->GetText().ToDouble()));
++}
++void TdlgSceneProps::OnApply() {
++  UpdateLight(FLightModel.GetLight(static_cast<size_t>(FCurrentLight)));UpdateLightModel(FLightModel);
++  auto& renderer=TGXApp::GetInstance().GetRenderer();renderer.LightModel=FLightModel;renderer.InitLights();renderer.Draw();
++  ShowStatus("Scene settings applied. File open/save and font editing remain unavailable on Harmony.");
++}
++void TdlgSceneProps::OnCancel() {
++  if(IsClosing()){RetryClose();return;}
++  auto& renderer=TGXApp::GetInstance().GetRenderer();renderer.LightModel=FOriginalModel;renderer.InitLights();renderer.Draw();EndModal(DialogCancelled);
++}
++void TdlgSceneProps::OnOpen() {
++  ShowStatus("Opening scene files is disabled until Harmony document URI access is connected.");
++}
++void TdlgSceneProps::OnSave() {
++  ShowStatus("Saving scene files is disabled until Harmony document URI access is connected.");
++}
++void TdlgSceneProps::ToggleHelp() {
++  helpVisible_=!helpVisible_;
++  ShowStatus(helpVisible_?olxstr("Adjust the selected light and model. Apply updates the preview; cancel restores the original scene. File open/save and font editing are not available on Harmony yet."):olxstr("Scene file open/save and font editing are not available on Harmony yet."));
++}
++void TdlgSceneProps::LoadFromFile(TGlLightModel&,const olxstr& file) {
++  TDataFile data;data.LoadFromXLFile(file,0);auto& renderer=TGXApp::GetInstance().GetRenderer();renderer.GetScene().FromDataItem(data.Root());FLightModel=renderer.LightModel;
++}
++void TdlgSceneProps::SaveToFile(TGlLightModel&,const olxstr& file) {
++  TDataFile data;auto& renderer=TGXApp::GetInstance().GetRenderer();renderer.GetScene().ToDataItem(data.Root());data.SaveToXLFile(file);
++}
++
++#else
+ #include "scenep.h"
+ #include "wx/fontdlg.h"
+ #include "wx/colordlg.h"
+@@ -457,3 +691,5 @@
+   }
+ }
+ //..............................................................................
++
++#endif // Harmony scene-parameters dialog / original wx implementation
+--- a/cmake/Olex2NativeWidgets.cmake
++++ b/cmake/Olex2NativeWidgets.cmake
+@@ -10,6 +10,7 @@
+     "${project_root}/upstream/olex/nui/nui.cpp"
+     "${project_root}/upstream/olex/edit.cpp"
+     "${project_root}/upstream/olex/updateth.cpp"
++    "${project_root}/upstream/olex/scenep.cpp"
+     "${project_root}/native/generation_options.cpp"
+     "${project_root}/upstream/olex/dgrad.cpp"
+     "${project_root}/upstream/olex/primtvs.cpp"

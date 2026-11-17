@@ -1,0 +1,290 @@
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -122,8 +122,9 @@
+         action!="view-along-100"&&action!="view-along-010"&&action!="view-along-001"&&action!="view-along-110"&&
+         action!="view-along-101"&&action!="view-along-011"&&action!="view-along-111"&&action!="view-along-selection"&&
+         action!="hide-selection"&&action!="quality-1"&&action!="quality-2"&&action!="quality-3"&&action!="toggle-hydrogens"&&
+-        action!="toggle-hydrogen-bonds"&&action!="toggle-qpeaks"&&action!="toggle-qpeak-bonds"&&action!="toggle-labels"&&action!="toggle-structure"))
+-      return reject("Allowed: pick, clear-selection, select-all, invert-selection, toggle-cell, toggle-basis, toggle-frame, toggle-grid, show-all, center-model, hide-selection, quality-1/2/3, toggle-hydrogens/hydrogen-bonds/qpeaks/qpeak-bonds/labels/structure, view-along-100/010/001/110/101/011/111/selection");
++        action!="toggle-hydrogen-bonds"&&action!="toggle-qpeaks"&&action!="toggle-qpeak-bonds"&&action!="toggle-labels"&&action!="toggle-structure"&&
++        action!="fragment-select"&&action!="fragment-select-atoms"&&action!="fragment-select-bonds"&&action!="fragment-hide"&&action!="fragment-show-only"))
++      return reject("Allowed: pick, clear-selection, select-all, invert-selection, toggle-cell, toggle-basis, toggle-frame, toggle-grid, show-all, center-model, hide-selection, quality-1/2/3, toggle-hydrogens/hydrogen-bonds/qpeaks/qpeak-bonds/labels/structure, fragment-select/select-atoms/select-bonds/hide/show-only, view-along-100/010/001/110/101/011/111/selection");
+     double x=0,y=0,mode=0;
+     if(napi_get_value_double(env,args[1],&x)!=napi_ok||napi_get_value_double(env,args[2],&y)!=napi_ok||
+         napi_get_value_double(env,args[3],&mode)!=napi_ok||!std::isfinite(x)||!std::isfinite(y)||
+--- a/app/entry/src/main/cpp/renderer.cpp
++++ b/app/entry/src/main/cpp/renderer.cpp
+@@ -700,6 +700,11 @@
+   else if(action=="toggle-qpeak-bonds")request.operation=Olex2DocumentOperation::ToggleQPeakBondsVisibility;
+   else if(action=="toggle-labels")request.operation=Olex2DocumentOperation::ToggleLabelsVisibility;
+   else if(action=="toggle-structure")request.operation=Olex2DocumentOperation::ToggleStructureVisibility;
++  else if(action=="fragment-select")request.operation=Olex2DocumentOperation::FragmentSelectAll;
++  else if(action=="fragment-select-atoms")request.operation=Olex2DocumentOperation::FragmentSelectAtoms;
++  else if(action=="fragment-select-bonds")request.operation=Olex2DocumentOperation::FragmentSelectBonds;
++  else if(action=="fragment-hide")request.operation=Olex2DocumentOperation::FragmentHide;
++  else if(action=="fragment-show-only")request.operation=Olex2DocumentOperation::FragmentShowOnly;
+   else return reject("Unknown original document interaction action");
+   if(!std::isfinite(x)||!std::isfinite(y)||x<0||x>1||y<0||y>1||mode>2)
+     return reject("Expected finite normalized viewport coordinates in [0,1] and selection mode 0, 1 or 2");
+--- a/app/entry/src/main/cpp/types/libolex2native/index.d.ts
++++ b/app/entry/src/main/cpp/types/libolex2native/index.d.ts
+@@ -108,7 +108,7 @@
+ // Private candidate38 ABI: JSON envelopes are parsed/validated by the document UI.
+ export const openOriginalDocument: (name: string, bytes: Uint8Array) => string;
+ // Existing original viewport only. x/y: finite normalized top-left [0,1].
+-// action: pick | clear-selection | select-all | invert-selection | toggle-cell | toggle-basis | toggle-frame | toggle-grid | show-all | center-model | hide-selection | quality-1/2/3 | toggle-hydrogens/hydrogen-bonds/qpeaks/qpeak-bonds | view-along-100/010/001/110/101/011/111/selection.
++// action: pick | clear-selection | select-all | invert-selection | toggle-cell | toggle-basis | toggle-frame | toggle-grid | show-all | center-model | hide-selection | quality-1/2/3 | toggle-hydrogens/hydrogen-bonds/qpeaks/qpeak-bonds/labels/structure | fragment-select/select-atoms/select-bonds/hide/show-only | view-along-100/010/001/110/101/011/111/selection.
+ // mode: integer 0 replace, 1 add, 2 toggle; all four arguments are required.
+ // Returns the actual document/core/presentation envelope (including failures).
+ export const interactOriginalDocument: (action: string, x: number, y: number, mode: number) => string;
+--- a/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
++++ b/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
+@@ -14,6 +14,7 @@
+ export const ORIGINAL_MAIN_GUI_QUALITY_SOURCE: string = 'original TMainForm::OnDrawQChange/GXLibMacros::macQual/TGXApp::Quality';
+ export const ORIGINAL_MAIN_GUI_HYDROGEN_SOURCE: string = 'original GXLibMacros::macShowH/TGXApp hydrogen visibility setters';
+ export const ORIGINAL_MAIN_GUI_QPEAK_SOURCE: string = 'original GXLibMacros::macShowQ/TGXApp Q-peak visibility setters';
++export const ORIGINAL_MAIN_GUI_FRAGMENT_SOURCE: string = 'original TMainForm fragment actions/TGXApp::FragmentsVisible and SelectFragments';
+ export interface OriginalDocumentCoreStatus {
+   passed: boolean; loaded: boolean; name: string; format: string;
+   byteCount: number; sha256: string; revision: number; frames: number;
+@@ -119,7 +120,10 @@
+        core.selectionAction !== 'quality-2' && core.selectionAction !== 'quality-3' &&
+        core.selectionAction !== 'toggle-labels' && core.selectionAction !== 'toggle-hydrogens' &&
+        core.selectionAction !== 'toggle-hydrogen-bonds' && core.selectionAction !== 'toggle-qpeaks' &&
+-       core.selectionAction !== 'toggle-qpeak-bonds' && core.selectionAction !== 'toggle-structure'))) ||
++       core.selectionAction !== 'toggle-qpeak-bonds' && core.selectionAction !== 'toggle-structure' &&
++       core.selectionAction !== 'fragment-select' && core.selectionAction !== 'fragment-select-atoms' &&
++       core.selectionAction !== 'fragment-select-bonds' && core.selectionAction !== 'fragment-hide' &&
++       core.selectionAction !== 'fragment-show-only'))) ||
+     (fields.indexOf('selectionSource') >= 0 && (typeof core.selectionSource !== 'string' ||
+       core.selectionSource !== ORIGINAL_SELECTION_SOURCE && core.selectionSource !== ORIGINAL_MAIN_GUI_CELL_SOURCE &&
+       core.selectionSource !== ORIGINAL_MAIN_GUI_BASIS_SOURCE &&
+@@ -133,7 +137,8 @@
+       core.selectionSource !== ORIGINAL_MAIN_GUI_QUALITY_SOURCE &&
+       core.selectionSource !== ORIGINAL_MAIN_GUI_HYDROGEN_SOURCE &&
+       core.selectionSource !== ORIGINAL_MAIN_GUI_QPEAK_SOURCE &&
+-      core.selectionSource !== ORIGINAL_MAIN_GUI_STRUCTURE_SOURCE))) {
++      core.selectionSource !== ORIGINAL_MAIN_GUI_STRUCTURE_SOURCE &&
++      core.selectionSource !== ORIGINAL_MAIN_GUI_FRAGMENT_SOURCE))) {
+     throw new Error('原版文档选择状态格式不合法');
+   }
+ }
+--- a/app/entry/src/main/ets/model/OriginalViewportInput.ts
++++ b/app/entry/src/main/ets/model/OriginalViewportInput.ts
+@@ -11,7 +11,9 @@
+   if ((action !== 'pick' && action !== 'clear-selection' && action !== 'select-all' && action !== 'invert-selection' && action !== 'toggle-cell' && action !== 'toggle-basis' && action !== 'toggle-frame' && action !== 'show-all' && action !== 'center-model' && action !== 'view-along-100' && action !== 'view-along-010' &&
+       action !== 'view-along-001' && action !== 'view-along-110' && action !== 'view-along-101' &&
+       action !== 'view-along-011' && action !== 'view-along-111' && action !== 'view-along-selection' && action !== 'hide-selection' && action !== 'toggle-grid' && action !== 'quality-1' && action !== 'quality-2' && action !== 'quality-3' && action !== 'toggle-hydrogens' &&
+-      action !== 'toggle-hydrogen-bonds' && action !== 'toggle-qpeaks' && action !== 'toggle-qpeak-bonds' && action !== 'toggle-labels' && action !== 'toggle-structure') ||
++      action !== 'toggle-hydrogen-bonds' && action !== 'toggle-qpeaks' && action !== 'toggle-qpeak-bonds' && action !== 'toggle-labels' && action !== 'toggle-structure' &&
++      action !== 'fragment-select' && action !== 'fragment-select-atoms' && action !== 'fragment-select-bonds' &&
++      action !== 'fragment-hide' && action !== 'fragment-show-only') ||
+     !Number.isFinite(x) || !Number.isFinite(y) || x < 0 || x > 1 || y < 0 || y > 1 ||
+     !Number.isInteger(mode) || mode < 0 || mode > 2) {
+     throw new Error('选择动作、视口坐标或选择模式不合法');
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -32,7 +32,7 @@
+   emptyOriginalDocumentTransfer, parseOriginalDocument, originalDocumentPresented,
+   ORIGINAL_MAIN_GUI_LABELS_SOURCE, ORIGINAL_MAIN_GUI_STRUCTURE_SOURCE, ORIGINAL_MAIN_GUI_HYDROGEN_SOURCE,
+   ORIGINAL_MAIN_GUI_QPEAK_SOURCE, ORIGINAL_MAIN_GUI_CELL_SOURCE, ORIGINAL_MAIN_GUI_BASIS_SOURCE,
+-  ORIGINAL_MAIN_GUI_FRAME_SOURCE, ORIGINAL_MAIN_GUI_GRID_SOURCE } from '../model/OriginalDocumentTransfer';
++  ORIGINAL_MAIN_GUI_FRAME_SOURCE, ORIGINAL_MAIN_GUI_GRID_SOURCE, ORIGINAL_MAIN_GUI_FRAGMENT_SOURCE } from '../model/OriginalDocumentTransfer';
+ import { HarmonyOriginalDocumentPort } from '../model/OriginalDocumentStore';
+ import { OriginalDocumentSaveTargets, OriginalDocumentSaveTarget } from '../model/OriginalDocumentSaveTargets';
+ import { OriginalDocumentSaveTransport, OriginalDocumentSerializedSnapshot } from '../model/OriginalDocumentSaveTransport';
+@@ -567,6 +567,11 @@
+           core.selectionSource !== ORIGINAL_MAIN_GUI_HYDROGEN_SOURCE) ||
+         ((validated.action === 'toggle-qpeaks' || validated.action === 'toggle-qpeak-bonds') &&
+           core.selectionSource !== ORIGINAL_MAIN_GUI_QPEAK_SOURCE) ||
++        ((validated.action === 'fragment-select' || validated.action === 'fragment-select-atoms' ||
++          validated.action === 'fragment-select-bonds' || validated.action === 'fragment-hide' ||
++          validated.action === 'fragment-show-only') && core.selectionSource !== ORIGINAL_MAIN_GUI_FRAGMENT_SOURCE) ||
++        ((validated.action === 'fragment-select' || validated.action === 'fragment-select-atoms' ||
++          validated.action === 'fragment-select-bonds') && core.selectedObjectCount === 0) ||
+         core.selectionSequence === 0 || (previousSequence !== undefined && core.selectionSequence <= previousSequence)) {
+         throw new Error('未收到本次实际选择动作的完整状态；不推测选中结果。');
+       }
+@@ -583,6 +588,11 @@
+                     validated.action === 'toggle-hydrogen-bonds' ? '氢键显示状态已读回' :
+                       validated.action === 'toggle-qpeaks' ? 'Q 峰显示状态已读回' :
+                         validated.action === 'toggle-qpeak-bonds' ? 'Q 峰键显示状态已读回' :
++                  validated.action === 'fragment-select' ? '已选中整个片段' :
++                  validated.action === 'fragment-select-atoms' ? '已选中片段原子' :
++                  validated.action === 'fragment-select-bonds' ? '已选中片段键' :
++                  validated.action === 'fragment-hide' ? '已隐藏所选片段' :
++                  validated.action === 'fragment-show-only' ? '仅显示所选片段并重新居中' :
+                   validated.action === 'view-along-selection' ? '已沿所选键/平面调整视向' : validated.action.startsWith('view-along-') ?
+             `视向已切换至 ${validated.action.substring('view-along-'.length)}` : '已显示全部分子并重新居中';
+       if (actualVisibility !== undefined) {
+@@ -2760,6 +2770,19 @@
+           .id('olex2-original-viewport-focus').fontSize(10).fontColor('#758579').layoutWeight(1)
+       }.width('100%')
+       Row({ space: 5 }) {
++        Button('片段').id('olex2-original-fragment-actions').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled() && this.originalDocument.core.selectedObjectCount !== undefined &&
++            this.originalDocument.core.selectedObjectCount > 0)
++          .bindMenu([
++            { value: '隐藏该片段', action: () => this.selectOriginalDocument('fragment-hide') },
++            { value: '仅显示该片段', action: () => this.selectOriginalDocument('fragment-show-only') },
++            { value: '选中片段原子', action: () => this.selectOriginalDocument('fragment-select-atoms') },
++            { value: '选中片段键', action: () => this.selectOriginalDocument('fragment-select-bonds') },
++            { value: '选中整个片段', action: () => this.selectOriginalDocument('fragment-select') }
++          ])
++        Text('由当前选中原子/键确定片段；仅显示会重新居中').fontSize(10).fontColor('#758579').layoutWeight(1)
++      }.width('100%')
++      Row({ space: 5 }) {
+         Button('切换网格').id('olex2-original-toggle-grid').height(25).fontSize(10)
+           .enabled(this.originalSelectionEnabled()).onClick(() => this.selectOriginalDocument('toggle-grid'))
+         Text('需先载入晶体学网格数据').fontSize(10).fontColor('#758579').layoutWeight(1)
+--- a/native/original_document_view.cpp
++++ b/native/original_document_view.cpp
+@@ -244,7 +244,10 @@
+     op==Olex2DocumentOperation::SetDrawingQualityMedium||op==Olex2DocumentOperation::SetDrawingQualityHigh||
+     op==Olex2DocumentOperation::ToggleHydrogensVisibility||op==Olex2DocumentOperation::ToggleHydrogenBondsVisibility||
+     op==Olex2DocumentOperation::ToggleQPeaksVisibility||op==Olex2DocumentOperation::ToggleQPeakBondsVisibility||
+-    op==Olex2DocumentOperation::ToggleLabelsVisibility||op==Olex2DocumentOperation::ToggleStructureVisibility;
++    op==Olex2DocumentOperation::ToggleLabelsVisibility||op==Olex2DocumentOperation::ToggleStructureVisibility||
++    op==Olex2DocumentOperation::FragmentSelectAll||op==Olex2DocumentOperation::FragmentSelectAtoms||
++    op==Olex2DocumentOperation::FragmentSelectBonds||op==Olex2DocumentOperation::FragmentHide||
++    op==Olex2DocumentOperation::FragmentShowOnly;
+ }
+ void ResetSelectionObservation(OriginalDocumentState& state){
+   state.selectionSequence=0;state.originalPickingCalls=0;state.pickHit=false;
+@@ -332,6 +335,30 @@
+       throw std::runtime_error("Original visibility action is unavailable");
+     if(request.operation==Olex2DocumentOperation::ToggleStructureVisibility)
+       state.centredBasis.SetCenter(renderer.GetBasis().GetCenter());
++  }else if(request.operation==Olex2DocumentOperation::FragmentSelectAll||
++      request.operation==Olex2DocumentOperation::FragmentSelectAtoms||
++      request.operation==Olex2DocumentOperation::FragmentSelectBonds||
++      request.operation==Olex2DocumentOperation::FragmentHide||
++      request.operation==Olex2DocumentOperation::FragmentShowOnly){
++    action=request.operation==Olex2DocumentOperation::FragmentSelectAll?"fragment-select":
++      request.operation==Olex2DocumentOperation::FragmentSelectAtoms?"fragment-select-atoms":
++      request.operation==Olex2DocumentOperation::FragmentSelectBonds?"fragment-select-bonds":
++      request.operation==Olex2DocumentOperation::FragmentHide?"fragment-hide":"fragment-show-only";
++    if(!DispatchHarmonyMainGuiAction(app,action))
++      throw std::runtime_error("Select an atom or bond before using an original fragment action");
++    if(request.operation==Olex2DocumentOperation::FragmentShowOnly)
++      state.centredBasis.SetCenter(renderer.GetBasis().GetCenter());
++    if(request.operation==Olex2DocumentOperation::FragmentHide||
++        request.operation==Olex2DocumentOperation::FragmentShowOnly){
++      // Hidden members cannot belong to a restorable viewport selection; the
++      // original fragment actions keep them selected, which the capture schema
++      // rejects. Detach only the newly hidden members.
++      for(size_t i=0;i<renderer.ObjectCount();++i){
++        AGDrawObject& object=renderer.GetObject(i);
++        if(&object!=&renderer.GetSelection()&&object.IsSelected()&&!object.IsVisible())
++          renderer.Select(object,false);
++      }
++    }
+   }else if(request.operation==Olex2DocumentOperation::CenterModel){
+     if(!DispatchHarmonyMainGuiAction(app,"center-model"))throw std::runtime_error("Harmony main-form center action is unavailable");
+     // The original action changes only the camera centre. Keep the neutral
+@@ -361,6 +388,16 @@
+     // so capture/restore and subsequent mouse rotation remain representable.
+     auto& basis=renderer.GetBasis();basis.ResetAngles();state.centredBasis=basis;
+   }
++  // The original renderer can leave objects inside its selection container while
++  // their selected flag is stale (observed after rollback/restore paths). The
++  // viewport inventory requires membership and flag to agree, so reconcile the
++  // renderer's own selection state after every successful selection mutation.
++  for(size_t i=0;i<renderer.ObjectCount();++i){
++    AGDrawObject& object=renderer.GetObject(i);
++    if(&object==&renderer.GetSelection())continue;
++    const bool member=object.GetParentGroup()==&renderer.GetSelection();
++    if(member!=object.IsSelected())object.SetSelected(member);
++  }
+   ++state.selectionSequence;state.pickHit=hit;state.lastPickedCollection=std::move(collection);state.selectionAction=std::move(action);
+ }
+ void ObserveVisibleContent(OriginalDocumentState& state,int width,int height){
+@@ -426,6 +463,10 @@
+     interactionSource="original GXLibMacros::macShowH/TGXApp hydrogen visibility setters";
+   else if(state.selectionAction=="toggle-qpeaks"||state.selectionAction=="toggle-qpeak-bonds")
+     interactionSource="original GXLibMacros::macShowQ/TGXApp Q-peak visibility setters";
++  else if(state.selectionAction=="fragment-hide"||state.selectionAction=="fragment-show-only"||
++      state.selectionAction=="fragment-select"||state.selectionAction=="fragment-select-atoms"||
++      state.selectionAction=="fragment-select-bonds")
++    interactionSource="original TMainForm fragment actions/TGXApp::FragmentsVisible and SelectFragments";
+   else if(state.selectionAction.rfind("view-along-",0)==0)interactionSource=state.selectionAction=="view-along-selection"?
+     "original TMainForm::OnBond/OnPlane/GXLibMacros::macSetView":"original TMainForm::OnViewAlong/GXLibMacros::macMatr";
+   std::ostringstream out;out<<"{\"passed\":"<<(passed?"true":"false")<<",\"loaded\":"<<(state.loaded?"true":"false")
+--- a/native/original_document_viewport_objects.h
++++ b/native/original_document_viewport_objects.h
+@@ -133,8 +133,17 @@
+     const bool selected=members.count(&object)!=0;
+     ViewportRequire(!container||!selected,"Original selection contains itself");
+     if(!container){
+-      ViewportRequire(object.IsSelected()==selected,"Original GetSelection and IsSelected disagree");
+-      ViewportRequire(selected?(object.GetParentGroup()==&selection&&object.IsGrouped()):(!object.GetParentGroup()&&!object.IsGrouped()),"Original grouping cannot be represented losslessly");
++      const std::string selectionDetail = std::string("Original GetSelection and IsSelected disagree at index ")+
++        std::to_string(i)+"/"+std::to_string(count)+": member="+(selected?"1":"0")+" flag="+(object.IsSelected()?"1":"0")+
++        " grouped="+(object.IsGrouped()?"1":"0")+" selectable="+(object.IsSelectable()?"1":"0")+
++        " visible="+(object.IsVisible()?"1":"0")+" type="+std::string(typeid(object).name())+
++        " collection="+Utf8(object.GetCollectionName())+" selectionCount="+std::to_string(selection.Count());
++      ViewportRequire(object.IsSelected()==selected, selectionDetail.c_str());
++      const std::string groupingDetail = std::string("Original grouping cannot be represented losslessly at index ")+
++        std::to_string(i)+": collection="+Utf8(object.GetCollectionName())+" parentSelection="+
++        (object.GetParentGroup()==&selection?"1":"0")+" grouped="+(object.IsGrouped()?"1":"0");
++      ViewportRequire(selected?(object.GetParentGroup()==&selection&&object.IsGrouped()):(!object.GetParentGroup()&&!object.IsGrouped()),
++        groupingDetail.c_str());
+       if(selected)ViewportRequire(object.IsVisible()&&object.IsSelectable(),"Original selected object is not visible/selectable");
+     }
+     Record descriptor;descriptor.Text(Utf8(object.GetCollectionName()));descriptor.Text(typeid(object).name());
+--- a/native/original_renderer_host.h
++++ b/native/original_renderer_host.h
+@@ -5,7 +5,7 @@
+ #include "display_font_metrics.h"
+ // Private same-build document-view request; both DSOs use the same libc++.
+ // This is not a stable third-party plugin ABI or a security sandbox.
+-enum class Olex2DocumentOperation { Render, Open, Close, Export, ResetView, Pick, ClearSelection, SelectAll, InvertSelection, CaptureViewport, RestoreViewport, ToggleCellVisibility, ToggleBasisVisibility, ToggleFrameVisibility, ToggleGridVisibility, ShowAllVisible, CenterModel, ViewAlong100, ViewAlong010, ViewAlong001, ViewAlong110, ViewAlong101, ViewAlong011, ViewAlong111, ViewAlongSelection, HideSelection, SetDrawingQualityLow, SetDrawingQualityMedium, SetDrawingQualityHigh, ToggleHydrogensVisibility, ToggleHydrogenBondsVisibility, ToggleQPeaksVisibility, ToggleQPeakBondsVisibility, ToggleLabelsVisibility, ToggleStructureVisibility };
++enum class Olex2DocumentOperation { Render, Open, Close, Export, ResetView, Pick, ClearSelection, SelectAll, InvertSelection, CaptureViewport, RestoreViewport, ToggleCellVisibility, ToggleBasisVisibility, ToggleFrameVisibility, ToggleGridVisibility, ShowAllVisible, CenterModel, ViewAlong100, ViewAlong010, ViewAlong001, ViewAlong110, ViewAlong101, ViewAlong011, ViewAlong111, ViewAlongSelection, HideSelection, SetDrawingQualityLow, SetDrawingQualityMedium, SetDrawingQualityHigh, ToggleHydrogensVisibility, ToggleHydrogenBondsVisibility, ToggleQPeaksVisibility, ToggleQPeakBondsVisibility, ToggleLabelsVisibility, ToggleStructureVisibility, FragmentSelectAll, FragmentSelectAtoms, FragmentSelectBonds, FragmentHide, FragmentShowOnly };
+ struct Olex2DocumentRequest {
+   Olex2DocumentOperation operation=Olex2DocumentOperation::Render;
+   std::string name,bytes;
+--- a/upstream/olex/main_gui.cpp
++++ b/upstream/olex/main_gui.cpp
+@@ -80,6 +80,42 @@
+     }
+     // The original ShowH/ShowQ commands preserve the user's camera while
+     // connectivity and visibility are recalculated; RestoreBasis also covers errors.
++    return true;
++  }
++  if (action == "fragment-select" || action == "fragment-select-atoms" ||
++      action == "fragment-select-bonds" || action == "fragment-hide" ||
++      action == "fragment-show-only") {
++    if (!app.XFile().HasLastLoader()) return false;
++    // Port of TMainForm::GetFragmentList: derive the fragment list from the
++    // actual selected atoms/bonds instead of a wx mouse-hover object.
++    TGlGroup& selection = app.GetRenderer().GetSelection();
++    TNetPList fragments;
++    for (size_t i = 0; i < selection.Count(); i++) {
++      if (selection[i].Is<TXAtom>()) fragments.Add(((TXAtom&)selection[i]).GetNetwork());
++      else if (selection[i].Is<TXBond>()) fragments.Add(((TXBond&)selection[i]).GetNetwork());
++    }
++    if (fragments.Count() == 0) return false;
++    for (size_t i = 0; i < fragments.Count(); i++) fragments[i]->SetTag(i);
++    for (size_t i = 0; i < fragments.Count(); i++)
++      if (fragments[i]->GetTag() != i) fragments[i] = 0;
++    fragments.Pack();
++    if (fragments.Count() == 0) return false;
++    if (action == "fragment-hide") {
++      app.FragmentsVisible(fragments, false);
++    }
++    else if (action == "fragment-show-only") {
++      app.FragmentsVisible(app.InvertFragmentsList(fragments), false);
++      app.CenterView(true);
++    }
++    else if (action == "fragment-select-atoms") {
++      app.SelectFragmentsAtoms(fragments, true);
++    }
++    else if (action == "fragment-select-bonds") {
++      app.SelectFragmentsBonds(fragments, true);
++    }
++    else {
++      app.SelectFragments(fragments, true);
++    }
+     return true;
+   }
+   if (action == "toggle-cell") {

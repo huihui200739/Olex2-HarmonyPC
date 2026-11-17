@@ -1,0 +1,21 @@
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -2890,6 +2890,18 @@
+             { value: '自由', action: () => this.runOriginalSelectionCommand('free occu sel') }
+           ])
+         Text('原版 Fix/Free occu · 作用于当前选择').fontSize(10).fontColor('#758579').layoutWeight(1)
++      }.width('100%')
++      Row({ space: 5 }) {
++        Button('Uiso').id('olex2-original-uiso').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled() && this.originalDocument.core.selectedObjectCount !== undefined &&
++            this.originalDocument.core.selectedObjectCount > 0)
++          .bindMenu([
++            { value: '0.02', action: () => this.runOriginalSelectionCommand('fix uiso 0.02 sel') },
++            { value: '0.03', action: () => this.runOriginalSelectionCommand('fix uiso 0.03 sel') },
++            { value: '0.05', action: () => this.runOriginalSelectionCommand('fix uiso 0.05 sel') },
++            { value: '自由', action: () => this.runOriginalSelectionCommand('free uiso sel') }
++          ])
++        Text('原版 Fix/Free uiso · 绝对值作用于当前选择').fontSize(10).fontColor('#758579').layoutWeight(1)
+       }.width('100%')
+       Row({ space: 5 }) {
+         Button('切换网格').id('olex2-original-toggle-grid').height(25).fontSize(10)

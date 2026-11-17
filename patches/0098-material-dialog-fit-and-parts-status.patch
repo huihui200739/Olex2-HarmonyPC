@@ -1,0 +1,24 @@
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -3277,7 +3277,7 @@
+         .id('olex2-original-document-transfer-status').fontSize(10).fontColor('#64796A').width('100%').maxLines(3)
+       Text(this.originalDocumentStatusError.length > 0 ? this.originalDocumentStatusError :
+         this.originalDocument.core.loaded ?
+-          `${this.originalDocument.core.name} · ${this.originalDocument.core.byteCount} 字节 · 修订 ${this.originalDocument.core.revision} · 原版帧 ${this.originalDocument.core.frames} · ${this.originalDocument.core.atomCount} 原子 / ${this.originalDocument.core.bondCount} 键 · ${this.originalDocument.core.renderObjects === undefined ? 0 : this.originalDocument.core.renderObjects} 渲染对象 / ${this.originalDocument.core.renderPrimitives === undefined ? 0 : this.originalDocument.core.renderPrimitives} 图元` :
++          `${this.originalDocument.core.name} · ${this.originalDocument.core.byteCount} 字节 · 修订 ${this.originalDocument.core.revision} · 原版帧 ${this.originalDocument.core.frames} · ${this.originalDocument.core.atomCount} 原子 / ${this.originalDocument.core.bondCount} 键 · ${this.originalDocument.core.renderObjects === undefined ? 0 : this.originalDocument.core.renderObjects} 渲染对象 / ${this.originalDocument.core.renderPrimitives === undefined ? 0 : this.originalDocument.core.renderPrimitives} 图元${this.originalDocument.core.selectedParts === undefined || this.originalDocument.core.selectedParts.length === 0 ? '' : ' · Parts ' + this.originalDocument.core.selectedParts}` :
+           this.originalDocumentActive() ? '原版视图状态待确认；不沿用演示图元验证资格。' : '当前未载入原版文档；下方为原有平台演示图元。')
+         .id('olex2-original-document-status').fontSize(10).fontColor('#758579').width('100%').maxLines(2)
+       if (this.originalDocumentActive()) { this.OriginalSelectionToolbar() }
+--- a/native/native_dialog_factory.cpp
++++ b/native/native_dialog_factory.cpp
+@@ -111,6 +111,10 @@
+         auto& stream=TGXApp::GetInstance().GetRenderer().GetSelection();
+         for(size_t i=0;i<stream.Count();++i)if(auto* group=dynamic_cast<TGlGroup*>(&stream[i]))group->SetGlM(material);
+       },Positions());
++    // The editor's default window is taller than this device's usable height,
++    // which leaves its Cancel/OK footer beyond the bottom edge. Use a modest
++    // centered size that fits the screen; the content scrolls internally.
++    owner->dialog->SetPosition(Point{0,0},true);owner->dialog->SetSize(Size{640,700});
+     auto& registry=Owners();std::lock_guard<std::mutex> lock(registry.mutex);
+     if(registry.next==std::numeric_limits<uintptr_t>::max())throw std::overflow_error("Native dialog handles exhausted");
+     auto key=reinterpret_cast<void*>(++registry.next);registry.owners.emplace(key,std::move(owner));return key;

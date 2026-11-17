@@ -1,0 +1,57 @@
+diff --git a/glib/glbase.h b/glib/glbase.h
+index 3269665..d49dccf 100644
+--- a/glib/glbase.h
++++ b/glib/glbase.h
+@@ -10,11 +10,7 @@
+ #ifndef __olx_gl_glbase_H
+ #define __olx_gl_glbase_H
+ 
+-#define BeginGlNamespace()  namespace glObj {
+-#define EndGlNamespace()  };\
+-  using namespace glObj;
+-#define UseGlNamespace()  using namespace glObj;
+-#define GlobalGlFunction( fun )     glObj::fun
++#include "glnamespace.h"
+ 
+ #include "ebase.h"
+ #include "gldefs.h"
+diff --git a/glib/gloption.h b/glib/gloption.h
+index cd12858..2f22864 100644
+--- a/glib/gloption.h
++++ b/glib/gloption.h
+@@ -9,7 +9,9 @@
+ 
+ #ifndef __olx_gl_option_H
+ #define __olx_gl_option_H
+-#include "glbase.h"
++#include "glnamespace.h"
++#include "ebase.h"
++#include "gldefs.h"
+ #include "emath.h"
+ #ifdef __WXWIDGETS__
+ #include <wx/colour.h>
+diff --git a/glib/glnamespace.h b/glib/glnamespace.h
+new file mode 100644
+index 0000000..587e82f
+--- /dev/null
++++ b/glib/glnamespace.h
+@@ -0,0 +1,19 @@
++/******************************************************************************
++ * Copyright (c) 2004-2026 O. Dolomanov, OlexSys                               *
++ *                                                                             *
++ * This file is part of the OlexSys Development Framework.                     *
++ *                                                                             *
++ * This source file is distributed under the terms of the licence located in   *
++ * the root folder.                                                            *
++ ******************************************************************************/
++
++#ifndef __olx_gl_namespace_H
++#define __olx_gl_namespace_H
++
++#define BeginGlNamespace()  namespace glObj {
++#define EndGlNamespace()  };\
++  using namespace glObj;
++#define UseGlNamespace()  using namespace glObj;
++#define GlobalGlFunction( fun )     glObj::fun
++
++#endif

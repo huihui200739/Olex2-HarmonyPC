@@ -1,0 +1,24 @@
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -2877,6 +2877,21 @@
+         Text('原版 Name 命令 · 修改当前选择的元素类型').fontSize(10).fontColor('#758579').layoutWeight(1)
+       }.width('100%')
+       Row({ space: 5 }) {
++        Button('占有率').id('olex2-original-occupancy').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled() && this.originalDocument.core.selectedObjectCount !== undefined &&
++            this.originalDocument.core.selectedObjectCount > 0)
++          .bindMenu([
++            { value: '1', action: () => this.runOriginalSelectionCommand('fix occu 1 sel') },
++            { value: '3/4', action: () => this.runOriginalSelectionCommand('fix occu 0.75 sel') },
++            { value: '1/2', action: () => this.runOriginalSelectionCommand('fix occu 0.5 sel') },
++            { value: '1/3', action: () => this.runOriginalSelectionCommand('fix occu 0.333333 sel') },
++            { value: '1/4', action: () => this.runOriginalSelectionCommand('fix occu 0.25 sel') },
++            { value: '固定', action: () => this.runOriginalSelectionCommand('fix occu sel') },
++            { value: '自由', action: () => this.runOriginalSelectionCommand('free occu sel') }
++          ])
++        Text('原版 Fix/Free occu · 作用于当前选择').fontSize(10).fontColor('#758579').layoutWeight(1)
++      }.width('100%')
++      Row({ space: 5 }) {
+         Button('切换网格').id('olex2-original-toggle-grid').height(25).fontSize(10)
+           .enabled(this.originalSelectionEnabled()).onClick(() => this.selectOriginalDocument('toggle-grid'))
+         Text('需先载入晶体学网格数据').fontSize(10).fontColor('#758579').layoutWeight(1)

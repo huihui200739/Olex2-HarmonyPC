@@ -1,0 +1,12 @@
+--- a/native/gles_offscreen_target.h
++++ b/native/gles_offscreen_target.h
+@@ -1,4 +1,9 @@
+ #pragma once
++// The pinned compatibility headers default to X11 on Unix. Harmony uses
++// opaque EGL handles and has no X11 native display or window dependency.
++#if defined(__OHOS__) && !defined(EGL_NO_X11)
++#define EGL_NO_X11 1
++#endif
+ #include <EGL/egl.h>
+ #include <cstdint>
+ #include <thread>

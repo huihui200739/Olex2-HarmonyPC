@@ -1,0 +1,10 @@
+--- a/cmake/Olex2NativeWidgets.cmake
++++ b/cmake/Olex2NativeWidgets.cmake
+@@ -7,6 +7,7 @@
+   target_sources(${target} PRIVATE
+     "${project_root}/upstream/olex/dgenopt.cpp"
+     "${project_root}/upstream/olex/ptable.cpp"
++    "${project_root}/upstream/olex/nui/nui.cpp"
+     "${project_root}/native/generation_options.cpp"
+     "${project_root}/upstream/olex/dgrad.cpp"
+     "${project_root}/upstream/olex/primtvs.cpp"

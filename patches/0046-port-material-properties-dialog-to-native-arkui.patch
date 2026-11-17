@@ -1,0 +1,196 @@
+--- a/upstream/olex/matprop.h
++++ b/upstream/olex/matprop.h
+@@ -1,3 +1,50 @@
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#pragma once
++#include "ctrls.h"
++#include "ctrls/checkboxext.h"
++#include "ctrls/colorext.h"
++#include "ctrls/spinctrlext.h"
++#include "ctrls/texteditext.h"
++#include "ctrls/btnext.h"
++#include "glmaterial.h"
++#include <array>
++#include <functional>
++#include <memory>
++#include <vector>
++
++class TdlgMatProp: public TDialog, public AEventsDispatcher {
++  struct Alive;
++  std::shared_ptr<Alive> alive_;
++  glObj::TGlMaterial material_;
++  std::function<void(const glObj::TGlMaterial&)> apply_;
++  std::shared_ptr<olex2::harmony::ui::Widget> scroll_,content_,footer_,status_;
++  std::array<std::shared_ptr<TCheckBox>,10> flags_;
++  std::array<std::shared_ptr<TColorCtrl>,8> colors_;
++  std::array<std::shared_ptr<TTextEdit>,2> shininess_;
++  std::shared_ptr<TSpinCtrl> blendAlpha_,transparency_;
++  std::shared_ptr<TCheckBox> transparent_,identity_;
++  std::vector<std::shared_ptr<TButton>> buttons_;
++  void BuildControls(olex2::harmony::ui::NodeBackend&);
++  void Layout();
++  void ShowStatus(const olxstr&);
++  glObj::TGlMaterial ReadControls() const;
++  void WriteControls(const glObj::TGlMaterial&);
++  bool Dispatch(int,short,const IOlxObject*,const IOlxObject*,TActionQueue*) override;
++  void OnOK();void OnCancel();void OnCopy();void OnPaste();
++  static glObj::TGlMaterial& MaterialCopy_();
++public:
++  TdlgMatProp(olex2::harmony::ui::NodeBackend&,
++    std::shared_ptr<olex2::harmony::ui::DialogBackend>,
++    std::shared_ptr<olex2::harmony::ui::UiScheduler>,
++    olex2::harmony::ui::Widget*,const glObj::TGlMaterial&,
++    std::function<void(const glObj::TGlMaterial&)> apply={},
++    std::shared_ptr<olex2::harmony::ui::DialogPositionStore> positions={});
++  ~TdlgMatProp() override;
++  const glObj::TGlMaterial& GetCurrent() const { return material_; }
++  void SetCurrent(const glObj::TGlMaterial& value) { material_=value;WriteControls(value); }
++};
++
++#else
+ /******************************************************************************
+ * Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
+ *                                                                             *
+@@ -56,3 +103,5 @@
+ };
+ 
+ #endif
++
++#endif // Harmony native material dialog / original wx implementation
+--- a/upstream/olex/matprop.cpp
++++ b/upstream/olex/matprop.cpp
+@@ -1,3 +1,118 @@
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "matprop.h"
++#include "native_widget.h"
++#include "native_dialog.h"
++#include "eutf8.h"
++#include <algorithm>
++#include <cmath>
++#include <stdexcept>
++using namespace olex2::harmony::ui;
++namespace {
++enum { MatResize=1,MatCopy,MatPaste,MatCancel,MatOK };
++const char* FlagNames[] = {"Ambient front","Ambient back","Diffuse front","Diffuse back","Emission front","Emission back","Specular front","Specular back","Shininess front","Shininess back"};
++const char* ColorNames[] = {"Ambient front color","Ambient back color","Diffuse front color","Diffuse back color","Emission front color","Emission back color","Specular front color","Specular back color"};
++using FlagSetter=void(glObj::TGlMaterial::*)(bool);
++const FlagSetter FlagSetters[] = {&glObj::TGlMaterial::SetAmbientF,&glObj::TGlMaterial::SetAmbientB,&glObj::TGlMaterial::SetDiffuseF,&glObj::TGlMaterial::SetDiffuseB,&glObj::TGlMaterial::SetEmissionF,&glObj::TGlMaterial::SetEmissionB,&glObj::TGlMaterial::SetSpecularF,&glObj::TGlMaterial::SetSpecularB,&glObj::TGlMaterial::SetShininessF,&glObj::TGlMaterial::SetShininessB};
++glObj::TGlOption glObj::TGlMaterial::* ColorMembers[] = {&glObj::TGlMaterial::AmbientF,&glObj::TGlMaterial::AmbientB,&glObj::TGlMaterial::DiffuseF,&glObj::TGlMaterial::DiffuseB,&glObj::TGlMaterial::EmissionF,&glObj::TGlMaterial::EmissionB,&glObj::TGlMaterial::SpecularF,&glObj::TGlMaterial::SpecularB};
++Color ToPickerColor(const glObj::TGlOption& value) {
++  auto channel=[](float v){return static_cast<uint8_t>(std::lround(std::clamp(v,0.0f,1.0f)*255.0f));};
++  return Color{channel(value[0]),channel(value[1]),channel(value[2]),channel(value[3])};
++}
++glObj::TGlOption FromPickerColor(const Color& value) {
++  return glObj::TGlOption(value.red/255.0f,value.green/255.0f,value.blue/255.0f,value.alpha/255.0f);
++}
++std::string Utf8(const olxstr& value) { auto encoded=TUtf8::Encode(value);return std::string(encoded.c_str(),encoded.Length()); }
++}
++struct TdlgMatProp::Alive { TdlgMatProp* owner=nullptr; };
++glObj::TGlMaterial& TdlgMatProp::MaterialCopy_() { static glObj::TGlMaterial material;return material; }
++TdlgMatProp::TdlgMatProp(NodeBackend& nodes,std::shared_ptr<DialogBackend> dialogs,
++  std::shared_ptr<UiScheduler> scheduler,Widget* parent,const glObj::TGlMaterial& initial,
++  std::function<void(const glObj::TGlMaterial&)> apply,std::shared_ptr<DialogPositionStore> positions)
++ :TDialog(nodes,std::move(dialogs),std::move(scheduler),parent,"Material Parameters","dlgMatProp",
++    DialogGeometry{Point{0,0},Size{680,720},true},std::move(positions)),alive_(std::make_shared<Alive>()),material_(initial),apply_(std::move(apply)) {
++  alive_->owner=this;BuildControls(nodes);WriteControls(material_);Layout();
++}
++TdlgMatProp::~TdlgMatProp() {
++  alive_->owner=nullptr;OnResize.Remove(this);
++  for(auto& button:buttons_) if(button) button->OnClick.Clear();
++}
++void TdlgMatProp::BuildControls(NodeBackend& nodes) {
++  scroll_=std::make_shared<Widget>(nodes,NodeKind::Scroll,&Body());Retain(scroll_);
++  content_=std::make_shared<Widget>(nodes,NodeKind::Column,scroll_.get());Retain(content_);content_->SetNumber(Property::RowSpacing,5);
++  auto row=[&](const olxstr& title) {
++    auto value=std::make_shared<Widget>(nodes,NodeKind::Row,content_.get());Retain(value);value->SetNumber(Property::RowSpacing,8);value->SetHeight(42);
++    auto label=std::make_shared<Widget>(nodes,NodeKind::Text,value.get());Retain(label);label->SetText(TextProperty::Content,Utf8(title));label->SetWidth(190);label->SetHeight(36);
++    return value;
++  };
++  for(size_t i=0;i<flags_.size();++i) {
++    auto parentRow=row(FlagNames[i]);
++    flags_[i]=std::make_shared<TCheckBox>(nodes,parentRow.get(),-1,"");Retain(flags_[i]);flags_[i]->SetWidth(250);flags_[i]->SetHeight(38);
++  }
++  for(size_t i=0;i<colors_.size();++i) {
++    auto parentRow=row(ColorNames[i]);
++    colors_[i]=std::make_shared<TColorCtrl>(nodes,parentRow.get());Retain(colors_[i]);colors_[i]->SetWidth(220);colors_[i]->SetHeight(38);
++  }
++  for(size_t i=0;i<shininess_.size();++i) {
++    auto parentRow=row(i==0?"Shininess front value":"Shininess back value");
++    shininess_[i]=std::make_shared<TTextEdit>(nodes,parentRow.get(),-1,"0");Retain(shininess_[i]);shininess_[i]->SetWidth(130);shininess_[i]->SetHeight(38);
++  }
++  auto alphaRow=row("Ambient / diffuse opacity (%)");
++  blendAlpha_=std::make_shared<TSpinCtrl>(nodes,alphaRow.get(),-1,"100");Retain(blendAlpha_);blendAlpha_->SetRange(0,100);blendAlpha_->SetWidth(110);blendAlpha_->SetHeight(38);
++  transparency_=std::make_shared<TSpinCtrl>(nodes,alphaRow.get(),-1,"100");Retain(transparency_);transparency_->SetRange(0,100);transparency_->SetWidth(110);transparency_->SetHeight(38);
++  auto toggleRow=row("Material options");
++  flags_[8]->SetCaption(FlagNames[8]);
++  transparent_=std::make_shared<TCheckBox>(nodes,toggleRow.get(),-1,"Transparent");Retain(transparent_);transparent_->SetWidth(170);transparent_->SetHeight(38);
++  identity_=std::make_shared<TCheckBox>(nodes,toggleRow.get(),-1,"Identity draw");Retain(identity_);identity_->SetWidth(170);identity_->SetHeight(38);
++  auto footer=std::make_shared<Widget>(nodes,NodeKind::Row,&Body());Retain(footer);footer_=footer;footer_->SetNumber(Property::RowSpacing,8);footer_->SetHeight(48);
++  const char* labels[]={"Copy material","Paste material","Cancel","OK"};const int ids[]={MatCopy,MatPaste,MatCancel,MatOK};
++  for(size_t i=0;i<4;++i){auto button=std::make_shared<TButton>(nodes,footer_.get(),-1,labels[i]);Retain(button);button->SetWidth(150);button->SetHeight(42);button->SetNumber(Property::Focusable,1);button->OnClick.Add(this,static_cast<short>(ids[i]),msiExecute);buttons_.push_back(std::move(button));}
++  auto statusRow=row("Status");status_=std::make_shared<Widget>(nodes,NodeKind::Text,statusRow.get());Retain(status_);status_->SetText(TextProperty::Accessibility,"Material editor status");status_->SetWidth(520);status_->SetHeight(40);status_->Hide();
++  OnResize.Add(this,MatResize,msiExecute);
++}
++void TdlgMatProp::Layout() {
++  if(!scroll_||!content_||!footer_) return;
++  const int width=std::max(320,GetWidth()-24);scroll_->SetWidth(width);scroll_->SetHeight(std::max(180,GetHeight()-82));content_->SetWidth(width);content_->SetHeight(960);footer_->SetWidth(width);
++  for(auto& button:buttons_) button->SetWidth(std::max(64,(width-40)/4));
++}
++void TdlgMatProp::ShowStatus(const olxstr& value) { status_->SetText(TextProperty::Content,Utf8(value));status_->Show(!value.IsEmpty()); }
++void TdlgMatProp::WriteControls(const glObj::TGlMaterial& value) {
++  const bool enabled[]={value.HasAmbientF(),value.HasAmbientB(),value.HasDiffuseF(),value.HasDiffuseB(),value.HasEmissionF(),value.HasEmissionB(),value.HasSpecularF(),value.HasSpecularB(),value.HasShininessF(),value.HasShininessB()};
++  for(size_t i=0;i<flags_.size();++i) flags_[i]->SetChecked(enabled[i]);
++  for(size_t i=0;i<colors_.size();++i) colors_[i]->SetValue(ToPickerColor(value.*ColorMembers[i]));
++  shininess_[0]->SetText(value.ShininessF);shininess_[1]->SetText(value.ShininessB);
++  blendAlpha_->SetValue(static_cast<int>(std::lround(value.AmbientF[3]*100.0f)));
++  transparency_->SetValue(static_cast<int>(std::lround(value.DiffuseF[3]*100.0f)));
++  transparent_->SetChecked(value.IsTransparent());identity_->SetChecked(value.IsIdentityDraw());
++}
++glObj::TGlMaterial TdlgMatProp::ReadControls() const {
++  glObj::TGlMaterial value=material_;
++  for(size_t i=0;i<flags_.size();++i) (value.*FlagSetters[i])(flags_[i]->IsChecked());
++  value.SetTransparent(transparent_->IsChecked());value.SetIdentityDraw(identity_->IsChecked());
++  for(size_t i=0;i<colors_.size();++i) value.*ColorMembers[i]=FromPickerColor(colors_[i]->GetValue());
++  value.AmbientF[3]=blendAlpha_->GetValue()/100.0f;
++  value.DiffuseF[3]=value.DiffuseB[3]=transparency_->GetValue()/100.0f;
++  value.ShininessF=static_cast<short>(shininess_[0]->GetText().ToInt());
++  value.ShininessB=static_cast<short>(shininess_[1]->GetText().ToInt());
++  return value;
++}
++bool TdlgMatProp::Dispatch(int event,short,const IOlxObject*,const IOlxObject*,TActionQueue*) {
++  if(event==MatResize){Layout();return true;}
++  if(event==MatCopy){material_=ReadControls();MaterialCopy_()=material_;ShowStatus("Material copied.");return true;}
++  if(event==MatPaste){SetCurrent(MaterialCopy_());ShowStatus("Material pasted.");return true;}
++  if(event==MatCancel){OnCancel();return true;}
++  if(event==MatOK){OnOK();return true;}
++  return false;
++}
++void TdlgMatProp::OnOK() {
++  try {auto next=ReadControls();if(apply_)apply_(next);material_=next;ShowStatus(EmptyString());EndModal(1);}
++  catch(const std::exception& error){ShowStatus(olxstr("Could not apply material: ")<<error.what());}
++  catch(...){ShowStatus("Could not apply material: unknown error.");}
++}
++void TdlgMatProp::OnCancel() {if(IsClosing()){RetryClose();return;}EndModal(DialogCancelled);}
++void TdlgMatProp::OnCopy() {material_=ReadControls();MaterialCopy_()=material_;ShowStatus("Material copied.");}
++void TdlgMatProp::OnPaste() {SetCurrent(MaterialCopy_());ShowStatus("Material pasted.");}
++
++#else
+ /******************************************************************************
+ * Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
+ *                                                                             *
+@@ -454,3 +569,5 @@
+   }
+ }
+ //..............................................................................
++
++#endif // Harmony native material dialog / original wx implementation
+--- a/cmake/Olex2NativeWidgets.cmake
++++ b/cmake/Olex2NativeWidgets.cmake
+@@ -11,6 +11,7 @@
+     "${project_root}/upstream/olex/edit.cpp"
+     "${project_root}/upstream/olex/updateth.cpp"
+     "${project_root}/upstream/olex/scenep.cpp"
++    "${project_root}/upstream/olex/matprop.cpp"
+     "${project_root}/native/generation_options.cpp"
+     "${project_root}/upstream/olex/dgrad.cpp"
+     "${project_root}/upstream/olex/primtvs.cpp"

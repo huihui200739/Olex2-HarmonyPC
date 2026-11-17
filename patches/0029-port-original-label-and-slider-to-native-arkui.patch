@@ -1,0 +1,224 @@
+--- a/olex/wininterface.h
++++ b/olex/wininterface.h
+@@ -9,6 +9,30 @@
+ 
+ #ifndef _WinInterfaceH
+ #define _WinInterfaceH
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "native_widget.h"
++#include <cstdint>
++class TWindowInterface {
++  olex2::harmony::ui::Widget* Window;
++public:
++  explicit TWindowInterface(olex2::harmony::ui::Widget* window):Window(window){}
++  int GetWidth()const{return Window->GetWidth();} void SetWidth(int v){Window->SetWidth(v);}
++  int GetHeight()const{return Window->GetHeight();} void SetHeight(int v){Window->SetHeight(v);}
++  int GetLeft()const{return Window->GetLeft();} void SetLeft(int v){Window->SetLeft(v);}
++  int GetTop()const{return Window->GetTop();} void SetTop(int v){Window->SetTop(v);}
++  uint32_t GetColor()const{uint32_t c=Window->GetBackgroundColor();return ((c>>16)&255)|(c&0xff00)|((c&255)<<16);}
++  void SetColor(uint32_t c){Window->SetBackgroundColor(0xff000000|((c&255)<<16)|(c&0xff00)|((c>>16)&255));}
++  void SetColor(olex2::harmony::ui::Color c){Window->SetBackgroundColor((uint32_t(c.alpha)<<24)|(uint32_t(c.red)<<16)|(uint32_t(c.green)<<8)|c.blue);}
++  bool IsVisible()const{return Window->IsShown();} void SetVisible(bool v){Window->Show(v);}
++  bool IsEnabled()const{return Window->IsEnabled();} void SetEnabled(bool v){Window->Enable(v);}
++  long GetWindowStyle()const{return Window->GetWindowStyle();} void SetWindowStyle(long v){Window->SetWindowStyle(v);}
++  void AddWindowStyle(long v){SetWindowStyle(GetWindowStyle()|v);} void DelWindowStyle(long v){SetWindowStyle(GetWindowStyle()&~v);}
++  bool HasWindowStyle(long v)const{return (GetWindowStyle()&v)!=0;}
++  long GetExtraStyle()const{return Window->GetExtraStyle();} void SetExtraStyle(long v){Window->SetExtraStyle(v);}
++  void AddExtraStyle(long v){SetExtraStyle(GetExtraStyle()|v);} void DelExtraStyle(long v){SetExtraStyle(GetExtraStyle()&~v);}
++  bool HasExtraStyle(long v)const{return (GetExtraStyle()&v)!=0;}
++};
++#else
+ #include <wx/wx.h>
+ #include "ebase.h"
+ #include "gldefs.h"
+@@ -66,4 +90,5 @@
+   bool HasExtraStyle(long v) const {  return (GetExtraStyle() & v) != 0;  }
+ };
+ 
++#endif // native widgets / original wx
+ #endif
+--- a/olex/ctrls/olxctrlbase.h
++++ b/olex/ctrls/olxctrlbase.h
+@@ -15,9 +15,17 @@
+ 
+ namespace ctrl_ext  {
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++  using ControlWindow = olex2::harmony::ui::Widget;
++  using ControlKeyEvent = olex2::harmony::ui::KeyEvent;
++#else
++  using ControlWindow = wxWindow;
++  using ControlKeyEvent = wxKeyEvent;
++#endif
++
+   class AOlxCtrl : public virtual IOlxObject {
+   protected:
+-    AOlxCtrl(wxWindow* this_window) : WI(this_window) {}
++    AOlxCtrl(ControlWindow* this_window) : WI(this_window) {}
+     virtual ~AOlxCtrl() {}
+     TActionQList Actions;
+   public:
+@@ -101,11 +109,11 @@
+     ;
+ 
+   class TKeyEvent: public IOlxObject  {
+-    wxKeyEvent* Event;
++    ControlKeyEvent* Event;
+   public:
+-    TKeyEvent(wxKeyEvent& evt)  {  Event = &evt;  }
+-    wxKeyEvent& GetEvent()    const {  return *Event;  }
+-    void SetEvent(wxKeyEvent& evt)  {  Event = &evt;  }
++    TKeyEvent(ControlKeyEvent& evt)  {  Event = &evt;  }
++    ControlKeyEvent& GetEvent()    const {  return *Event;  }
++    void SetEvent(ControlKeyEvent& evt)  {  Event = &evt;  }
+   };
+ };  //end namespace ctrl_ext
+ using namespace ctrl_ext;
+--- a/olex/ctrls/labelext.h
++++ b/olex/ctrls/labelext.h
+@@ -11,6 +11,21 @@
+ #define __olx_ctrl_label_H
+ #include "olxctrlbase.h"
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++namespace ctrl_ext {
++class TLabel:public olex2::harmony::ui::Widget,public AOlxCtrl {
++  olxstr Data;
++protected:
++  void OnNativeEvent(const olex2::harmony::ui::NodeEvent&)override;
++public:
++  TLabel(olex2::harmony::ui::NodeBackend&,olex2::harmony::ui::Widget*,const olxstr&,long style=0);
++  DefPropC(olxstr, Data)
++  AOlxCtrl::ActionQueue& OnClick;
++  void SetCaption(const olxstr&);
++  olxstr GetCaption()const;
++};
++}
++#else
+ namespace ctrl_ext  {
+   class TLabel: public wxStaticText, public AOlxCtrl  {
+     TActionQList *FActions;
+@@ -38,4 +53,5 @@
+     olxstr GetCaption() const {  return GetLabel(); }
+   };
+ }; // end namespace ctrl_ext
++#endif // native widgets / original wx
+ #endif
+--- a/olex/ctrls/labelext.cpp
++++ b/olex/ctrls/labelext.cpp
+@@ -7,6 +7,20 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "labelext.h"
++#include "eutf8.h"
++using namespace ctrl_ext;
++using namespace olex2::harmony::ui;
++TLabel::TLabel(NodeBackend& backend,Widget* parent,const olxstr& label,long style)
++  :Widget(backend,NodeKind::Text,parent,-1,{}, {},style),AOlxCtrl(this),Data(EmptyString()),
++   OnClick(AOlxCtrl::ActionQueue::New(Actions,evt_on_click_id)) {
++  SetCaption(label);Listen({EventKind::Click});
++}
++void TLabel::SetCaption(const olxstr& caption){olxcstr utf8=TUtf8::Encode(caption);SetText(TextProperty::Content,std::string(utf8.c_str(),utf8.Length()));}
++olxstr TLabel::GetCaption()const{auto value=GetText(TextProperty::Content);return TUtf8::Decode(value.c_str(),value.size());}
++void TLabel::OnNativeEvent(const NodeEvent& event){if(event.kind==EventKind::Click)OnClick.Execute(this);}
++#else
+ #include "labelext.h"
+ #include "frameext.h"
+ #include "egc.h"
+@@ -36,3 +50,5 @@
+   event.Skip(true);
+ #endif
+ }
++
++#endif // native widgets / original wx
+--- a/olex/ctrls/trackbarext.h
++++ b/olex/ctrls/trackbarext.h
+@@ -11,6 +11,30 @@
+ #define __olx_ctrl_trackbar_H
+ #include "olxctrlbase.h"
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++namespace ctrl_ext {
++class TTrackBar:public olex2::harmony::ui::Widget,public AOlxCtrl {
++  olxstr Data;
++  int this_Val;
++protected:
++  void OnNativeEvent(const olex2::harmony::ui::NodeEvent&)override;
++  void ScrollEvent(double);
++  void MouseUpEvent();
++public:
++  TTrackBar(olex2::harmony::ui::NodeBackend&,olex2::harmony::ui::Widget* parent=nullptr,int id=-1,int value=0,int minimum=0,int maximum=100,olex2::harmony::ui::Point={},olex2::harmony::ui::Size={},long style=0);
++  DefPropC(olxstr, Data)
++  int GetValue()const;
++  void SetValue(int);
++  int GetMin()const;
++  void SetMin(int);
++  int GetMax()const;
++  void SetMax(int);
++  void SetRange(int,int);
++  AOlxCtrl::ActionQueue& OnChange;
++  AOlxCtrl::ActionQueue& OnMouseUp;
++};
++}
++#else
+ namespace ctrl_ext  {
+ 
+   class TTrackBar: public wxSlider, public AOlxCtrl {
+@@ -39,4 +63,5 @@
+     AOlxCtrl::ActionQueue &OnChange, &OnMouseUp;
+   };
+ }; // end namespace ctrl_ext
++#endif // native widgets / original wx
+ #endif
+--- a/olex/ctrls/trackbarext.cpp
++++ b/olex/ctrls/trackbarext.cpp
+@@ -7,6 +7,41 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "trackbarext.h"
++#include <algorithm>
++#include <cmath>
++#include <stdexcept>
++using namespace ctrl_ext;
++using namespace olex2::harmony::ui;
++TTrackBar::TTrackBar(NodeBackend& backend,Widget* parent,int id,int value,int minimum,int maximum,Point position,Size size,long style)
++  :Widget(backend,NodeKind::Slider,parent,id,position,size,style),AOlxCtrl(this),this_Val(value),
++   OnChange(AOlxCtrl::ActionQueue::New(Actions,evt_change_id)),
++   OnMouseUp(AOlxCtrl::ActionQueue::New(Actions,evt_on_mouse_up_id)) {
++  SetRange(minimum,maximum);SetNumber(Property::SliderStep,1);SetValue(value);SetNumber(Property::Focusable,1);Listen({EventKind::SliderChange});
++}
++int TTrackBar::GetValue()const{return static_cast<int>(std::lround(GetNumber(Property::SliderValue)));}
++int TTrackBar::GetMin()const{return static_cast<int>(std::lround(GetNumber(Property::SliderMinimum)));}
++int TTrackBar::GetMax()const{return static_cast<int>(std::lround(GetNumber(Property::SliderMaximum)));}
++void TTrackBar::SetValue(int value){int clamped=std::clamp(value,GetMin(),GetMax());SetNumber(Property::SliderValue,clamped);this_Val=clamped;}
++void TTrackBar::SetRange(int minimum,int maximum){
++  if(minimum>maximum)throw std::invalid_argument("Slider minimum exceeds maximum");
++  int value=GetValue();
++  if(minimum>GetMax()){SetNumber(Property::SliderMaximum,maximum);SetNumber(Property::SliderMinimum,minimum);}
++  else {SetNumber(Property::SliderMinimum,minimum);SetNumber(Property::SliderMaximum,maximum);}
++  SetValue(value);
++}
++void TTrackBar::SetMin(int value){SetRange(value,GetMax());}
++void TTrackBar::SetMax(int value){SetRange(GetMin(),value);}
++void TTrackBar::ScrollEvent(double value){
++  if(!std::isfinite(value))return;
++  int next=static_cast<int>(std::lround(std::clamp(value,double(GetMin()),double(GetMax()))));
++  if(this_Val==next)return;
++  SetNumber(Property::SliderValue,next);this_Val=next;OnChange.Execute(static_cast<AOlxCtrl*>(this));
++}
++void TTrackBar::MouseUpEvent(){OnMouseUp.Execute(static_cast<AOlxCtrl*>(this));}
++void TTrackBar::OnNativeEvent(const NodeEvent& event){if(event.kind!=EventKind::SliderChange)return;ScrollEvent(event.value);if(event.phase==SliderPhase::End||event.phase==SliderPhase::Click)MouseUpEvent();}
++#else
+ #include "trackbarext.h"
+ #include "frameext.h"
+ #include "olxvar.h"
+@@ -37,3 +72,5 @@
+   evt.Skip();
+   OnMouseUp.Execute((AOlxCtrl*)this);
+ }
++
++#endif // native widgets / original wx

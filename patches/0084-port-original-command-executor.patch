@@ -1,0 +1,218 @@
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -265,6 +265,13 @@
+   auto& owner=Runtime();std::lock_guard<std::mutex> lock(owner.mutex);olex2::harmony::ApplicationFunctionResult result;result.input=input;
+   try{if(!owner.runtime)throw std::runtime_error("Original application runtime is not initialized");result=owner.runtime->Evaluate(input);}catch(const std::exception& e){result.error=e.what();}
+   napi_value out;napi_create_object(env,&out);Boolean(env,out,"passed",result.passed);Boolean(env,out,"optionsChanged",result.optionsChanged);Property(env,out,"input",String(env,result.input));Property(env,out,"text",String(env,result.text));Property(env,out,"error",String(env,result.error));Property(env,out,"source",String(env,olex2::harmony::ApplicationRuntimeSource()));Property(env,out,"runtime",RuntimeObject(env,result.runtime));return out;
++}
++napi_value ExecuteOriginalCommand(napi_env env,napi_callback_info info){
++  size_t count=1;napi_value args[1];napi_get_cb_info(env,info,&count,args,nullptr,nullptr);std::string input;
++  if(count!=1 || !ReadString(env,args[0],4096,input)){napi_throw_type_error(env,nullptr,"Expected an original command");return nullptr;}
++  auto& owner=Runtime();std::lock_guard<std::mutex> lock(owner.mutex);olex2::harmony::ApplicationCommandResult result;result.input=input;
++  try{if(!owner.runtime)throw std::runtime_error("Original application runtime is not initialized");result=owner.runtime->ExecuteCommand(input);}catch(const std::exception& e){result.error=e.what();}
++  napi_value out;napi_create_object(env,&out);Boolean(env,out,"passed",result.passed);Property(env,out,"input",String(env,result.input));Property(env,out,"text",String(env,result.text));Property(env,out,"output",String(env,result.output));Property(env,out,"error",String(env,result.error));Property(env,out,"runtime",RuntimeObject(env,result.runtime));return out;
+ }
+ napi_value OriginalLogsObject(napi_env env,const olex2::harmony::OriginalLogSnapshot& s,const std::string& error){
+   napi_value out,entries;napi_create_object(env,&out);napi_create_array_with_length(env,s.entries.size(),&entries);
+@@ -558,6 +565,7 @@
+     {"captureOriginalDocumentViewport",nullptr,CaptureOriginalDocumentViewport,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"restoreOriginalDocumentViewport",nullptr,RestoreOriginalDocumentViewport,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"evaluateApplicationFunction",nullptr,EvaluateApplicationFunction,nullptr,nullptr,nullptr,napi_default,nullptr},
++    {"executeOriginalCommand",nullptr,ExecuteOriginalCommand,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"getOriginalLogs",nullptr,GetOriginalLogs,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"clearOriginalLogs",nullptr,ClearOriginalLogs,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"runCoreCatalog",nullptr,RunCoreCatalog,nullptr,nullptr,nullptr,napi_default,nullptr},
+--- a/app/entry/src/main/cpp/types/libolex2native/index.d.ts
++++ b/app/entry/src/main/cpp/types/libolex2native/index.d.ts
+@@ -59,6 +59,13 @@
+ export const getApplicationRuntimeStatus: () => ApplicationRuntimeStatus;
+ export const shutdownApplicationRuntime: () => void;
+ export const evaluateApplicationFunction: (expression: string) => ApplicationFunctionReport;
++export interface OriginalCommandReport {
++  passed: boolean; input: string; text: string; output: string; error: string; runtime: ApplicationRuntimeStatus;
++}
++// Executes a command through the replicated original application macro library
++// plus the ported Harmony main-form actions. Output is the bounded original log
++// text produced by the command; no separate macro parser is used.
++export const executeOriginalCommand: (command: string) => OriginalCommandReport;
+ 
+ export interface ApplicationOptionsTransferReport {
+   passed: boolean; optionsChanged: boolean; importedOptions: number;
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1,4 +1,4 @@
+-import nativeBridge, { GraphicsStatus, UtilityReport, CheckResult, ApplicationRuntimeStatus, OriginalLogSnapshot, CoreCatalogReport, PythonRuntimeStatus, OriginalLinePathGpuProbe, PythonExecutionReport, ApplicationFunctionReport, DesktopCommandReport } from 'libolex2native.so';
++import nativeBridge, { GraphicsStatus, UtilityReport, CheckResult, ApplicationRuntimeStatus, OriginalLogSnapshot, CoreCatalogReport, PythonRuntimeStatus, OriginalLinePathGpuProbe, PythonExecutionReport, ApplicationFunctionReport, OriginalCommandReport, DesktopCommandReport } from 'libolex2native.so';
+ import { fileIo } from '@kit.CoreFileKit';
+ import { common } from '@kit.AbilityKit';
+ import { OptionsDocumentTransfer, OptionsDocumentStatus, OptionsDocumentBackend, emptyOptionsDocumentStatus } from '../model/OptionsDocumentTransfer';
+@@ -394,9 +394,11 @@
+   }
+ 
+   private submitCommand(): void {
+-    if (this.commandText.trim().startsWith('py ')) this.executePythonScript();
++    const input: string = this.commandText.trim();
++    if (input.startsWith('py ')) this.executePythonScript();
+     else if (usesApplicationInterpreter(this.commandText)) this.executeApplicationFunction();
+-    else this.executeDesktopCommand();
++    else if (input.startsWith('pc.')) this.executeDesktopCommand();
++    else this.executeOriginalCommand();
+   }
+ 
+   private executePythonScript(): void {
+@@ -1768,6 +1770,25 @@
+     this.saveRecord();
+   }
+ 
++  private executeOriginalCommand(): void {
++    const input: string = this.commandText;
++    try {
++      const result: OriginalCommandReport = nativeBridge.executeOriginalCommand(input);
++      this.applicationRuntime = result.runtime;
++      this.commandPassed = result.passed;
++      this.commandError = result.error;
++      const output: string = result.output.trim();
++      this.commandMessage = output.length > 0 ? output : (result.passed ? result.text : '原版命令未通过');
++      this.originalLog = nativeBridge.getOriginalLogs();
++      this.refreshGraphics();
++    } catch (error) {
++      this.commandPassed = false;
++      this.commandMessage = '';
++      this.commandError = '原版命令输入应为1～4096字节；请检查输入后重试';
++    }
++    this.saveRecord();
++  }
++
+   private executeDesktopCommand(): void {
+     const input: string = this.commandText;
+     const sequence: number = this.commandStatus.sequence + 1;
+@@ -2597,9 +2618,9 @@
+   @Builder
+   private CommandEntry() {
+     Column({ space: 6 }) {
+-      Text('原版解析 · pc.* / app.*').fontSize(10).fontColor('#A8C2B5').width('100%')
++      Text('原版解析 · 宏命令 / app.* / pc.*').fontSize(10).fontColor('#A8C2B5').width('100%')
+       Row({ space: 4 }) {
+-        TextInput({ text: this.commandText, placeholder: '英文 pc.mesh torus' }).id('olex2-command-input')
++        TextInput({ text: this.commandText, placeholder: '英文原版命令，如 help / arad pers' }).id('olex2-command-input')
+           .layoutWeight(1).height(32).fontSize(11).maxLength(2048).backgroundColor('#E7EEE9')
+           .type(InputType.Normal).enableAutoFill(false).enterKeyType(EnterKeyType.Go)
+           .onChange((value: string) => { this.commandText = value; })
+@@ -2612,6 +2633,8 @@
+           .onClick(() => { this.executeDesktopCommand(); })
+         Button('应用函数').id('olex2-application-function-run').layoutWeight(1).padding({ left: 4, right: 4 }).height(30).fontSize(11).backgroundColor('#42735A')
+           .onClick(() => { this.executeApplicationFunction(); })
++        Button('原版命令').id('olex2-original-command-run').layoutWeight(1).padding({ left: 4, right: 4 }).height(30).fontSize(11).backgroundColor('#42735A')
++          .onClick(() => { this.executeOriginalCommand(); })
+         Button('Python').id('olex2-python-run').layoutWeight(1).padding({ left: 3, right: 3 }).height(30).fontSize(11).backgroundColor('#42735A')
+           .enabled(this.pythonRuntime.initialized).onClick(() => { this.executePythonScript(); })
+       }.width('100%')
+@@ -2620,7 +2643,7 @@
+       Button('命令帮助').id('olex2-command-help').width('100%').height(28).fontSize(10).backgroundColor('#355345')
+         .onClick(() => { this.commandText = 'pc.help'; this.executeDesktopCommand(); })
+       if (this.applicationRuntime.commandHints) {
+-        Text('pc.mesh torus / app.ConfigDir() / py print(1+1)').id('olex2-command-hint').fontSize(8).fontColor('#A2BDAD').width('100%')
++        Text('arad pers / help / app.ConfigDir() / py print(1+1)').id('olex2-command-hint').fontSize(8).fontColor('#A2BDAD').width('100%')
+       }
+       Text(this.commandError.length > 0 ? this.commandError : this.commandMessage).id('olex2-command-status')
+         .fontSize(9).fontColor(this.commandError.length > 0 ? '#F1B9A9' : '#A2BDAD').lineHeight(13)
+--- a/cmake/original_renderer.exports
++++ b/cmake/original_renderer.exports
+@@ -147,6 +147,7 @@
+   _ZN5glObj9TGlOption10FromStringERKN4esdl9TTSStringINS1_8TWStringEwEE;
+   _ZN5olex27harmony17CoreCatalogResultD2Ev;
+   _ZN5olex27harmony18ApplicationRuntime13ImportOptionsERKNSt4__n112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE;
++  _ZN5olex27harmony18ApplicationRuntime14ExecuteCommandERKNSt4__n112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE;
+   _ZN5olex27harmony18ApplicationRuntime14RunCoreCatalogERKNSt4__n112basic_stringIcNS2_11char_traitsIcEENS2_9allocatorIcEEEE;
+   _ZN5olex27harmony18ApplicationRuntime17ClearOriginalLogsEv;
+   _ZN5olex27harmony18ApplicationRuntime26ReadOriginalDocumentSourceEv;
+--- a/native/application_runtime.cpp
++++ b/native/application_runtime.cpp
+@@ -188,6 +188,61 @@
+   if(!r.passed && r.error.empty())r.error="Original application function failed";
+   r.optionsChanged=before!=OptionsKey(impl_->app->GetOptions());r.runtime=impl_->Status();return r;
+ }
++ApplicationCommandResult ApplicationRuntime::ExecuteCommand(const std::string& input){
++  std::lock_guard<std::mutex> lock(impl_->mutex);OriginalInterpreterGuard guard;
++  ApplicationCommandResult r;r.input=input;const auto before=impl_->log->Snapshot();
++  try{
++    if(input.empty() || input.size()>4096 || input.find('\0')!=std::string::npos ||
++        Utf8(Text(input))!=input)
++      throw std::invalid_argument("Expected a canonical UTF-8 original command, at most 4096 bytes");
++    OriginalProcessor processor;TLibrary& library=processor.GetLibrary();
++    // Replicate the application's own registry: the app library owns the real
++    // macros/functions, so moving or borrowing it would corrupt the runtime.
++    size_t replicated=0;
++    {
++      TLibrary::container_t::iterator_t itr=impl_->app->GetLibrary().IterateMacros();
++      while(itr->HasNext()){
++        ABasicFunction* original=itr->Next();
++        std::unique_ptr<ABasicFunction> copy(original->Replicate());
++        AMacro* macro=dynamic_cast<AMacro*>(copy.get());
++        if(!macro)throw std::runtime_error("Original library macro could not be replicated");
++        try{library.Register(macro);copy.release();++replicated;}
++        catch(const TExceptionBase&){/* keep the interpreter builtin with this name */}
++      }
++    }
++    {
++      TLibrary::container_t::iterator_t itr=impl_->app->GetLibrary().IterateFunctions();
++      while(itr->HasNext()){
++        ABasicFunction* original=itr->Next();
++        std::unique_ptr<ABasicFunction> copy(original->Replicate());
++        AFunction* function=dynamic_cast<AFunction*>(copy.get());
++        if(!function)throw std::runtime_error("Original library function could not be replicated");
++        try{library.Register(function);copy.release();++replicated;}
++        catch(const TExceptionBase&){/* keep the interpreter builtin with this name */}
++      }
++    }
++    if(replicated==0)throw std::runtime_error("Original application macro library is empty");
++    library.AttachLibrary(CreateHarmonyMainFormLibrary());
++    olxstr text=Text(input);TMacroData error;error.SetQuiet(true);
++    error.SetLocation("HarmonyPC original command");
++    r.passed=processor.processMacroEx(text,error,"HarmonyPC original command",true);
++    if(r.passed){r.text=Utf8(error.GetRetVal());if(r.text.empty())r.text="ok";}
++    else r.error=Utf8(error.GetInfo());
++  }catch(const TExceptionBase& e){r.error=Utf8(e.GetException()->GetFullMessage());}
++  catch(const std::exception& e){r.error=e.what();}
++  const auto after=impl_->log->Snapshot();
++  // Only the bounded log entries produced by this command, in order.
++  std::ostringstream output;
++  for(const auto& entry:after.entries){
++    if(entry.sequence<=before.posted)continue;
++    if(output.tellp()>65536)break;
++    output<<entry.text<<'\n';
++  }
++  r.output=output.str();
++  if(r.output.size()>65536)r.output.resize(65536);
++  if(!r.passed && r.error.empty())r.error="Original command was not accepted";
++  r.runtime=impl_->Status();return r;
++}
+ CoreCatalogResult ApplicationRuntime::RunCoreCatalog(const std::string& input){
+   std::lock_guard<std::mutex> lock(impl_->mutex);OriginalInterpreterGuard guard;
+   CoreCatalogResult result;result.input=input;result.postedBefore=impl_->log->Snapshot().posted;
+--- a/native/application_runtime.h
++++ b/native/application_runtime.h
+@@ -19,6 +19,11 @@
+   std::string input,text,error;
+   ApplicationRuntimeStatus runtime;
+ };
++struct ApplicationCommandResult {
++  bool passed=false;
++  std::string input,text,output,error;
++  ApplicationRuntimeStatus runtime;
++};
+ struct ApplicationOptionsTransferResult {
+   bool passed=false,optionsChanged=false;
+   unsigned importedOptions=0;
+@@ -53,6 +58,11 @@
+   // Fresh, verified staged input bytes; no saver, graphics or state changes.
+   std::string ReadOriginalDocumentSource();
+   ApplicationFunctionResult Evaluate(const std::string& expression);
++  // Executes an original application command through the real macro library:
++  // the application's registered macros/functions are replicated (never moved)
++  // into a bounded interpreter instance, and the Harmony main-form library is
++  // attached so ported main-frame actions are callable by command name.
++  ApplicationCommandResult ExecuteCommand(const std::string& command);
+   // Only real LstMac/LstFun clones are attached under core.*, never the full
+   // scientific registry. They print metadata through the original TLog bus.
+   CoreCatalogResult RunCoreCatalog(const std::string& command);

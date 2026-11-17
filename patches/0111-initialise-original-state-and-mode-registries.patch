@@ -1,0 +1,31 @@
+--- a/native/application_runtime.cpp
++++ b/native/application_runtime.cpp
+@@ -1,4 +1,5 @@
+ #include "application_runtime.h"
++#include "olxstate.h"
+ #include "original_file_formats.h"
+ #include "gradient_options.h"
+ #include "original_display_options.h"
+@@ -139,6 +140,11 @@
+   auto scene=std::make_unique<PlatformWindowScene>(impl_->sceneLifetime);
+   impl_->app.reset(new PlatformApp(impl_->base,scene.get()));
+   impl_->scene=scene.release(); // The genuine TGXApp renderer now owns it.
++  // The original wx main form creates these process-lifetime registries. Harmony
++  // has no form, so create them before any command or state callback needs them.
++  // Their constructors set the singleton pointer and throw if it already exists.
++  try{new TStateRegistry();}catch(const TExceptionBase&){/* already created */}
++  try{new TModeRegistry();}catch(const TExceptionBase&){/* already created */}
+   impl_->app->Configure(impl_->shared,impl_->instance,impl_->config);
+   impl_->log.reset(new OriginalLogCapture(impl_->app->GetLog()));
+   std::unique_ptr<TLibrary> library(impl_->app->ExportLibrary("app"));impl_->functionCount=library->FunctionCount();impl_->python->AttachApplicationLibrary(library.release());
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -3518,7 +3518,7 @@
+         .id('olex2-original-document-transfer-status').fontSize(10).fontColor('#64796A').width('100%').maxLines(3)
+       Text(this.originalDocumentStatusError.length > 0 ? this.originalDocumentStatusError :
+         this.originalDocument.core.loaded ?
+-          `${this.originalDocument.core.name} · ${this.originalDocument.core.byteCount} 字节 · 修订 ${this.originalDocument.core.revision} · 原版帧 ${this.originalDocument.core.frames} · ${this.originalDocument.core.atomCount} 原子 / ${this.originalDocument.core.bondCount} 键 · ${this.originalDocument.core.renderObjects === undefined ? 0 : this.originalDocument.core.renderObjects} 渲染对象 / ${this.originalDocument.core.renderPrimitives === undefined ? 0 : this.originalDocument.core.renderPrimitives} 图元 · 集合 ${this.originalDocument.core.renderCollections === undefined ? 0 : this.originalDocument.core.renderCollections}${this.originalDocument.core.selectedParts === undefined || this.originalDocument.core.selectedParts.length === 0 ? '' : ' · Parts ' + this.originalDocument.core.selectedParts}` :
++          `${this.originalDocument.core.name} · ${this.originalDocument.core.byteCount} 字节 · 修订 ${this.originalDocument.core.revision} · 原版帧 ${this.originalDocument.core.frames} · ${this.originalDocument.core.atomCount} 原子 / ${this.originalDocument.core.bondCount} 键 · ${this.originalDocument.core.renderObjects === undefined ? 0 : this.originalDocument.core.renderObjects} 渲染对象 / ${this.originalDocument.core.renderPrimitives === undefined ? 0 : this.originalDocument.core.renderPrimitives} 图元 · 集合 ${this.originalDocument.core.renderCollections === undefined ? 0 : this.originalDocument.core.renderCollections}${this.originalDocument.core.labelsVisible === undefined ? '' : this.originalDocument.core.labelsVisible ? ' · 标签显示' : ' · 标签隐藏'}${this.originalDocument.core.selectedParts === undefined || this.originalDocument.core.selectedParts.length === 0 ? '' : ' · Parts ' + this.originalDocument.core.selectedParts}` :
+           this.originalDocumentActive() ? '原版视图状态待确认；不沿用演示图元验证资格。' : '当前未载入原版文档；下方为原有平台演示图元。')
+         .id('olex2-original-document-status').fontSize(10).fontColor('#758579').width('100%').maxLines(2)
+       if (this.originalDocumentActive()) { this.OriginalSelectionToolbar() }

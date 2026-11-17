@@ -1,0 +1,61 @@
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1750,6 +1750,30 @@
+       this.captureOriginalViewportBeforeReplacement('before-new-display-tab');
+       const result: OriginalDocumentTransferResult = await this.originalDocumentTransfer.openSynthetic(bytes,
+         this.originalDocumentBackend());
++      this.acceptOriginalDocumentResult(result);
++    } catch (error) {
++      this.failOriginalSessionOperation(error as Error); this.readOriginalDocumentStatus(); this.reconcileOriginalSessionNative();
++    } finally {
++      this.originalDocumentBusy = false; this.syncOriginalDocumentSessions();
++      this.applicationRuntime = nativeBridge.getApplicationRuntimeStatus();
++      this.originalLog = nativeBridge.getOriginalLogs(); this.refreshGraphics(); this.syncOriginalViewportInput();
++    }
++  }
++
++  private async openShelxSyntheticOriginalDocument(): Promise<void> {
++    if (this.originalDocumentOperationBusy() || !this.applicationRuntime.initialized) return;
++    if (!this.originalDocumentSessions.canAdd()) {
++      this.originalDocumentMessage = '会话最多 4 份文档、合计 32 MiB；请先明确关闭一份文档。未替换原生文档。';
++      this.saveRecord(); return;
++    }
++    this.syncOriginalDocumentSessions(); this.beginOriginalSessionOperation('open-synthetic', '');
++    this.originalDocumentBusy = true; this.syncOriginalViewportInput();
++    try {
++      const context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
++      const bytes: Uint8Array = await context.resourceManager.getRawFileContent('synthetic-view.ins');
++      this.captureOriginalViewportBeforeReplacement('before-new-display-tab');
++      const result: OriginalDocumentTransferResult = await this.originalDocumentTransfer.openSynthetic(bytes,
++        this.originalDocumentBackend(), 'synthetic-view.ins');
+       this.acceptOriginalDocumentResult(result);
+     } catch (error) {
+       this.failOriginalSessionOperation(error as Error); this.readOriginalDocumentStatus(); this.reconcileOriginalSessionNative();
+@@ -3432,6 +3456,10 @@
+           .fontColor('#536857').backgroundColor('#F2F5EC')
+           .enabled(this.applicationRuntime.initialized && !this.originalDocumentOperationBusy())
+           .onClick(() => this.openXyzSyntheticOriginalDocument())
++        Button('SHELX 示例').id('olex2-original-document-shelx').height(26).fontSize(10)
++          .fontColor('#536857').backgroundColor('#F2F5EC')
++          .enabled(this.applicationRuntime.initialized && !this.originalDocumentOperationBusy())
++          .onClick(() => this.openShelxSyntheticOriginalDocument())
+         Text('非科研数据 · 仅平台显示').fontSize(10).fontColor('#7C8064').layoutWeight(1)
+       }.width('100%')
+       Text(this.originalDocumentBusy ? '正在处理原版文档；请等待文件操作完成…' : this.originalDocumentMessage)
+--- a/app/entry/src/main/resources/rawfile/synthetic-view.ins
++++ b/app/entry/src/main/resources/rawfile/synthetic-view.ins
+@@ -0,0 +1,14 @@
++TITL synthetic non-biological display fixture
++CELL 0.71073 10.000 10.000 10.000 90.000 90.000 90.000
++ZERR 1 0.000 0.000 0.000 0.000 0.000 0.000
++LATT 1
++SYMM X, Y, Z
++SFAC C H
++UNIT 5 4
++C1 1 0.5000 0.5000 0.5000 11.00000 0.02000
++H1 2 0.5670 0.5670 0.5670 11.00000 0.03000
++H2 2 0.4330 0.4330 0.5670 11.00000 0.03000
++H3 2 0.4330 0.5670 0.4330 11.00000 0.03000
++H4 2 0.5670 0.4330 0.4330 11.00000 0.03000
++HKLF 4
++END

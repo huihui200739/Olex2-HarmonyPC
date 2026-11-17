@@ -1,0 +1,33 @@
+--- a/app/entry/src/main/cpp/application_view.cpp
++++ b/app/entry/src/main/cpp/application_view.cpp
+@@ -199,7 +199,7 @@
+   if(name.empty()||name.size()>240||name.find('\0')!=std::string::npos||name.find_first_of("/\\:")!=std::string::npos){error="Expected a document basename (1..240 UTF-8 bytes), not a path or URI";return false;}
+   size_t dot=name.rfind('.');std::string extension=dot==std::string::npos?"":name.substr(dot);
+   std::transform(extension.begin(),extension.end(),extension.begin(),[](unsigned char c){return char(std::tolower(c));});
+-  if(dot==0||(extension!=".cif"&&extension!=".ins"&&extension!=".res")){error="Original document format must be .cif, .ins or .res";return false;}
++  if(dot==0||(extension!=".cif"&&extension!=".ins"&&extension!=".res"&&extension!=".xyz")){error="Original document format must be .cif, .ins, .res or .xyz";return false;}
+   if(bytes.empty()||bytes.size()>MaximumOriginalDocumentBytes||bytes.find('\0')!=std::string::npos){error="Expected nonempty original text bytes without NUL (maximum 8 MiB)";return false;}
+   return true;
+ }
+--- a/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
++++ b/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
+@@ -237,7 +237,7 @@
+     if (length > 240) throw new Error('文档名称不能超过 240 个 UTF-8 字节');
+   }
+   const format: string = originalDocumentFormat(name);
+-  if (format !== 'cif' && format !== 'ins' && format !== 'res') throw new Error('仅支持 .cif / .ins / .res 文档');
++  if (format !== 'cif' && format !== 'ins' && format !== 'res' && format !== 'xyz') throw new Error('仅支持 .cif / .ins / .res / .xyz 文档');
+ }
+ function requireDocumentUri(uri: string): void {
+   if (!uri.startsWith('file://') || uri.length > 16 * 1024 || /[\x00-\x1F\x7F]/.test(uri)) {
+--- a/native/original_document_view.cpp
++++ b/native/original_document_view.cpp
+@@ -52,7 +52,7 @@
+     throw std::invalid_argument("Document name must be a basename of at most 240 UTF-8 bytes");
+   const auto dot=name.rfind('.');std::string ext=dot==std::string::npos?"":name.substr(dot+1);
+   for(auto& c:ext)c=static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+-  if(ext!="cif"&&ext!="ins"&&ext!="res")throw std::invalid_argument("Only CIF, INS and RES text documents are supported");
++  if(ext!="cif"&&ext!="ins"&&ext!="res"&&ext!="xyz")throw std::invalid_argument("Only CIF, INS, RES and XYZ text documents are supported");
+   return ext;
+ }
+ class CurrentDirectory {

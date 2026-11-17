@@ -1,0 +1,95 @@
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -142,6 +142,13 @@
+   }catch(const TExceptionBase& e){return String(env,Renderer::Instance().RejectOriginalDocumentOperation(TUtf8::Encode(e.GetException()->GetFullMessage()).c_str()));}
+   catch(const std::exception& e){return String(env,Renderer::Instance().RejectOriginalDocumentOperation(e.what()));}
+   catch(...){return String(env,Renderer::Instance().RejectOriginalDocumentOperation("Unknown original document close failure"));}
++}
++napi_value RedrawOriginalDocument(napi_env env,napi_callback_info) {
++  auto& owner=Runtime();std::lock_guard<std::mutex> lock(owner.mutex);std::string json;
++  try{if(!owner.runtime)throw std::runtime_error("Original application runtime is not initialized");
++    json=Renderer::Instance().RedrawOriginalDocument(owner.runtime.get());}
++  catch(const std::exception& e){json=Renderer::Instance().RejectOriginalDocumentOperation(e.what());}
++  return String(env,json);
+ }
+ napi_value GetOriginalDocumentStatus(napi_env env,napi_callback_info) {
+   // Cache read only: intentionally does not acquire owner or call GL/core.
+@@ -559,6 +566,7 @@
+     {"interactOriginalDocument",nullptr,InteractOriginalDocument,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"closeOriginalDocument",nullptr,CloseOriginalDocument,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"getOriginalDocumentStatus",nullptr,GetOriginalDocumentStatus,nullptr,nullptr,nullptr,napi_default,nullptr},
++    {"redrawOriginalDocument",nullptr,RedrawOriginalDocument,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"exportOriginalDocument",nullptr,ExportOriginalDocument,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"readOriginalDocumentSource",nullptr,ReadOriginalDocumentSource,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"resetOriginalDocumentView",nullptr,ResetOriginalDocumentView,nullptr,nullptr,nullptr,napi_default,nullptr},
+--- a/app/entry/src/main/cpp/renderer.cpp
++++ b/app/entry/src/main/cpp/renderer.cpp
+@@ -640,6 +640,23 @@
+ std::string Renderer::GetOriginalDocumentStatus() {
+   std::lock_guard<std::mutex> lock(mutex_);return originalStatus_;
+ }
++std::string Renderer::RedrawOriginalDocument(void* runtime) {
++  std::lock_guard<std::mutex> lock(mutex_);
++  auto reject=[&](const std::string& error){
++    originalStatus_=originalView_.Failure(error).json;status_.error=error;return originalStatus_;
++  };
++  if(!runtime)return reject("Original application runtime is not initialized");
++  if(!originalRuntime_||!originalView_.HasContext()||originalDirectory_.empty())
++    return reject("No retained original document session is available");
++  if(runtime!=originalRuntime_)return reject("Retained original document belongs to another runtime");
++  if(!status_.initialized||!status_.surfaceReady||display_==EGL_NO_DISPLAY||
++      surface_==EGL_NO_SURFACE||context_==EGL_NO_CONTEXT)
++    return reject("Original document redraw requires the actual main viewport surface");
++  if(!status_.originalDocumentView)
++    return reject("No presented original document to redraw");
++  DrawLocked();
++  return originalStatus_;
++}
+ std::string Renderer::OpenOriginalDocument(void* runtime,const std::string& directory,
+     const std::string& name,const std::string& bytes) {
+   std::lock_guard<std::mutex> lock(mutex_);std::string error;
+--- a/app/entry/src/main/cpp/renderer.h
++++ b/app/entry/src/main/cpp/renderer.h
+@@ -101,6 +101,9 @@
+   // Caller holds RuntimeOwner::mutex; reuse the retained original session only.
+   std::string InteractOriginalDocument(void* runtime,const std::string& action,
+                                        double x,double y,unsigned mode);
++  // Draw the retained original document again without changing selection or
++  // camera; used after original commands that only mutate renderer state.
++  std::string RedrawOriginalDocument(void* runtime);
+   std::string CloseOriginalDocument(void* runtime,const std::string& privateDirectory);
+   std::string GetOriginalDocumentStatus(); // cached only, no runtime/GL calls
+   // Explicit loaded-session reset only; re-fit the actual current viewport. Throws on failure.
+--- a/app/entry/src/main/cpp/types/libolex2native/index.d.ts
++++ b/app/entry/src/main/cpp/types/libolex2native/index.d.ts
+@@ -119,6 +119,9 @@
+ // mode: integer 0 replace, 1 add, 2 toggle; all four arguments are required.
+ // Returns the actual document/core/presentation envelope (including failures).
+ export const interactOriginalDocument: (action: string, x: number, y: number, mode: number) => string;
++// Redraws the retained original document without changing selection or camera.
++// Returns the actual presentation envelope; used after original commands.
++export const redrawOriginalDocument: () => string;
+ export const closeOriginalDocument: () => string;
+ export const getOriginalDocumentStatus: () => string;
+ export const exportOriginalDocument: () => Uint8Array;
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1781,6 +1781,18 @@
+       this.commandMessage = output.length > 0 ? output : (result.passed ? result.text : '原版命令未通过');
+       this.originalLog = nativeBridge.getOriginalLogs();
+       this.refreshGraphics();
++      if (result.passed && this.originalDocumentActive()) {
++        // Original commands can change renderer state without drawing. Redraw the
++        // retained document so the effect is visible immediately; a redraw failure
++        // is reported through the document/graphics status, not as a false failure.
++        try {
++          nativeBridge.redrawOriginalDocument();
++          this.readOriginalDocumentStatus();
++          this.refreshGraphics();
++        } catch (redrawError) {
++          this.originalLog = nativeBridge.getOriginalLogs();
++        }
++      }
+     } catch (error) {
+       this.commandPassed = false;
+       this.commandMessage = '';

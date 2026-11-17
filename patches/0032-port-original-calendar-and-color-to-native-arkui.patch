@@ -1,0 +1,129 @@
+diff --git a/olex/ctrls/datectrlext.h b/olex/ctrls/datectrlext.h
+--- a/olex/ctrls/datectrlext.h
++++ b/olex/ctrls/datectrlext.h
+@@ -7,6 +7,25 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#pragma once
++#include "olxctrlbase.h"
++#include "native_picker.h"
++namespace ctrl_ext {
++class TDateCtrl:public olex2::harmony::ui::NativeDateControl,public AOlxCtrl {
++protected:
++  olxstr Data;
++  olex2::harmony::ui::CalendarDate Value;
++  void OnNativeEvent(const olex2::harmony::ui::NodeEvent&)override;
++public:
++  TDateCtrl(olex2::harmony::ui::NodeBackend&,olex2::harmony::ui::Widget*,int id=-1,const olex2::harmony::ui::CalendarDate& value=olex2::harmony::ui::CalendarDate::Today(),olex2::harmony::ui::Point={},olex2::harmony::ui::Size={},long=0);
++  void SetValue(const olex2::harmony::ui::CalendarDate& value){NativeDateControl::SetValue(value);Value=value;}
++  DefPropC(olxstr,Data)
++  AOlxCtrl::ActionQueue& OnChange;
++};
++}
++
++#else
+ #ifndef __olx_ctrl_datetime_H
+ #define __olx_ctrl_datetime_H
+ #include "olxctrlbase.h"
+@@ -37,3 +56,5 @@
+   };
+ }; // end namespace ctrl_ext
+ #endif
++
++#endif
+diff --git a/olex/ctrls/datectrlext.cpp b/olex/ctrls/datectrlext.cpp
+--- a/olex/ctrls/datectrlext.cpp
++++ b/olex/ctrls/datectrlext.cpp
+@@ -7,6 +7,18 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "datectrlext.h"
++using namespace ctrl_ext;
++using namespace olex2::harmony::ui;
++TDateCtrl::TDateCtrl(NodeBackend& backend,Widget* parent,int id,const CalendarDate& value,Point pos,Size size,long style)
++ :NativeDateControl(backend,parent,id,value,pos,size,style),AOlxCtrl(this),Value(GetValue()),OnChange(AOlxCtrl::ActionQueue::New(Actions,evt_change_id)){}
++void TDateCtrl::OnNativeEvent(const NodeEvent& event){
++  if(event.kind==EventKind::DateChange){if(!ApplyDateEvent(event))return;auto next=GetValue();if(next==Value)return;Value=next;OnChange.Execute(this);}
++  else NativeDateControl::OnNativeEvent(event);
++}
++
++#else
+ #include "datectrlext.h"
+ #include "frameext.h"
+ #include "olxvar.h"
+@@ -31,3 +43,5 @@
+   OnChange.Execute(this);
+ }
+ //..............................................................................
++
++#endif
+diff --git a/olex/ctrls/colorext.h b/olex/ctrls/colorext.h
+--- a/olex/ctrls/colorext.h
++++ b/olex/ctrls/colorext.h
+@@ -7,6 +7,28 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#pragma once
++#include "olxctrlbase.h"
++#include "native_picker.h"
++namespace ctrl_ext {
++class TColorCtrl:public olex2::harmony::ui::NativeColorControl,public AOlxCtrl {
++protected:
++  olxstr Data;
++  olex2::harmony::ui::Color Color;
++  // wxColour's original default cache is invalid until a user/programmatic
++  // assignment. Preserve that first-notification behavior, not a fake value.
++  bool HasColorBaseline=false;
++  void OnNativeEvent(const olex2::harmony::ui::NodeEvent&)override;
++public:
++  TColorCtrl(olex2::harmony::ui::NodeBackend&,olex2::harmony::ui::Widget*,int id=-1,olex2::harmony::ui::Color value={},olex2::harmony::ui::Point={},olex2::harmony::ui::Size={},long=0);
++  void SetValue(olex2::harmony::ui::Color value){NativeColorControl::SetValue(value);Color=value;HasColorBaseline=true;}
++  DefPropC(olxstr,Data)
++  AOlxCtrl::ActionQueue& OnChange;
++};
++}
++
++#else
+ #ifndef __olx_ctrl_color_H
+ #define __olx_ctrl_color_H
+ #include "olxctrlbase.h"
+@@ -41,3 +63,5 @@
+   };
+ }; // end namespace ctrl_ext
+ #endif
++
++#endif
+diff --git a/olex/ctrls/colorext.cpp b/olex/ctrls/colorext.cpp
+--- a/olex/ctrls/colorext.cpp
++++ b/olex/ctrls/colorext.cpp
+@@ -7,6 +7,18 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "colorext.h"
++using namespace ctrl_ext;
++using namespace olex2::harmony::ui;
++TColorCtrl::TColorCtrl(NodeBackend& backend,Widget* parent,int id,olex2::harmony::ui::Color value,Point pos,Size size,long style)
++ :NativeColorControl(backend,parent,id,value,pos,size,style),AOlxCtrl(this),OnChange(AOlxCtrl::ActionQueue::New(Actions,evt_change_id)){}
++void TColorCtrl::OnNativeEvent(const NodeEvent& event){
++  if(event.kind==EventKind::ColorChange){if(!ApplyColorEvent(event))return;auto next=GetValue();if(HasColorBaseline&&SameColor(next,Color))return;Color=next;HasColorBaseline=true;OnChange.Execute(this);}
++  else NativeColorControl::OnNativeEvent(event);
++}
++
++#else
+ #include "colorext.h"
+ #include "frameext.h"
+ #include "olxvar.h"
+@@ -33,3 +45,5 @@
+   OnChange.Execute(this);
+ }
+ //..............................................................................
++
++#endif

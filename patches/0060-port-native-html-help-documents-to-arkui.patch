@@ -1,0 +1,535 @@
+diff --git a/cmake/Olex2PlatformServices.cmake b/cmake/Olex2PlatformServices.cmake
+index bd36dd3..9c7a566 100644
+--- a/cmake/Olex2PlatformServices.cmake
++++ b/cmake/Olex2PlatformServices.cmake
+@@ -17,7 +17,10 @@ function(add_olex2_platform_services target source_directory)
+     "${source_directory}/olex/imagep.cpp"
+     "${source_directory}/olex/langdict.cpp"
+     "${source_directory}/olex/html/htmlswitch.cpp"
+-    "${source_directory}/olex/html/htmlprep.cpp")
++    "${source_directory}/olex/html/htmlprep.cpp"
++    "${source_directory}/olex/html/htmlext.cpp"
++    "${source_directory}/olex/html/htmlmanager.cpp"
++    "${source_directory}/olex/html/htmltags.cpp")
+   target_include_directories(${target} PRIVATE
+-    "${source_directory}/olex" "${source_directory}/olex/html")
++    "${source_directory}/olex" "${source_directory}/olex/html" "${source_directory}/native")
+ endfunction()
+diff --git a/upstream/olex/html/htmlext.cpp b/upstream/olex/html/htmlext.cpp
+index d39aa41..b01471b 100644
+--- a/upstream/olex/html/htmlext.cpp
++++ b/upstream/olex/html/htmlext.cpp
+@@ -7,6 +7,116 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(__OHOS__) && !defined(__WXWIDGETS__)
++#include "htmlmanager.h"
++#include <algorithm>
++#include <cerrno>
++#include <cmath>
++#include <cstdlib>
++#include <stdexcept>
++#include <utility>
++using namespace olex2::harmony::ui;
++
++namespace {
++bool ParseDimension(const std::map<std::string,std::string>& attrs,
++    const char* key,int& value,bool& percent) {
++  auto i=attrs.find(key);if(i==attrs.end()||i->second.empty())return false;
++  std::string text=i->second;percent=false;
++  if(text.back()=='%'){percent=true;text.pop_back();}
++  char* end=nullptr;errno=0;double number=std::strtod(text.c_str(),&end);
++  if(errno||end!=text.c_str()+text.size()||!std::isfinite(number)||number<=0||number>32768)return false;
++  value=static_cast<int>(std::ceil(number));return true;
++}
++}
++
++THtmlNativeDocument::THtmlNativeDocument(NodeBackend& backend,Widget* parent)
++  :backend_(backend),root_(backend,NodeKind::Scroll,parent),content_(backend,NodeKind::Column,&root_) {
++  content_.SetNumber(Property::RowSpacing,4);
++}
++void THtmlNativeDocument::ClearRendered() {
++  imageNodes_.clear();linkNodes_.clear();textNodes_.clear();
++}
++void THtmlNativeDocument::SetPage(const std::string& html) {
++  auto parsed=THtmlNativeParser::Parse(html);
++  ClearRendered();
++  THtmlImageCell* lastImage=nullptr;
++  for(const auto& element:parsed) {
++    if(element.kind==THtmlNativeElement::Kind::Break) {
++      auto node=std::make_unique<Widget>(backend_,NodeKind::Text,&content_);
++      node->SetText(TextProperty::Content," ");node->SetNumber(Property::Height,8);
++      textNodes_.push_back(std::move(node));lastImage=nullptr;continue;
++    }
++    if(element.kind==THtmlNativeElement::Kind::Text) {
++      if(element.text.empty())continue;
++      if(!element.href.empty()) {
++        THtmlNativeLink link{element.href,element.target};auto node=std::make_unique<EventWidget>(backend_,NodeKind::Text,&content_,
++          std::vector<EventKind>{EventKind::Click},[this,link](const NodeEvent& event){if(event.kind==EventKind::Click&&linkHandler_)linkHandler_(link);});
++        node->SetText(TextProperty::Content,element.text);node->SetNumber(Property::FontColor,0xff1565c0u);
++        if(element.headingLevel>0)node->SetNumber(Property::FontSize,32.0-3.0*element.headingLevel);
++        linkNodes_.push_back(std::move(node));
++      } else {
++        auto node=std::make_unique<Widget>(backend_,NodeKind::Text,&content_);
++        node->SetText(TextProperty::Content,element.text);
++        if(element.headingLevel>0)node->SetNumber(Property::FontSize,32.0-3.0*element.headingLevel);
++        textNodes_.push_back(std::move(node));
++      }
++      lastImage=nullptr;continue;
++    }
++    if(element.kind==THtmlNativeElement::Kind::Image) {
++      auto src=element.attributes.find("src");
++      auto alt=element.attributes.find("alt");
++      if(src==element.attributes.end()||!imageProvider_) {
++        if(alt!=element.attributes.end()&&!alt->second.empty()) {
++          auto node=std::make_unique<Widget>(backend_,NodeKind::Text,&content_);node->SetText(TextProperty::Content,alt->second);textNodes_.push_back(std::move(node));
++        }
++        lastImage=nullptr;continue;
++      }
++      std::vector<uint8_t> encoded=imageProvider_(src->second);
++      if(encoded.empty()) {
++        if(alt!=element.attributes.end()&&!alt->second.empty()) {auto node=std::make_unique<Widget>(backend_,NodeKind::Text,&content_);node->SetText(TextProperty::Content,alt->second);textNodes_.push_back(std::move(node));}
++        lastImage=nullptr;continue;
++      }
++      auto cell=std::make_unique<THtmlImageCell>(backend_,&content_);
++      if(alt!=element.attributes.end())cell->SetText(alt->second);
++      int width=-1,height=-1;bool widthPercent=false,heightPercent=false;
++      ParseDimension(element.attributes,"width",width,widthPercent);
++      ParseDimension(element.attributes,"height",height,heightPercent);
++      cell->SetRequestedSize(width,height,1.0,widthPercent,heightPercent);
++      cell->SetImageData(encoded,src->second);
++      if(!element.href.empty()) {
++        THtmlNativeLink link{element.href,element.target};cell->SetLinkHandler([this,link](const THtmlImageMapLink&){if(linkHandler_)linkHandler_(link);});
++      } else {
++        cell->SetLinkHandler([this](const THtmlImageMapLink& mapped){if(linkHandler_)linkHandler_({mapped.href,mapped.target});});
++      }
++      if(!element.href.empty())cell->AddRect(0,0,32768,32768,element.href,element.target);
++      if(!widthPercent&&!heightPercent)cell->Layout(640,480);
++      lastImage=cell.get();imageNodes_.push_back(std::move(cell));continue;
++    }
++    if(lastImage&&element.kind==THtmlNativeElement::Kind::RectMap&&element.coordinateCount==4) {
++      lastImage->AddRect(element.coordinates[0],element.coordinates[1],element.coordinates[2],element.coordinates[3],element.href,element.target);
++    } else if(lastImage&&element.kind==THtmlNativeElement::Kind::CircleMap&&element.coordinateCount==3) {
++      lastImage->AddCircle(element.coordinates[0],element.coordinates[1],element.coordinates[2],element.href,element.target);
++    }
++  }
++  source_=html;
++}
++void THtmlNativeDocument::Layout(int viewportWidth,int viewportHeight) {
++  if(viewportWidth<=0||viewportHeight<=0)throw std::invalid_argument("HTML viewport size must be positive");
++  root_.SetWidth(viewportWidth);root_.SetHeight(viewportHeight);
++  content_.SetWidth(viewportWidth);
++  for(auto& image:imageNodes_)image->Layout(viewportWidth,viewportHeight);
++}
++
++THtml::THtml(THtmlManager& manager,NodeBackend& backend,Widget* parent)
++  :manager_(manager),document_(std::make_unique<THtmlNativeDocument>(backend,parent)) {
++  manager_.Configure(*document_);
++}
++THtml::~THtml()=default;
++bool THtml::SetPage(const std::string& html) {document_->SetPage(html);return true;}
++NodeHandle THtml::NativeNode() const {return document_->NativeNode();}
++void THtml::Layout(int viewportWidth,int viewportHeight) {document_->Layout(viewportWidth,viewportHeight);}
++const std::string& THtml::Source() const {return document_->Source();}
++#else
+ #include "htmlext.h"
+ #include "htmlmanager.h"
+ #include "estack.h"
+@@ -1039,3 +1149,5 @@ void THtml::CyclicReduce(olxstr_dict<olxstr, true>& values) {
+   }
+ }
+ //.............................................................................
++
++#endif // __OHOS__ && !__WXWIDGETS__
+diff --git a/upstream/olex/html/htmlext.h b/upstream/olex/html/htmlext.h
+index 7103bb0..efda1c2 100644
+--- a/upstream/olex/html/htmlext.h
++++ b/upstream/olex/html/htmlext.h
+@@ -9,6 +9,27 @@
+ 
+ #ifndef __olx_htmlext_H
+ #define __olx_htmlext_H
++#if defined(__OHOS__) && !defined(__WXWIDGETS__)
++#include "htmlnative.h"
++#include <memory>
++
++class THtmlManager;
++class THtml {
++  friend class THtmlManager;
++  THtmlManager& manager_;
++  std::unique_ptr<THtmlNativeDocument> document_;
++public:
++  THtml(THtmlManager& manager, olex2::harmony::ui::NodeBackend& backend,
++    olex2::harmony::ui::Widget* parent);
++  ~THtml();
++  THtml(const THtml&)=delete;
++  THtml& operator=(const THtml&)=delete;
++  bool SetPage(const std::string& html);
++  void Layout(int viewportWidth,int viewportHeight);
++  olex2::harmony::ui::NodeHandle NativeNode() const;
++  const std::string& Source() const;
++};
++#else
+ #include "estrlist.h"
+ #include "bapp.h"
+ #include "paramlist.h"
+@@ -232,4 +253,6 @@ public:
+   friend class THtmlManager;
+ };
+ 
++#endif // __OHOS__ && !__WXWIDGETS__
++
+ #endif
+diff --git a/upstream/olex/html/htmlmanager.cpp b/upstream/olex/html/htmlmanager.cpp
+index 8db13fb..d7d8873 100644
+--- a/upstream/olex/html/htmlmanager.cpp
++++ b/upstream/olex/html/htmlmanager.cpp
+@@ -7,6 +7,80 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(__OHOS__) && !defined(__WXWIDGETS__)
++#include "htmlmanager.h"
++#include <stdexcept>
++#include <utility>
++
++THtmlManager::~THtmlManager() { Destroy(); }
++void THtmlManager::Destroy() {
++  if(destroyed_)return;
++  destroyed_=true;mainOwner_.reset();main=nullptr;
++}
++std::string THtmlManager::ResolveResource(const std::string& path) const {
++  if(path.empty()||path.front()=='/'||path.front()=='#'||path.find(':')!=std::string::npos||currentPagePath_.empty())return path;
++  const size_t slash=currentPagePath_.find_last_of("/\\");
++  if(slash==std::string::npos)return path;
++  return currentPagePath_.substr(0,slash+1)+path;
++}
++std::vector<uint8_t> THtmlManager::ReadResource(const std::string& path) const {
++  if(!resourceProvider_)return {};
++  auto result=resourceProvider_(ResolveResource(path));
++  if(!result)return {};
++  if(result->size()>32u*1024u*1024u)throw std::length_error("HTML resource exceeds 32 MiB");
++  return std::move(*result);
++}
++void THtmlManager::Configure(THtmlNativeDocument& document) const {
++  if(useResourceProvider_)document.SetImageProvider([this](const std::string& path){return ReadResource(path);});
++  else document.SetImageProvider(imageProvider_);
++  document.SetLinkHandler([this](const THtmlNativeLink& link){DispatchLink(link);});
++}
++void THtmlManager::DispatchLink(const THtmlNativeLink& link) const {
++  if(!linkHandler_)return;
++  THtmlNativeLink resolved=link;
++  resolved.href=ResolveResource(resolved.href);
++  linkHandler_(resolved);
++}
++void THtmlManager::InitialiseMain(olex2::harmony::ui::NodeBackend& backend,
++    olex2::harmony::ui::Widget* parent) {
++  if(destroyed_)throw std::logic_error("HTML manager has been destroyed");
++  if(mainOwner_)return;
++  auto next=std::make_unique<THtml>(*this,backend,parent);
++  main=next.get();mainOwner_=std::move(next);
++}
++void THtmlManager::SetImageProvider(ImageProvider provider) {
++  imageProvider_=std::move(provider);useResourceProvider_=false;
++  if(main&&main->document_)Configure(*main->document_);
++}
++void THtmlManager::SetResourceProvider(ResourceProvider provider) {
++  resourceProvider_=std::move(provider);useResourceProvider_=true;
++  if(main&&main->document_)Configure(*main->document_);
++}
++void THtmlManager::SetLinkHandler(LinkHandler handler) {
++  linkHandler_=std::move(handler);
++  if(main&&main->document_)Configure(*main->document_);
++}
++bool THtmlManager::SetPage(const std::string& html) {
++  if(!main||destroyed_)return false;
++  main->SetPage(html);return true;
++}
++bool THtmlManager::LoadPage(const std::string& path) {
++  if(!main||destroyed_||path.empty()||!resourceProvider_)return false;
++  auto bytes=resourceProvider_(path);
++  if(!bytes)return false;
++  if(bytes->size()>4u*1024u*1024u)throw std::length_error("HTML document exceeds 4 MiB");
++  currentPagePath_=path;
++  if(useResourceProvider_)Configure(*main->document_);
++  const std::string html=bytes->empty()?std::string():std::string(reinterpret_cast<const char*>(bytes->data()),bytes->size());
++  main->SetPage(html);
++  return true;
++}
++void THtmlManager::Layout(int viewportWidth,int viewportHeight) {
++  if(!main||destroyed_)throw std::logic_error("HTML manager has no live main document");
++  main->Layout(viewportWidth,viewportHeight);
++}
++
++#else
+ #include "htmlmanager.h"
+ #include "htmlswitch.h"
+ #include "fsext.h"
+@@ -1501,3 +1575,5 @@ TLibrary *THtmlManager::ExportLibrary(const olxstr &name) {
+ }
+ 
+ //.............................................................................
++
++#endif // __OHOS__ && !__WXWIDGETS__
+diff --git a/upstream/olex/html/htmlmanager.h b/upstream/olex/html/htmlmanager.h
+index d46de23..05e7487 100644
+--- a/upstream/olex/html/htmlmanager.h
++++ b/upstream/olex/html/htmlmanager.h
+@@ -9,6 +9,49 @@
+ 
+ #ifndef __olx_htmlmanager_H
+ #define __olx_htmlmanager_H
++#if defined(__OHOS__) && !defined(__WXWIDGETS__)
++#include "htmlext.h"
++#include <functional>
++#include <memory>
++#include <optional>
++
++class THtmlManager {
++public:
++  using ImageProvider=THtmlNativeDocument::ImageProvider;
++  using ResourceProvider=std::function<std::optional<std::vector<uint8_t>>(const std::string&)>;
++  using LinkHandler=THtmlNativeDocument::LinkHandler;
++private:
++  std::unique_ptr<THtml> mainOwner_;
++  ImageProvider imageProvider_;
++  ResourceProvider resourceProvider_;
++  std::string currentPagePath_;
++  bool useResourceProvider_=false;
++  LinkHandler linkHandler_;
++  bool destroyed_=false;
++public:
++  THtml* main=nullptr;
++  THtmlManager()=default;
++  ~THtmlManager();
++  THtmlManager(const THtmlManager&)=delete;
++  THtmlManager& operator=(const THtmlManager&)=delete;
++  void InitialiseMain(olex2::harmony::ui::NodeBackend& backend,
++    olex2::harmony::ui::Widget* parent=nullptr);
++  void Destroy();
++  void SetImageProvider(ImageProvider provider);
++  void SetResourceProvider(ResourceProvider provider);
++  void SetLinkHandler(LinkHandler handler);
++  bool SetPage(const std::string& html);
++  bool LoadPage(const std::string& path);
++  void Layout(int viewportWidth,int viewportHeight);
++  bool IsInitialised() const { return main!=nullptr; }
++private:
++  friend class THtml;
++  void Configure(THtmlNativeDocument& document) const;
++  void DispatchLink(const THtmlNativeLink& link) const;
++  std::vector<uint8_t> ReadResource(const std::string& path) const;
++  std::string ResolveResource(const std::string& path) const;
++};
++#else
+ #include "htmlext.h"
+ 
+ class THtmlManager : public AActionHandler {
+@@ -120,4 +163,6 @@ public:
+   TActionQueue &OnLink;
+ };
+ 
++#endif // __OHOS__ && !__WXWIDGETS__
++
+ #endif
+diff --git a/upstream/olex/html/htmltags.cpp b/upstream/olex/html/htmltags.cpp
+index 60ce6e9..1f6035f 100644
+--- a/upstream/olex/html/htmltags.cpp
++++ b/upstream/olex/html/htmltags.cpp
+@@ -7,6 +7,115 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(__OHOS__) && !defined(__WXWIDGETS__)
++#include "htmlnative.h"
++#include <algorithm>
++#include <cctype>
++#include <cmath>
++#include <cstdint>
++#include <cstdlib>
++#include <limits>
++#include <stdexcept>
++
++namespace {
++using Attributes=std::map<std::string,std::string>;
++std::string Lower(std::string value) {
++  for (char& c:value) c=static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
++  return value;
++}
++bool Space(char c) { return std::isspace(static_cast<unsigned char>(c))!=0; }
++void AppendUtf8(std::string& out,uint32_t cp) {
++  if(cp>0x10ffff||(cp>=0xd800&&cp<=0xdfff))cp=0xfffd;
++  if(cp<0x80)out.push_back(static_cast<char>(cp));
++  else if(cp<0x800){out.push_back(static_cast<char>(0xc0|(cp>>6)));out.push_back(static_cast<char>(0x80|(cp&0x3f)));}
++  else if(cp<0x10000){out.push_back(static_cast<char>(0xe0|(cp>>12)));out.push_back(static_cast<char>(0x80|((cp>>6)&0x3f)));out.push_back(static_cast<char>(0x80|(cp&0x3f)));}
++  else{out.push_back(static_cast<char>(0xf0|(cp>>18)));out.push_back(static_cast<char>(0x80|((cp>>12)&0x3f)));out.push_back(static_cast<char>(0x80|((cp>>6)&0x3f)));out.push_back(static_cast<char>(0x80|(cp&0x3f)));}
++}
++std::string DecodeEntities(const std::string& input) {
++  std::string out;out.reserve(input.size());
++  for(size_t i=0;i<input.size();) {
++    if(input[i]!='&'){out.push_back(input[i++]);continue;}
++    size_t semi=input.find(';',i+1);
++    if(semi==std::string::npos||semi-i>16){out.push_back(input[i++]);continue;}
++    const std::string name=input.substr(i+1,semi-i-1);uint32_t cp=0;bool known=true;
++    if(name=="amp")cp='&';else if(name=="lt")cp='<';else if(name=="gt")cp='>';else if(name=="quot")cp='"';else if(name=="apos"||name=="#39")cp='\'';else if(name=="nbsp")cp=0xa0;
++    else if(!name.empty()&&name[0]=='#') {
++      size_t at=1;int base=10;if(at<name.size()&&(name[at]=='x'||name[at]=='X')){base=16;++at;}
++      if(at==name.size()){known=false;}
++      else {uint32_t n=0;for(;at<name.size();++at){unsigned char c=static_cast<unsigned char>(name[at]);int d=(c>='0'&&c<='9')?c-'0':(base==16&&c>='a'&&c<='f')?c-'a'+10:(base==16&&c>='A'&&c<='F')?c-'A'+10:-1;if(d<0||d>=base||n>(0x10ffffu-static_cast<uint32_t>(d))/static_cast<uint32_t>(base)){known=false;break;}n=n*static_cast<uint32_t>(base)+static_cast<uint32_t>(d);}if(known)cp=n;}
++    } else known=false;
++    if(known){AppendUtf8(out,cp);i=semi+1;}else{out.append(input,i,semi-i+1);i=semi+1;}
++  }
++  return out;
++}
++bool ReadNumber(const std::string& value,double& result) {
++  if(value.empty())return false;char* end=nullptr;result=std::strtod(value.c_str(),&end);
++  return end==value.c_str()+value.size()&&std::isfinite(result);
++}
++std::vector<double> Coordinates(const std::string& value) {
++  std::vector<double> result;size_t start=0;
++  while(start<=value.size()) {size_t comma=value.find(',',start);if(comma==std::string::npos)comma=value.size();double number=0;if(!ReadNumber(value.substr(start,comma-start),number))return {};result.push_back(number);if(comma==value.size())break;start=comma+1;}
++  return result;
++}
++struct ParsedTag {std::string name;Attributes attributes;bool closing=false,selfClosing=false;};
++ParsedTag ParseTag(const std::string& source,size_t& at) {
++  ParsedTag tag;++at;if(at<source.size()&&source[at]=='/'){tag.closing=true;++at;}
++  while(at<source.size()&&Space(source[at]))++at;size_t begin=at;
++  while(at<source.size()&&(std::isalnum(static_cast<unsigned char>(source[at]))||source[at]=='-'||source[at]=='_'||source[at]==':'))++at;
++  tag.name=Lower(source.substr(begin,at-begin));
++  while(at<source.size()) {
++    while(at<source.size()&&Space(source[at]))++at;
++    if(at>=source.size())break;
++    if(source[at]=='>'){++at;break;}
++    if(source[at]=='/'&&at+1<source.size()&&source[at+1]=='>'){tag.selfClosing=true;at+=2;break;}
++    size_t keyStart=at;
++    while(at<source.size()&&!Space(source[at])&&source[at]!='='&&source[at]!='>'&&source[at]!='/')++at;
++    if(keyStart==at){++at;continue;}
++    std::string key=Lower(source.substr(keyStart,at-keyStart));while(at<source.size()&&Space(source[at]))++at;
++    std::string value;
++    if(at<source.size()&&source[at]=='=') {
++      ++at;while(at<source.size()&&Space(source[at]))++at;
++      if(at<source.size()&&(source[at]=='\''||source[at]=='"')){char quote=source[at++];size_t valueStart=at;while(at<source.size()&&source[at]!=quote)++at;value=source.substr(valueStart,at-valueStart);if(at<source.size())++at;}
++      else {size_t valueStart=at;while(at<source.size()&&!Space(source[at])&&source[at]!='>')++at;value=source.substr(valueStart,at-valueStart);}
++    }
++    tag.attributes.emplace(std::move(key),DecodeEntities(value));
++  }
++  return tag;
++}
++void PushBreak(std::vector<THtmlNativeElement>& out) {
++  if(out.empty()||out.back().kind!=THtmlNativeElement::Kind::Break)out.push_back({THtmlNativeElement::Kind::Break});
++}
++}
++
++std::vector<THtmlNativeElement> THtmlNativeParser::Parse(const std::string& source) {
++  constexpr size_t maximumSourceBytes=4u*1024u*1024u;
++  if(source.size()>maximumSourceBytes)throw std::length_error("HTML source exceeds 4 MiB");
++  if(source.find('\0')!=std::string::npos)throw std::invalid_argument("HTML source contains an embedded NUL");
++  std::vector<THtmlNativeElement> out;size_t at=0;int heading=0;THtmlNativeLink activeLink;bool suppressRawText=false;std::string rawTag;
++  while(at<source.size()) {
++    if(source[at]!='<') {
++      size_t end=source.find('<',at);if(end==std::string::npos)end=source.size();
++      if(!suppressRawText) {std::string text=DecodeEntities(source.substr(at,end-at));if(!text.empty()){if(!out.empty()&&out.back().kind==THtmlNativeElement::Kind::Text&&out.back().href==activeLink.href&&out.back().target==activeLink.target&&out.back().headingLevel==heading)out.back().text+=text;else{THtmlNativeElement el;el.kind=THtmlNativeElement::Kind::Text;el.text=std::move(text);el.href=activeLink.href;el.target=activeLink.target;el.headingLevel=heading;out.push_back(std::move(el));}}}
++      at=end;continue;
++    }
++    if(source.compare(at,4,"<!--")==0){size_t end=source.find("-->",at+4);at=end==std::string::npos?source.size():end+3;continue;}
++    if(at+1>=source.size()||(!std::isalpha(static_cast<unsigned char>(source[at+1]))&&source[at+1]!='/'&&source[at+1]!='!')){if(!suppressRawText)out.push_back({THtmlNativeElement::Kind::Text,"<"});++at;continue;}
++    if(source.compare(at,2,"<!")==0||source.compare(at,2,"<?")==0){size_t end=source.find('>',at+2);at=end==std::string::npos?source.size():end+1;continue;}
++    ParsedTag tag=ParseTag(source,at);if(tag.name.empty())continue;
++    if(suppressRawText){if(tag.closing&&tag.name==rawTag){suppressRawText=false;rawTag.clear();}continue;}
++    if(tag.name=="script"||tag.name=="style"){if(!tag.closing&&!tag.selfClosing){suppressRawText=true;rawTag=tag.name;}continue;}
++    if(tag.name.size()==2&&tag.name[0]=='h'&&tag.name[1]>='1'&&tag.name[1]<='6') {if(tag.closing){heading=0;PushBreak(out);}else{PushBreak(out);heading=tag.name[1]-'0';}continue;}
++    if(tag.name=="p"||tag.name=="div"||tag.name=="li"||tag.name=="tr"){if(tag.closing)PushBreak(out);else if(!out.empty())PushBreak(out);continue;}
++    if(tag.name=="br"||tag.name=="hr"){PushBreak(out);continue;}
++    if(tag.name=="a"){if(tag.closing)activeLink={};else {auto href=tag.attributes.find("href");if(href!=tag.attributes.end()){activeLink.href=href->second;auto target=tag.attributes.find("target");activeLink.target=target==tag.attributes.end()?std::string():target->second;}}continue;}
++    if(tag.name=="img"||tag.name=="zimg"||tag.name=="image") {THtmlNativeElement el;el.kind=THtmlNativeElement::Kind::Image;el.attributes=std::move(tag.attributes);el.href=activeLink.href;el.target=activeLink.target;out.push_back(std::move(el));continue;}
++    if(tag.name=="zrect"||tag.name=="rect"||tag.name=="zcircle"||tag.name=="circle") {
++      auto c=tag.attributes.find("coords"),h=tag.attributes.find("href");if(c!=tag.attributes.end()&&h!=tag.attributes.end()){auto nums=Coordinates(c->second);const bool circle=(tag.name=="zcircle"||tag.name=="circle");if(nums.size()==(circle?3u:4u)&&!h->second.empty()){THtmlNativeElement el;el.kind=circle?THtmlNativeElement::Kind::CircleMap:THtmlNativeElement::Kind::RectMap;el.coordinates[0]=nums[0];el.coordinates[1]=nums[1];el.coordinates[2]=nums[2];if(nums.size()>3)el.coordinates[3]=nums[3];el.coordinateCount=nums.size();el.href=h->second;auto target=tag.attributes.find("target");if(target!=tag.attributes.end())el.target=target->second;out.push_back(std::move(el));}}continue;
++    }
++  }
++  return out;
++}
++#else
+ #include "htmlmanager.h"
+ #include "imgcellext.h"
+ #include "widgetcellext.h"
+@@ -1285,3 +1394,5 @@ TAGS_MODULE_BEGIN(Input)
+     TAGS_MODULE_ADD(INCLUDE)
+     TAGS_MODULE_ADD(SNIPPET)
+   TAGS_MODULE_END(Input)
++
++#endif // __OHOS__ && !__WXWIDGETS__
+diff --git b/upstream/olex/html/htmlnative.h b/upstream/olex/html/htmlnative.h
+new file mode 100644
+index 0000000..e089335
+--- /dev/null
++++ b/upstream/olex/html/htmlnative.h
+@@ -0,0 +1,68 @@
++/******************************************************************************
++* Copyright (c) 2004-2026 O. Dolomanov, OlexSys                               *
++*                                                                             *
++* This file is part of the OlexSys Development Framework.                     *
++* This source file is distributed under the terms of the licence located in   *
++* the root folder.                                                            *
++******************************************************************************/
++#pragma once
++
++#if defined(__OHOS__) && !defined(__WXWIDGETS__)
++#include "native_widget.h"
++#include "imgcellext.h"
++#include <functional>
++#include <map>
++#include <memory>
++#include <string>
++#include <vector>
++
++struct THtmlNativeLink {
++  std::string href;
++  std::string target;
++};
++
++struct THtmlNativeElement {
++  enum class Kind { Text, Break, Image, RectMap, CircleMap } kind=Kind::Text;
++  std::string text;
++  std::map<std::string,std::string> attributes;
++  std::string href, target;
++  int headingLevel=0;
++  double coordinates[4]={0,0,0,0};
++  size_t coordinateCount=0;
++};
++
++// Parses the static HTML subset used by original help and information pages.
++// It deliberately does not execute script tags, embedded macros, or INCLUDE.
++class THtmlNativeParser {
++public:
++  static std::vector<THtmlNativeElement> Parse(const std::string& source);
++};
++
++class THtmlNativeDocument {
++public:
++  using ImageProvider=std::function<std::vector<uint8_t>(const std::string&)>;
++  using LinkHandler=std::function<void(const THtmlNativeLink&)>;
++private:
++  olex2::harmony::ui::NodeBackend& backend_;
++  olex2::harmony::ui::Widget root_;
++  olex2::harmony::ui::Widget content_;
++  std::vector<std::unique_ptr<olex2::harmony::ui::Widget>> textNodes_;
++  std::vector<std::unique_ptr<olex2::harmony::ui::EventWidget>> linkNodes_;
++  std::vector<std::unique_ptr<THtmlImageCell>> imageNodes_;
++  ImageProvider imageProvider_;
++  LinkHandler linkHandler_;
++  std::string source_;
++  void ClearRendered();
++public:
++  THtmlNativeDocument(olex2::harmony::ui::NodeBackend& backend,
++    olex2::harmony::ui::Widget* parent=nullptr);
++  THtmlNativeDocument(const THtmlNativeDocument&)=delete;
++  THtmlNativeDocument& operator=(const THtmlNativeDocument&)=delete;
++  olex2::harmony::ui::NodeHandle NativeNode() const { return root_.Handle(); }
++  const std::string& Source() const { return source_; }
++  void SetImageProvider(ImageProvider provider) { imageProvider_=std::move(provider); }
++  void SetLinkHandler(LinkHandler handler) { linkHandler_=std::move(handler); }
++  void SetPage(const std::string& html);
++  void Layout(int viewportWidth,int viewportHeight);
++};
++#endif

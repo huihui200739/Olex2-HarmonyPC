@@ -1,0 +1,122 @@
+--- a/upstream/olex/main_gui.cpp
++++ b/upstream/olex/main_gui.cpp
+@@ -57,6 +57,17 @@
+       center /= weight;
+       app.GetRenderer().GetBasis().SetCenter(-center);
+     }
++    return true;
++  }
++  if (action == "hide-selection") {
++    // Match original TMainForm::OnGraphics -> `hide sel`: push visibility into
++    // the original undo stack, then clear selection only after the hide succeeds.
++    TGlGroup& selection = app.GetSelection();
++    if (selection.Count() == 0) return false;
++    AGDObjList objects;
++    for (size_t i = 0; i < selection.Count(); i++) objects.Add(selection[i]);
++    app.GetUndo().Push(app.SetGraphicsVisible(objects, false));
++    selection.Clear();
+     return true;
+   }
+   // Preserve the original TMainForm::OnViewAlong -> `matr <hkl>` behavior.
+--- a/native/original_renderer_host.h
++++ b/native/original_renderer_host.h
+@@ -5,7 +5,7 @@
+ #include "display_font_metrics.h"
+ // Private same-build document-view request; both DSOs use the same libc++.
+ // This is not a stable third-party plugin ABI or a security sandbox.
+-enum class Olex2DocumentOperation { Render, Open, Close, Export, ResetView, Pick, ClearSelection, SelectAll, InvertSelection, CaptureViewport, RestoreViewport, ToggleCellVisibility, ToggleBasisVisibility, ToggleFrameVisibility, ShowAllVisible, CenterModel, ViewAlong100, ViewAlong010, ViewAlong001, ViewAlong110, ViewAlong101, ViewAlong011, ViewAlong111, ViewAlongSelection };
++enum class Olex2DocumentOperation { Render, Open, Close, Export, ResetView, Pick, ClearSelection, SelectAll, InvertSelection, CaptureViewport, RestoreViewport, ToggleCellVisibility, ToggleBasisVisibility, ToggleFrameVisibility, ShowAllVisible, CenterModel, ViewAlong100, ViewAlong010, ViewAlong001, ViewAlong110, ViewAlong101, ViewAlong011, ViewAlong111, ViewAlongSelection, HideSelection };
+ struct Olex2DocumentRequest {
+   Olex2DocumentOperation operation=Olex2DocumentOperation::Render;
+   std::string name,bytes;
+--- a/native/original_document_view.cpp
++++ b/native/original_document_view.cpp
+@@ -296,6 +296,10 @@
+   }else if(request.operation==Olex2DocumentOperation::ShowAllVisible){
+     if(!DispatchHarmonyMainGuiAction(app,"show-all"))throw std::runtime_error("Harmony main-form show-all action is unavailable");
+     action="show-all";
++  }else if(request.operation==Olex2DocumentOperation::HideSelection){
++    if(!DispatchHarmonyMainGuiAction(app,"hide-selection"))
++      throw std::runtime_error("Select one or more objects before hiding the selection");
++    action="hide-selection";
+   }else if(request.operation==Olex2DocumentOperation::CenterModel){
+     if(!DispatchHarmonyMainGuiAction(app,"center-model"))throw std::runtime_error("Harmony main-form center action is unavailable");
+     // The original action changes only the camera centre. Keep the neutral
+@@ -380,6 +384,7 @@
+   else if(state.selectionAction=="toggle-frame")interactionSource="original TMainForm::FrameVChange/T3DFrameCtrl::SetVisible";
+   else if(state.selectionAction=="show-all")interactionSource="original TMainForm::OnShowAll/GXLibMacros::macFmol";
+   else if(state.selectionAction=="center-model")interactionSource="original TMainForm::OnModelCenter/GXLibMacros::macCenter";
++  else if(state.selectionAction=="hide-selection")interactionSource="original TMainForm::OnGraphics/GXLibMacros::macHide";
+   else if(state.selectionAction.rfind("view-along-",0)==0)interactionSource=state.selectionAction=="view-along-selection"?
+     "original TMainForm::OnBond/OnPlane/GXLibMacros::macSetView":"original TMainForm::OnViewAlong/GXLibMacros::macMatr";
+   std::ostringstream out;out<<"{\"passed\":"<<(passed?"true":"false")<<",\"loaded\":"<<(state.loaded?"true":"false")
+--- a/app/entry/src/main/cpp/renderer.cpp
++++ b/app/entry/src/main/cpp/renderer.cpp
+@@ -689,6 +689,7 @@
+   else if(action=="view-along-011")request.operation=Olex2DocumentOperation::ViewAlong011;
+   else if(action=="view-along-111")request.operation=Olex2DocumentOperation::ViewAlong111;
+   else if(action=="view-along-selection")request.operation=Olex2DocumentOperation::ViewAlongSelection;
++  else if(action=="hide-selection")request.operation=Olex2DocumentOperation::HideSelection;
+   else return reject("Unknown original document interaction action");
+   if(!std::isfinite(x)||!std::isfinite(y)||x<0||x>1||y<0||y>1||mode>2)
+     return reject("Expected finite normalized viewport coordinates in [0,1] and selection mode 0, 1 or 2");
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -120,8 +120,9 @@
+         (action!="pick"&&action!="clear-selection"&&action!="select-all"&&action!="invert-selection"&&
+          action!="toggle-cell"&&action!="toggle-basis"&&action!="toggle-frame"&&action!="show-all"&&action!="center-model"&&
+         action!="view-along-100"&&action!="view-along-010"&&action!="view-along-001"&&action!="view-along-110"&&
+-        action!="view-along-101"&&action!="view-along-011"&&action!="view-along-111"&&action!="view-along-selection"))
+-      return reject("Allowed: pick, clear-selection, select-all, invert-selection, toggle-cell, toggle-basis, toggle-frame, show-all, center-model, view-along-100/010/001/110/101/011/111/selection");
++        action!="view-along-101"&&action!="view-along-011"&&action!="view-along-111"&&action!="view-along-selection"&&
++        action!="hide-selection"))
++      return reject("Allowed: pick, clear-selection, select-all, invert-selection, toggle-cell, toggle-basis, toggle-frame, show-all, center-model, hide-selection, view-along-100/010/001/110/101/011/111/selection");
+     double x=0,y=0,mode=0;
+     if(napi_get_value_double(env,args[1],&x)!=napi_ok||napi_get_value_double(env,args[2],&y)!=napi_ok||
+         napi_get_value_double(env,args[3],&mode)!=napi_ok||!std::isfinite(x)||!std::isfinite(y)||
+--- a/app/entry/src/main/cpp/types/libolex2native/index.d.ts
++++ b/app/entry/src/main/cpp/types/libolex2native/index.d.ts
+@@ -108,7 +108,7 @@
+ // Private candidate38 ABI: JSON envelopes are parsed/validated by the document UI.
+ export const openOriginalDocument: (name: string, bytes: Uint8Array) => string;
+ // Existing original viewport only. x/y: finite normalized top-left [0,1].
+-// action: pick | clear-selection | select-all | invert-selection | toggle-cell | toggle-basis | toggle-frame | show-all | center-model.
++// action: pick | clear-selection | select-all | invert-selection | toggle-cell | toggle-basis | toggle-frame | show-all | center-model | hide-selection | view-along-100/010/001/110/101/011/111/selection.
+ // mode: integer 0 replace, 1 add, 2 toggle; all four arguments are required.
+ // Returns the actual document/core/presentation envelope (including failures).
+ export const interactOriginalDocument: (action: string, x: number, y: number, mode: number) => string;
+--- a/app/entry/src/main/ets/model/OriginalViewportInput.ts
++++ b/app/entry/src/main/ets/model/OriginalViewportInput.ts
+@@ -10,7 +10,7 @@
+ export function originalSelectionRequest(action: string, x: number, y: number, mode: number): OriginalSelectionRequest {
+   if ((action !== 'pick' && action !== 'clear-selection' && action !== 'select-all' && action !== 'invert-selection' && action !== 'toggle-cell' && action !== 'toggle-basis' && action !== 'toggle-frame' && action !== 'show-all' && action !== 'center-model' && action !== 'view-along-100' && action !== 'view-along-010' &&
+       action !== 'view-along-001' && action !== 'view-along-110' && action !== 'view-along-101' &&
+-      action !== 'view-along-011' && action !== 'view-along-111' && action !== 'view-along-selection') ||
++      action !== 'view-along-011' && action !== 'view-along-111' && action !== 'view-along-selection' && action !== 'hide-selection') ||
+     !Number.isFinite(x) || !Number.isFinite(y) || x < 0 || x > 1 || y < 0 || y > 1 ||
+     !Number.isInteger(mode) || mode < 0 || mode > 2) {
+     throw new Error('选择动作、视口坐标或选择模式不合法');
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -530,8 +530,8 @@
+         validated.action === 'clear-selection' ? '已清除选择' : validated.action === 'select-all' ? '已全选' :
+         validated.action === 'invert-selection' ? '已反选' : validated.action === 'toggle-cell' ? '已切换晶胞显示' :
+           validated.action === 'toggle-basis' ? '已切换基矢显示' : validated.action === 'toggle-frame' ? '已切换包围框显示' :
+-            validated.action === 'center-model' ? '模型已居中' : validated.action === 'view-along-selection' ?
+-            '已沿所选键/平面调整视向' : validated.action.startsWith('view-along-') ?
++            validated.action === 'center-model' ? '模型已居中' : validated.action === 'hide-selection' ? '已隐藏所选图形' :
++              validated.action === 'view-along-selection' ? '已沿所选键/平面调整视向' : validated.action.startsWith('view-along-') ?
+             `视向已切换至 ${validated.action.substring('view-along-'.length)}` : '已显示全部分子并重新居中';
+       this.originalSelectionMessage = `${actionLabel} · 选中 ${core.selectedObjectCount} · 选择序号 ${core.selectionSequence}` +
+         (core.lastPickedCollection.length > 0 ? ` · 集合 ${core.lastPickedCollection}` : '');
+@@ -2677,6 +2677,10 @@
+             { value: '沿 111 方向查看', action: () => this.selectOriginalDocument('view-along-111') },
+             { value: '沿所选键/平面查看', action: () => this.selectOriginalDocument('view-along-selection') }
+           ])
++        Button('隐藏选中').id('olex2-original-hide-selection').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled() && this.originalDocument.core.selectedObjectCount !== undefined &&
++            this.originalDocument.core.selectedObjectCount > 0)
++          .onClick(() => this.selectOriginalDocument('hide-selection'))
+         Text(this.originalViewportFocused ? '视口焦点' : '点击视口聚焦')
+           .id('olex2-original-viewport-focus').fontSize(10).fontColor('#758579').layoutWeight(1)
+       }.width('100%')

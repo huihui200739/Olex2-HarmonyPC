@@ -1,0 +1,38 @@
+--- a/app/entry/src/main/ets/model/OriginalDocumentSessions.ts
++++ b/app/entry/src/main/ets/model/OriginalDocumentSessions.ts
+@@ -356,6 +356,23 @@
+   // session ownership binding. Compare only the stable source/ownership fields,
+   // never the operation outcome or transient observation fields, and fail closed
+   // when the document is no longer loaded or was replaced/modified.
++  // Style-only changes (bond radius, drawing settings) can flip
++  // modelMayHaveChanged without changing the source or revision. The original
++  // application keeps such a document open; keep the ownership binding and let
++  // the caller refresh the presented identity.
++  matchesNativeSourceRevision(document: OriginalDocumentEnvelope): boolean {
++    if (this.activeId === '' || this.nativeSessionId !== this.activeId) return false;
++    try {
++      const session: OriginalDocumentSessionRecord = this.requireSession(this.activeId);
++      const stored: OriginalDocumentStableIdentity = JSON.parse(session.identity) as OriginalDocumentStableIdentity;
++      const core = document.core;
++      return core.loaded === true &&
++        core.name === stored.name && core.format === stored.format &&
++        core.byteCount === stored.byteCount && core.sha256 === stored.sha256 &&
++        core.revision === stored.revision && core.source === stored.source;
++    } catch (_) { return false; }
++  }
++
+   matchesNativeSourceIdentity(document: OriginalDocumentEnvelope): boolean {
+     if (this.activeId === '' || this.nativeSessionId !== this.activeId) return false;
+     try {
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1230,7 +1230,8 @@
+     if (this.originalDocumentStatusError.length === 0 &&
+       this.originalDocumentSessions.getStatus().nativeSessionId.length > 0 &&
+       !this.originalDocumentSessions.matchesNative(this.originalDocument) &&
+-      this.originalDocumentSessions.matchesNativeSourceIdentity(this.originalDocument) &&
++      (this.originalDocumentSessions.matchesNativeSourceIdentity(this.originalDocument) ||
++        this.originalDocumentSessions.matchesNativeSourceRevision(this.originalDocument)) &&
+       originalDocumentPresented(this.originalDocument)) {
+       this.originalDocumentSessions.refreshPresentedIdentity(this.originalDocument);
+     }

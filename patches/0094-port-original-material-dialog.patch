@@ -1,0 +1,299 @@
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -372,7 +372,54 @@
+   Boolean(env,out,"accepted",rc==0&&symbol[0]!='\0');
+   Property(env,out,"error",String(env,readError));
+   return out;
++}
++struct MaterialDialogState {
++  std::mutex mutex;void* handle=nullptr;bool done=false;int result=0;
++};
++MaterialDialogState& MaterialDialog(){static auto* state=new MaterialDialogState;return *state;}
++int MaterialDialogCompleted(void*,int result,const char*){
++  auto& state=MaterialDialog();std::lock_guard<std::mutex> lock(state.mutex);
++  state.done=true;state.result=result;return 0;
+ }
++napi_value OpenOriginalMaterialDialog(napi_env env,napi_callback_info){
++  napi_value out;napi_create_object(env,&out);
++  auto& owner=Runtime();std::lock_guard<std::mutex> ownerLock(owner.mutex);
++  auto& state=MaterialDialog();
++  {
++    std::lock_guard<std::mutex> lock(state.mutex);
++    if(!owner.runtime){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,"Original application runtime is not initialized"));return out;}
++    if(state.handle){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,"A material editor is already open"));return out;}
++    char error[512]={};
++    void* handle=olex2_native_material_create(env,MaterialDialogCompleted,nullptr,error,sizeof(error));
++    if(!handle){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,error[0]?error:"Original material editor could not be created"));return out;}
++    state.handle=handle;state.done=false;state.result=0;
++  }
++  char error[512]={};
++  if(olex2_native_dialog_show(state.handle,true,error,sizeof(error))!=0){
++    std::lock_guard<std::mutex> lock(state.mutex);
++    char releaseError[512]={};olex2_native_dialog_release(state.handle,releaseError,sizeof(releaseError));state.handle=nullptr;
++    Boolean(env,out,"opened",false);Property(env,out,"error",String(env,error[0]?error:"Original material editor could not be shown"));return out;
++  }
++  Boolean(env,out,"opened",true);Property(env,out,"error",String(env,""));return out;
++}
++napi_value PollOriginalMaterialDialog(napi_env env,napi_callback_info){
++  napi_value out;napi_create_object(env,&out);
++  auto& state=MaterialDialog();std::lock_guard<std::mutex> lock(state.mutex);
++  if(!state.handle){Property(env,out,"state",String(env,"none"));Property(env,out,"error",String(env,""));return out;}
++  if(!state.done){Property(env,out,"state",String(env,"open"));Property(env,out,"error",String(env,""));return out;}
++  char signature[2048]={};int applied=0,sceneChanged=0;char error[512]={};
++  const int rc=olex2_native_material_result(state.handle,signature,sizeof(signature),&applied,&sceneChanged,error,sizeof(error));
++  std::string readError=rc!=0?(error[0]?error:"Original material result could not be read"):"";
++  char releaseError[512]={};olex2_native_dialog_release(state.handle,releaseError,sizeof(releaseError));
++  state.handle=nullptr;state.done=false;
++  Property(env,out,"state",String(env,"done"));
++  Boolean(env,out,"accepted",state.result==1);
++  Boolean(env,out,"applied",applied!=0);
++  Boolean(env,out,"sceneChanged",sceneChanged!=0);
++  Property(env,out,"signature",String(env,rc==0?signature:""));
++  Property(env,out,"error",String(env,readError));
++  return out;
++}
+ napi_value OriginalLogsObject(napi_env env,const olex2::harmony::OriginalLogSnapshot& s,const std::string& error){
+   napi_value out,entries;napi_create_object(env,&out);napi_create_array_with_length(env,s.entries.size(),&entries);
+   Boolean(env,out,"attached",s.attached);Number(env,out,"posted",s.posted);Number(env,out,"dropped",s.dropped);Number(env,out,"truncated",s.truncated);Number(env,out,"captureFailures",s.captureFailures);Number(env,out,"clearCount",s.clearCount);Number(env,out,"clearedEntries",s.clearedEntries);Number(env,out,"entryCount",s.entries.size());Number(env,out,"retainedBytes",s.retainedBytes);
+@@ -671,6 +718,8 @@
+     {"pollOriginalGenerateDialog",nullptr,PollOriginalGenerateDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"openOriginalPeriodicTable",nullptr,OpenOriginalPeriodicTable,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"pollOriginalPeriodicTable",nullptr,PollOriginalPeriodicTable,nullptr,nullptr,nullptr,napi_default,nullptr},
++    {"openOriginalMaterialDialog",nullptr,OpenOriginalMaterialDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
++    {"pollOriginalMaterialDialog",nullptr,PollOriginalMaterialDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"getOriginalLogs",nullptr,GetOriginalLogs,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"clearOriginalLogs",nullptr,ClearOriginalLogs,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"runCoreCatalog",nullptr,RunCoreCatalog,nullptr,nullptr,nullptr,napi_default,nullptr},
+--- a/app/entry/src/main/cpp/types/libolex2native/index.d.ts
++++ b/app/entry/src/main/cpp/types/libolex2native/index.d.ts
+@@ -87,6 +87,18 @@
+ // dialog and returns its symbol.
+ export const openOriginalPeriodicTable: () => { opened: boolean; error: string };
+ export const pollOriginalPeriodicTable: () => OriginalPeriodicTableReport;
++export interface OriginalMaterialDialogReport {
++  state: 'none' | 'open' | 'done';
++  accepted?: boolean;
++  applied?: boolean;
++  sceneChanged?: boolean;
++  signature?: string;
++  error: string;
++}
++// Original material editor (Graphics -> Draw style...). On OK the material is
++// applied to the current selection by the native dialog itself.
++export const openOriginalMaterialDialog: () => { opened: boolean; error: string };
++export const pollOriginalMaterialDialog: () => OriginalMaterialDialogReport;
+ 
+ export interface ApplicationOptionsTransferReport {
+   passed: boolean; optionsChanged: boolean; importedOptions: number;
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1,4 +1,4 @@
+-import nativeBridge, { GraphicsStatus, UtilityReport, CheckResult, ApplicationRuntimeStatus, OriginalLogSnapshot, CoreCatalogReport, PythonRuntimeStatus, OriginalLinePathGpuProbe, PythonExecutionReport, ApplicationFunctionReport, OriginalCommandReport, OriginalGenerateDialogReport, OriginalPeriodicTableReport, DesktopCommandReport } from 'libolex2native.so';
++import nativeBridge, { GraphicsStatus, UtilityReport, CheckResult, ApplicationRuntimeStatus, OriginalLogSnapshot, CoreCatalogReport, PythonRuntimeStatus, OriginalLinePathGpuProbe, PythonExecutionReport, ApplicationFunctionReport, OriginalCommandReport, OriginalGenerateDialogReport, OriginalPeriodicTableReport, OriginalMaterialDialogReport, DesktopCommandReport } from 'libolex2native.so';
+ import { fileIo } from '@kit.CoreFileKit';
+ import { common } from '@kit.AbilityKit';
+ import { OptionsDocumentTransfer, OptionsDocumentStatus, OptionsDocumentBackend, emptyOptionsDocumentStatus } from '../model/OptionsDocumentTransfer';
+@@ -226,6 +226,8 @@
+   private generateDialogOpen: boolean = false;
+   private periodicTableTimer: number = -1;
+   private periodicTableOpen: boolean = false;
++  private materialDialogTimer: number = -1;
++  private materialDialogOpen: boolean = false;
+   @State private commandMessage: string = '原版解析器已接入视图命令；完整命令库未接通';
+   @State private commandError: string = '';
+   @State private commandPassed: boolean = false;
+@@ -399,6 +401,8 @@
+     this.generateDialogTimer = -1;
+     if (this.periodicTableTimer >= 0) clearInterval(this.periodicTableTimer);
+     this.periodicTableTimer = -1;
++    if (this.materialDialogTimer >= 0) clearInterval(this.materialDialogTimer);
++    this.materialDialogTimer = -1;
+   }
+ 
+   private submitCommand(): void {
+@@ -1982,6 +1986,52 @@
+     }
+   }
+ 
++  private openOriginalMaterialDialog(): void {
++    if (this.materialDialogOpen || !this.originalSelectionEnabled()) return;
++    try {
++      const opened = nativeBridge.openOriginalMaterialDialog();
++      if (!opened.opened) {
++        this.originalSelectionMessage = opened.error || '原版材质对话框未打开';
++        return;
++      }
++      this.materialDialogOpen = true;
++      this.originalSelectionMessage = '已打开原版材质对话框…';
++      if (this.materialDialogTimer < 0) {
++        this.materialDialogTimer = setInterval(() => { this.pollOriginalMaterialDialog(); }, 400);
++      }
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版材质对话框调用失败';
++    }
++  }
++
++  private pollOriginalMaterialDialog(): void {
++    if (!this.materialDialogOpen) return;
++    try {
++      const report: OriginalMaterialDialogReport = nativeBridge.pollOriginalMaterialDialog();
++      if (report.state === 'open') return;
++      if (this.materialDialogTimer >= 0) clearInterval(this.materialDialogTimer);
++      this.materialDialogTimer = -1;
++      this.materialDialogOpen = false;
++      if (report.state !== 'done') return;
++      if (!report.accepted) {
++        this.originalSelectionMessage = '已取消原版材质对话框';
++        return;
++      }
++      const applied: boolean = report.applied === true;
++      const sceneChanged: boolean = report.sceneChanged === true;
++      let message: string = `材质已应用：对话框已应用=${applied ? '是' : '否'}，场景已更新=${sceneChanged ? '是' : '否'}`;
++      this.originalSelectionMessage = message;
++      if (applied) {
++        try { nativeBridge.redrawOriginalDocument(); } catch (redrawError) { this.originalLog = nativeBridge.getOriginalLogs(); }
++      }
++      this.rebindPresentedSessionAfterModelChange();
++      this.readOriginalDocumentStatus();
++      this.refreshGraphics();
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版材质对话框轮询失败';
++    }
++  }
++
+   private executeDesktopCommand(): void {
+     const input: string = this.commandText;
+     const sequence: number = this.commandStatus.sequence + 1;
+@@ -3073,6 +3123,13 @@
+         Text('原版 Poly · 多面体显示作用于当前选择').fontSize(10).fontColor('#758579').layoutWeight(1)
+       }.width('100%')
+       Row({ space: 5 }) {
++        Button('材质…').id('olex2-original-material').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled() && this.originalDocument.core.selectedObjectCount !== undefined &&
++            this.originalDocument.core.selectedObjectCount > 0 && !this.materialDialogOpen)
++          .onClick(() => this.openOriginalMaterialDialog())
++        Text('原版 Draw style 材质对话框 · 应用于当前选择').fontSize(10).fontColor('#758579').layoutWeight(1)
++      }.width('100%')
++      Row({ space: 5 }) {
+         Button('切换网格').id('olex2-original-toggle-grid').height(25).fontSize(10)
+           .enabled(this.originalSelectionEnabled()).onClick(() => this.selectOriginalDocument('toggle-grid'))
+         Text('需先载入晶体学网格数据').fontSize(10).fontColor('#758579').layoutWeight(1)
+--- a/cmake/original_renderer.exports
++++ b/cmake/original_renderer.exports
+@@ -8,6 +8,8 @@
+   olex2_native_generate_values;
+   olex2_native_periodic_table_create;
+   olex2_native_periodic_table_symbol;
++  olex2_native_material_create;
++  olex2_native_material_result;
+   olex2_native_options_mount;
+   olex2_native_options_update;
+   olex2_native_options_unmount;
+--- a/native/native_dialog_factory.cpp
++++ b/native/native_dialog_factory.cpp
+@@ -1,6 +1,9 @@
+ #include "updateoptions.h"
+ #include "dgenopt.h"
+ #include "ptable.h"
++#include "matprop.h"
++#include "gxapp.h"
++#include "glgroup.h"
+ #include "native_dialog_factory.h"
+ #include "ctrls.h"
+ #include "msgbox.h"
+@@ -23,6 +26,7 @@
+   std::shared_ptr<UiScheduler> scheduler;std::shared_ptr<DialogBackend> backend;
+   std::unique_ptr<TDialog> dialog;TdlgMsgBox* message=nullptr;
+   Olex2NativeDialogCompleted completed=nullptr;void* context=nullptr;
++  bool materialApplied=false;std::string materialInitial,materialValue;
+   void Check()const{if(thread!=std::this_thread::get_id())throw std::runtime_error("Dialog owner requires its creating UI thread");}
+   void Apply(const Olex2NativeDialogLayout& value){Check();auto geometry=Geometry(value);dialog->SetTitle(std::string(value.title));dialog->SetPosition(geometry.offset,geometry.centered);if(message)message->SetSize(geometry.size);else dialog->SetSize(geometry.size);}
+   void Show(bool modal){
+@@ -92,6 +96,43 @@
+   }catch(const std::exception& e){Error(error,errorCapacity,e.what());}catch(...){Error(error,errorCapacity,"Periodic table symbol read failed");}
+   return -1;
+ }
++extern "C" void* olex2_native_material_create(void* environment,Olex2NativeDialogCompleted completed,void* context,char* error,std::size_t capacity){
++  try{
++    Error(error,capacity,"");if(!environment)throw std::invalid_argument("Material editor requires its UI environment");
++    auto owner=std::make_shared<Owner>();owner->scheduler=CreateNapiUiScheduler(environment);owner->backend=CreateArkUiDialogBackend(owner->scheduler);owner->completed=completed;owner->context=context;
++    glObj::TGlMaterial current;
++    {auto& stream=TGXApp::GetInstance().GetRenderer().GetSelection();
++     for(size_t i=0;i<stream.Count();++i)if(auto* group=dynamic_cast<TGlGroup*>(&stream[i])){current=group->GetGlM();break;}}
++    owner->materialInitial=std::string(TUtf8::Encode(current.ToString()).c_str());
++    Owner* raw=owner.get();
++    owner->dialog=std::make_unique<TdlgMatProp>(ArkUiBackend(),owner->backend,owner->scheduler,nullptr,current,
++      [raw](const glObj::TGlMaterial& material){
++        raw->materialApplied=true;raw->materialValue=std::string(TUtf8::Encode(material.ToString()).c_str());
++        auto& stream=TGXApp::GetInstance().GetRenderer().GetSelection();
++        for(size_t i=0;i<stream.Count();++i)if(auto* group=dynamic_cast<TGlGroup*>(&stream[i]))group->SetGlM(material);
++      },Positions());
++    auto& registry=Owners();std::lock_guard<std::mutex> lock(registry.mutex);
++    if(registry.next==std::numeric_limits<uintptr_t>::max())throw std::overflow_error("Native dialog handles exhausted");
++    auto key=reinterpret_cast<void*>(++registry.next);registry.owners.emplace(key,std::move(owner));return key;
++  }catch(const std::exception& e){Error(error,capacity,e.what());}catch(...){Error(error,capacity,"Original material editor failed");}
++  return nullptr;
++}
++extern "C" int olex2_native_material_result(void* key,char* signature,std::size_t capacity,int* applied,int* sceneChanged,char* error,std::size_t errorCapacity){
++  try{
++    Error(error,errorCapacity,"");if(!signature||capacity==0)throw std::invalid_argument("Material signature destination is absent");
++    signature[0]='\0';auto owner=Find(key);auto* dialog=dynamic_cast<TdlgMatProp*>(owner->dialog.get());
++    if(!dialog)throw std::invalid_argument("Native dialog is not a material editor");
++    const std::string current(TUtf8::Encode(dialog->GetCurrent().ToString()).c_str());
++    const auto length=std::min(capacity-1,current.size());std::memcpy(signature,current.data(),length);signature[length]='\0';
++    if(applied)*applied=owner->materialApplied?1:0;
++    std::string scene;
++    {auto& stream=TGXApp::GetInstance().GetRenderer().GetSelection();
++     for(size_t i=0;i<stream.Count();++i)if(auto* group=dynamic_cast<TGlGroup*>(&stream[i])){scene=std::string(TUtf8::Encode(group->GetGlM().ToString()).c_str());break;}}
++    if(sceneChanged)*sceneChanged=(owner->materialApplied&&scene!=owner->materialInitial)?1:0;
++    return 0;
++  }catch(const std::exception& e){Error(error,errorCapacity,e.what());}catch(...){Error(error,errorCapacity,"Material result read failed");}
++  return -1;
++}
+ extern "C" void* olex2_native_update_options_create(void* environment,Olex2NativeDialogCompleted completed,void* context,char* error,std::size_t capacity){
+   try{
+     Error(error,capacity,"");if(!environment)throw std::invalid_argument("Update options require their UI environment");
+--- a/native/native_dialog_factory.h
++++ b/native/native_dialog_factory.h
+@@ -25,6 +25,10 @@
+ // ends the modal dialog; its symbol is read before release.
+ void* olex2_native_periodic_table_create(void* napiEnvironment,Olex2NativeDialogCompleted,void* context,char* error,std::size_t);
+ int olex2_native_periodic_table_symbol(void* owner,char* symbol,std::size_t symbolCapacity,char* error,std::size_t);
++// Original material editor (Graphics -> Draw style...). On OK the applied
++// material is set on the current selection; result reports signature/applied.
++void* olex2_native_material_create(void* napiEnvironment,Olex2NativeDialogCompleted,void* context,char* error,std::size_t);
++int olex2_native_material_result(void* owner,char* signature,std::size_t capacity,int* applied,int* sceneChanged,char* error,std::size_t);
+ void* olex2_native_dialog_create(void* napiEnvironment,const Olex2NativeDialogValues*,Olex2NativeDialogCompleted,void* context,char* error,std::size_t);
+ int olex2_native_dialog_show(void* owner,bool modal,char* error,std::size_t);
+ int olex2_native_dialog_update(void* owner,const Olex2NativeDialogLayout*,char* error,std::size_t);
+--- a/upstream/olex/matprop.cpp
++++ b/upstream/olex/matprop.cpp
+@@ -40,7 +40,7 @@
+   scroll_=std::make_shared<Widget>(nodes,NodeKind::Scroll,&Body());Retain(scroll_);
+   content_=std::make_shared<Widget>(nodes,NodeKind::Column,scroll_.get());Retain(content_);content_->SetNumber(Property::RowSpacing,5);
+   auto row=[&](const olxstr& title) {
+-    auto value=std::make_shared<Widget>(nodes,NodeKind::Row,content_.get());Retain(value);value->SetNumber(Property::RowSpacing,8);value->SetHeight(42);
++    auto value=std::make_shared<Widget>(nodes,NodeKind::Row,content_.get());Retain(value);value->SetNumber(Property::RowSpacing,8);value->SetHeight(42);rows_.push_back(value);
+     auto label=std::make_shared<Widget>(nodes,NodeKind::Text,value.get());Retain(label);label->SetText(TextProperty::Content,Utf8(title));label->SetWidth(190);label->SetHeight(36);
+     return value;
+   };
+@@ -71,7 +71,8 @@
+ }
+ void TdlgMatProp::Layout() {
+   if(!scroll_||!content_||!footer_) return;
+-  const int width=std::max(320,GetWidth()-24);scroll_->SetWidth(width);scroll_->SetHeight(std::max(180,GetHeight()-82));content_->SetWidth(width);content_->SetHeight(960);footer_->SetWidth(width);
++  const int width=std::max(320,GetWidth()-24);scroll_->SetWidth(width);scroll_->SetHeight(std::max(180,GetHeight()-82));content_->SetWidth(width);footer_->SetWidth(width);
++  int contentHeight=0;for(const auto& row:rows_)if(row)contentHeight+=row->GetHeight()+5;content_->SetHeight(std::max(180,contentHeight));
+   for(auto& button:buttons_) button->SetWidth(std::max(64,(width-40)/4));
+ }
+ void TdlgMatProp::ShowStatus(const olxstr& value) { status_->SetText(TextProperty::Content,Utf8(value));status_->Show(!value.IsEmpty()); }
+--- a/upstream/olex/matprop.h
++++ b/upstream/olex/matprop.h
+@@ -24,6 +24,7 @@
+   std::shared_ptr<TSpinCtrl> blendAlpha_,transparency_;
+   std::shared_ptr<TCheckBox> transparent_,identity_;
+   std::vector<std::shared_ptr<TButton>> buttons_;
++  std::vector<std::shared_ptr<olex2::harmony::ui::Widget>> rows_;
+   void BuildControls(olex2::harmony::ui::NodeBackend&);
+   void Layout();
+   void ShowStatus(const olxstr&);

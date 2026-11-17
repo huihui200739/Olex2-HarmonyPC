@@ -1,0 +1,244 @@
+diff --git a/app/entry/src/main/cpp/napi_init.cpp b/app/entry/src/main/cpp/napi_init.cpp
+index f4df035..c2f64ae 100644
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -117,8 +117,9 @@ napi_value InteractOriginalDocument(napi_env env,napi_callback_info info) {
+         return reject("Expected primitive action string and three number arguments; no coercion is supported");
+     }
+     if(!ReadString(env,args[0],32,action)||
+-        (action!="pick"&&action!="clear-selection"&&action!="select-all"&&action!="invert-selection"))
+-      return reject("Action must be pick, clear-selection, select-all, invert-selection, ");
++        (action!="pick"&&action!="clear-selection"&&action!="select-all"&&action!="invert-selection"&&
++         action!="toggle-cell"&&action!="toggle-basis"))
++      return reject("Action must be pick, clear-selection, select-all, invert-selection, toggle-cell or toggle-basis");
+     double x=0,y=0,mode=0;
+     if(napi_get_value_double(env,args[1],&x)!=napi_ok||napi_get_value_double(env,args[2],&y)!=napi_ok||
+         napi_get_value_double(env,args[3],&mode)!=napi_ok||!std::isfinite(x)||!std::isfinite(y)||
+diff --git a/app/entry/src/main/cpp/renderer.cpp b/app/entry/src/main/cpp/renderer.cpp
+index 2f96c70..e354bf1 100644
+--- a/app/entry/src/main/cpp/renderer.cpp
++++ b/app/entry/src/main/cpp/renderer.cpp
+@@ -676,6 +676,8 @@ std::string Renderer::InteractOriginalDocument(void* runtime,const std::string&
+   else if(action=="clear-selection")request.operation=Olex2DocumentOperation::ClearSelection;
+   else if(action=="select-all")request.operation=Olex2DocumentOperation::SelectAll;
+   else if(action=="invert-selection")request.operation=Olex2DocumentOperation::InvertSelection;
++  else if(action=="toggle-cell")request.operation=Olex2DocumentOperation::ToggleCellVisibility;
++  else if(action=="toggle-basis")request.operation=Olex2DocumentOperation::ToggleBasisVisibility;
+   else return reject("Unknown original document interaction action");
+   if(!std::isfinite(x)||!std::isfinite(y)||x<0||x>1||y<0||y>1||mode>2)
+     return reject("Expected finite normalized viewport coordinates in [0,1] and selection mode 0, 1 or 2");
+diff --git a/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts b/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
+index 3841312..6b01180 100644
+--- a/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
++++ b/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
+@@ -1,6 +1,8 @@
+ // Platform document transport only. It never executes code or scientific workflows.
+ export const MAXIMUM_ORIGINAL_DOCUMENT_BYTES: number = 8 * 1024 * 1024;
+ export const ORIGINAL_SELECTION_SOURCE: string = 'original TGlRenderer::SelectObject and original TGlGroup';
++export const ORIGINAL_MAIN_GUI_CELL_SOURCE: string = 'original TMainForm::OnCellVisible/TGXApp::SetCellVisible';
++export const ORIGINAL_MAIN_GUI_BASIS_SOURCE: string = 'original TMainForm::OnBasisVisible/TGXApp::SetBasisVisible';
+ export interface OriginalDocumentCoreStatus {
+   passed: boolean; loaded: boolean; name: string; format: string;
+   byteCount: number; sha256: string; revision: number; frames: number;
+@@ -82,9 +84,11 @@ function validateOptionalSelection(core: OriginalDocumentCoreStatus): void {
+       !validPickedCollection(core.lastPickedCollection))) ||
+     (fields.indexOf('selectionAction') >= 0 && (typeof core.selectionAction !== 'string' ||
+       (core.selectionAction !== '' && core.selectionAction !== 'pick' && core.selectionAction !== 'clear-selection' &&
+-       core.selectionAction !== 'select-all' && core.selectionAction !== 'invert-selection' && core.selectionAction !== 'restore-selection' 
++       core.selectionAction !== 'select-all' && core.selectionAction !== 'invert-selection' && core.selectionAction !== 'restore-selection' &&
++       core.selectionAction !== 'toggle-cell' && core.selectionAction !== 'toggle-basis'))) ||
+     (fields.indexOf('selectionSource') >= 0 && (typeof core.selectionSource !== 'string' ||
+-      core.selectionSource !== ORIGINAL_SELECTION_SOURCE))) {
++      core.selectionSource !== ORIGINAL_SELECTION_SOURCE && core.selectionSource !== ORIGINAL_MAIN_GUI_CELL_SOURCE &&
++      core.selectionSource !== ORIGINAL_MAIN_GUI_BASIS_SOURCE))) {
+     throw new Error('原版文档选择状态格式不合法');
+   }
+ }
+diff --git a/app/entry/src/main/ets/model/OriginalViewportInput.ts b/app/entry/src/main/ets/model/OriginalViewportInput.ts
+index d559ebe..510db25 100644
+--- a/app/entry/src/main/ets/model/OriginalViewportInput.ts
++++ b/app/entry/src/main/ets/model/OriginalViewportInput.ts
+@@ -8,7 +8,7 @@ export interface OriginalSelectionRequest { action: string; x: number; y: number
+ export interface OriginalViewportKeyResult { handled: boolean; action: string; }
+ 
+ export function originalSelectionRequest(action: string, x: number, y: number, mode: number): OriginalSelectionRequest {
+-  if ((action !== 'pick' && action !== 'clear-selection' && action !== 'select-all' && action !== 'invert-selection') ||
++  if ((action !== 'pick' && action !== 'clear-selection' && action !== 'select-all' && action !== 'invert-selection' && action !== 'toggle-cell' && action !== 'toggle-basis') ||
+     !Number.isFinite(x) || !Number.isFinite(y) || x < 0 || x > 1 || y < 0 || y > 1 ||
+     !Number.isInteger(mode) || mode < 0 || mode > 2) {
+     throw new Error('选择动作、视口坐标或选择模式不合法');
+diff --git a/app/entry/src/main/ets/pages/Index.ets b/app/entry/src/main/ets/pages/Index.ets
+index 022b7eb..e4355fa 100644
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -528,7 +528,7 @@ struct Index {
+       }
+       const actionLabel: string = validated.action === 'pick' ? (core.pickHit ? '单击命中' : '单击未命中') :
+         validated.action === 'clear-selection' ? '已清除选择' : validated.action === 'select-all' ? '已全选' :
+-        '已反选';
++        validated.action === 'invert-selection' ? '已反选' : validated.action === 'toggle-cell' ? '已切换晶胞显示' : '已切换基矢显示';
+       this.originalSelectionMessage = `${actionLabel} · 选中 ${core.selectedObjectCount} · 选择序号 ${core.selectionSequence}` +
+         (core.lastPickedCollection.length > 0 ? ` · 集合 ${core.lastPickedCollection}` : '');
+     } catch (error) {
+@@ -2642,6 +2642,10 @@ struct Index {
+           .enabled(this.originalSelectionEnabled()).onClick(() => this.selectOriginalDocument('select-all'))
+         Button('反选').id('olex2-original-selection-invert').height(27).fontSize(10)
+           .enabled(this.originalSelectionEnabled()).onClick(() => this.selectOriginalDocument('invert-selection'))
++        Button('晶胞').id('olex2-original-toggle-cell').height(27).fontSize(10)
++          .enabled(this.originalSelectionEnabled()).onClick(() => this.selectOriginalDocument('toggle-cell'))
++        Button('基矢').id('olex2-original-toggle-basis').height(27).fontSize(10)
++          .enabled(this.originalSelectionEnabled()).onClick(() => this.selectOriginalDocument('toggle-basis'))
+       }.width('100%')
+       Row({ space: 4 }) {
+         ForEach([0, 1, 2], (mode: number) => {
+diff --git a/cmake/Olex2GraphicsRuntime.cmake b/cmake/Olex2GraphicsRuntime.cmake
+index f6f647e..46609ec 100644
+--- a/cmake/Olex2GraphicsRuntime.cmake
++++ b/cmake/Olex2GraphicsRuntime.cmake
+@@ -23,7 +23,7 @@ add_olex2_core_library(legacy_core legacy_sdl "${OLEX2_ROOT}/upstream")
+ file(GLOB GLIB_SOURCES CONFIGURE_DEPENDS "${OLEX2_ROOT}/upstream/glib/*.cpp")
+ add_library(olex2core_graphics SHARED "${OLEX2_ROOT}/native/original_renderer_bridge.cpp" ${GLIB_SOURCES}
+  "${OLEX2_ROOT}/native/application_runtime.cpp" "${OLEX2_ROOT}/native/original_log.cpp"
+- "${OLEX2_ROOT}/native/original_interpreter.cpp" "${OLEX2_ROOT}/native/desktop_commands.cpp" "${OLEX2_ROOT}/upstream/olex/mainform.cpp" "${OLEX2_ROOT}/upstream/olex/xpprocs.cpp")
++ "${OLEX2_ROOT}/native/original_interpreter.cpp" "${OLEX2_ROOT}/native/desktop_commands.cpp" "${OLEX2_ROOT}/upstream/olex/mainform.cpp" "${OLEX2_ROOT}/upstream/olex/main_gui.cpp" "${OLEX2_ROOT}/upstream/olex/xpprocs.cpp")
+ target_include_directories(olex2core_graphics PRIVATE "${GLU_ROOT}/include" "${GL4ES_ROOT}/include" "${OLEX2_ROOT}/upstream/glib" "${OLEX2_ROOT}/native")
+ target_link_libraries(olex2core_graphics PRIVATE legacy_core legacy_glu GL m dl)
+ set(OLEX2_EXPORT_SCRIPT "${OLEX2_ROOT}/cmake/original_renderer.exports" CACHE FILEPATH "Private shared-runtime export list")
+diff --git a/native/harmony_main_gui.h b/native/harmony_main_gui.h
+new file mode 100644
+index 0000000..906b4b2
+--- /dev/null
++++ b/native/harmony_main_gui.h
+@@ -0,0 +1,7 @@
++#pragma once
++#include <string>
++namespace gxlib { class TGXApp; }
++namespace olex2::harmony {
++// Dispatches only original main-form actions that have a native Harmony UI.
++bool DispatchHarmonyMainGuiAction(gxlib::TGXApp& app, const std::string& action);
++}
+diff --git a/native/original_document_view.cpp b/native/original_document_view.cpp
+index e2ee2d5..397f2ba 100644
+--- a/native/original_document_view.cpp
++++ b/native/original_document_view.cpp
+@@ -1,4 +1,5 @@
+ #include "original_document_view.h"
++#include "harmony_main_gui.h"
+ #include "original_document_framing.h"
+ #include "eutf8.h"
+ #include "platform_sha256.h"
+@@ -229,16 +230,18 @@ public:
+   explicit OriginalPickMode(TGlRenderer& renderer):renderer_(renderer),old_(renderer.IsGLUSelection()) {renderer_.SetGLUSelection(false);}
+   ~OriginalPickMode(){renderer_.SetGLUSelection(old_);}
+ };
+-bool IsSelectionOperation(Olex2DocumentOperation op){
++bool IsDocumentInteractionOperation(Olex2DocumentOperation op){
+   return op==Olex2DocumentOperation::Pick||op==Olex2DocumentOperation::ClearSelection||
+-    op==Olex2DocumentOperation::SelectAll||op==Olex2DocumentOperation::InvertSelection;
++    op==Olex2DocumentOperation::SelectAll||op==Olex2DocumentOperation::InvertSelection||
++    op==Olex2DocumentOperation::ToggleCellVisibility||op==Olex2DocumentOperation::ToggleBasisVisibility;
+ }
+ void ResetSelectionObservation(OriginalDocumentState& state){
+   state.selectionSequence=0;state.originalPickingCalls=0;state.pickHit=false;
+   state.lastPickPixelX=state.lastPickPixelY=-1;state.selectionAction.clear();state.lastPickedCollection.clear();
+ }
+-void ApplySelection(TGlRenderer& renderer,OriginalDocumentState& state,const Olex2DocumentRequest& request,int width,int height){
+-  if(!IsSelectionOperation(request.operation))return;
++void ApplySelection(TGXApp& app,OriginalDocumentState& state,const Olex2DocumentRequest& request,int width,int height){
++  if(!IsDocumentInteractionOperation(request.operation))return;
++  TGlRenderer& renderer=app.GetRenderer();
+   if(request.selection_mode>2||!std::isfinite(request.pointer_x)||!std::isfinite(request.pointer_y)||
+       request.pointer_x<0||request.pointer_x>1||request.pointer_y<0||request.pointer_y>1)
+     throw std::invalid_argument("Invalid original selection mode or normalized viewport coordinate");
+@@ -274,8 +277,14 @@ void ApplySelection(TGlRenderer& renderer,OriginalDocumentState& state,const Ole
+     renderer.SelectAll(false);action="clear-selection";
+   }else if(request.operation==Olex2DocumentOperation::SelectAll){
+     renderer.SelectAll(true);action="select-all";
+-  }else{
++  }else if(request.operation==Olex2DocumentOperation::InvertSelection){
+     renderer.InvertSelection();action="invert-selection";
++  }else if(request.operation==Olex2DocumentOperation::ToggleCellVisibility){
++    if(!DispatchHarmonyMainGuiAction(app,"toggle-cell"))throw std::runtime_error("Harmony main-form cell action is unavailable");
++    action="toggle-cell";
++  }else if(request.operation==Olex2DocumentOperation::ToggleBasisVisibility){
++    if(!DispatchHarmonyMainGuiAction(app,"toggle-basis"))throw std::runtime_error("Harmony main-form basis action is unavailable");
++    action="toggle-basis";
+   }
+   ++state.selectionSequence;state.pickHit=hit;state.lastPickedCollection=std::move(collection);state.selectionAction=std::move(action);
+ }
+@@ -326,6 +335,9 @@ std::string Status(const OriginalDocumentState& state,TGXApp& app,bool passed,co
+   size_t visible=0;if(state.loaded){auto atoms=app.GetAtoms();while(atoms.HasNext())if(atoms.Next().IsVisible())++visible;}
+   const auto& renderer=app.GetRenderer();
+   std::ostringstream view;view<<renderer.GetBasis().GetCenter()[0]<<','<<renderer.GetBasis().GetCenter()[1]<<','<<renderer.GetBasis().GetCenter()[2];
++  const char* interactionSource="original TGlRenderer::SelectObject and original TGlGroup";
++  if(state.selectionAction=="toggle-cell")interactionSource="original TMainForm::OnCellVisible/TGXApp::SetCellVisible";
++  else if(state.selectionAction=="toggle-basis")interactionSource="original TMainForm::OnBasisVisible/TGXApp::SetBasisVisible";
+   std::ostringstream out;out<<"{\"passed\":"<<(passed?"true":"false")<<",\"loaded\":"<<(state.loaded?"true":"false")
+     <<",\"name\":"<<Quote(state.name)<<",\"format\":"<<Quote(state.format)<<",\"byteCount\":"<<state.byteCount<<",\"sha256\":"<<Quote(state.sha256)
+     <<",\"revision\":"<<state.revision<<",\"frames\":"<<state.frames<<",\"atomCount\":"<<(state.loaded?app.GetAtoms().count:0)
+@@ -341,7 +353,7 @@ std::string Status(const OriginalDocumentState& state,TGXApp& app,bool passed,co
+     <<",\"pickHit\":"<<(state.pickHit?"true":"false")<<",\"lastPickedCollection\":"<<Quote(state.lastPickedCollection)
+     <<",\"selectionAction\":"<<Quote(state.selectionAction)<<",\"originalPickingCalls\":"<<state.originalPickingCalls
+     <<",\"lastPickPixelX\":"<<state.lastPickPixelX<<",\"lastPickPixelY\":"<<state.lastPickPixelY
+-    <<",\"selectionSource\":\"original TGlRenderer::SelectObject and original TGlGroup\""
++    <<",\"selectionSource\":"<<Quote(interactionSource)
+     <<FramingStatusFields(state.lastFraming)
+     <<",\"source\":\"original TGXApp/TGXFile + original TGlRenderer\"}";return out.str();
+ }
+@@ -545,7 +557,7 @@ std::string RunOriginalDocumentLocked(const Olex2LegacyHost& host,TGXApp& app,Pl
+         }
+         // Capture deliberately does NOT ApplyCamera(request): observe the real
+         // basis without replacing it with the caller/controller camera cache.
+-      }else{ApplyCamera(app,state,request);ApplySelection(renderer,state,request,width,height);}
++      }else{ApplyCamera(app,state,request);ApplySelection(app,state,request,width,height);}
+       if(request.operation==Olex2DocumentOperation::Open){
+         //43 actual window evidence showed the first original scene pass only
+         //settled its drawing state: the complete markers appeared on the next
+diff --git a/native/original_renderer_host.h b/native/original_renderer_host.h
+index c549403..d8bddc6 100644
+--- a/native/original_renderer_host.h
++++ b/native/original_renderer_host.h
+@@ -5,7 +5,7 @@
+ #include "display_font_metrics.h"
+ // Private same-build document-view request; both DSOs use the same libc++.
+ // This is not a stable third-party plugin ABI or a security sandbox.
+-enum class Olex2DocumentOperation { Render, Open, Close, Export, ResetView, Pick, ClearSelection, SelectAll, InvertSelection, CaptureViewport, RestoreViewport };
++enum class Olex2DocumentOperation { Render, Open, Close, Export, ResetView, Pick, ClearSelection, SelectAll, InvertSelection, CaptureViewport, RestoreViewport, ToggleCellVisibility, ToggleBasisVisibility };
+ struct Olex2DocumentRequest {
+   Olex2DocumentOperation operation=Olex2DocumentOperation::Render;
+   std::string name,bytes;
+diff --git a/upstream/olex/main_gui.cpp b/upstream/olex/main_gui.cpp
+index 80db5ce..4f0fdb1 100644
+--- a/upstream/olex/main_gui.cpp
++++ b/upstream/olex/main_gui.cpp
+@@ -1,3 +1,24 @@
++#if defined(__OHOS__) && !defined(__WXWIDGETS__)
++#include "harmony_main_gui.h"
++#include "gxapp.h"
++#include "olxstate.h"
++
++namespace olex2::harmony {
++bool DispatchHarmonyMainGuiAction(gxlib::TGXApp& app, const std::string& action) {
++  if (action == "toggle-cell") {
++    app.SetCellVisible(!app.IsCellVisible());
++    TStateRegistry::GetInstance().SetState(app.stateCellVisible, app.IsCellVisible(), EmptyString(), true);
++    return true;
++  }
++  if (action == "toggle-basis") {
++    app.SetBasisVisible(!app.IsBasisVisible());
++    TStateRegistry::GetInstance().SetState(app.stateBasisVisible, app.IsBasisVisible(), EmptyString(), true);
++    return true;
++  }
++  return false;
++}
++}
++#else
+ /******************************************************************************
+ * Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
+ *                                                                             *
+@@ -972,3 +993,5 @@ void TMainForm::OnGraphicsStyle(wxCommandEvent& event)  {
+   }
+ }
+ //..............................................................................
++
++#endif // __OHOS__ && !__WXWIDGETS__

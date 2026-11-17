@@ -1,0 +1,205 @@
+--- a/upstream/olex/ptable.cpp
++++ b/upstream/olex/ptable.cpp
+@@ -7,6 +7,144 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "ptable.h"
++#include <algorithm>
++#include <string>
++#include "eutf8.h"
++
++using namespace olex2::harmony::ui;
++
++struct TPTableDlg::Alive {
++  TPTableDlg* owner = nullptr;
++};
++
++TPTableDlg::TPTableDlg(NodeBackend& nodes,
++  std::shared_ptr<DialogBackend> dialogs,
++  std::shared_ptr<UiScheduler> scheduler, Widget* parent,
++  std::shared_ptr<DialogPositionStore> positions)
++  : TDialog(nodes, std::move(dialogs), std::move(scheduler), parent,
++      "Periodic table", "TPTableDlg",
++      DialogGeometry{Point{0, 0}, Size{740, 430}, true},
++      std::move(positions)),
++    alive_(std::make_shared<Alive>())
++{
++  alive_->owner = this;
++
++  scroll_ = std::make_shared<Widget>(nodes, NodeKind::Scroll, &Body());
++  Retain(scroll_);
++  table_ = std::make_shared<Widget>(nodes, NodeKind::Column, scroll_.get());
++  Retain(table_);
++  table_->SetNumber(Property::RowSpacing, 0);
++
++  for (size_t row = 0; row < rows_.size(); ++row) {
++    if (row == 7) {
++      spacer_ = std::make_shared<Widget>(nodes, NodeKind::Column, table_.get());
++      Retain(spacer_);
++      spacer_->SetWidth(1);
++      spacer_->SetHeight(5);
++    }
++
++    rows_[row] = std::make_shared<Widget>(nodes, NodeKind::Row, table_.get());
++    Retain(rows_[row]);
++    rows_[row]->SetNumber(Property::RowSpacing, 0);
++    rows_[row]->SetWidth(18 * 37);
++    rows_[row]->SetHeight(37);
++    for (size_t column = 0; column < cells_[row].size(); ++column) {
++      cells_[row][column] = std::make_shared<Widget>(
++        nodes, NodeKind::Row, rows_[row].get());
++      Retain(cells_[row][column]);
++      cells_[row][column]->SetWidth(37);
++      cells_[row][column]->SetHeight(37);
++    }
++  }
++
++  for (int row = 0; row < 9; ++row) {
++    for (int column = 0; column < 18; ++column) {
++      if (row == 0) {
++        if (column == 0 || column == 17) CreateButton(row, column);
++      }
++      else if (row < 3) {
++        if (column <= 1 || column >= 12) CreateButton(row, column);
++      }
++      else if (row < 6) {
++        CreateButton(row, column);
++      }
++      else if (row == 6) {
++        if (column <= 3) CreateButton(row, column);
++      }
++      else if (column <= 14) {
++        CreateButton(row, column);
++      }
++    }
++  }
++  CreateButton(8, 17);  // Q peak
++
++  for (size_t index = iQPeakIndex + 1; index <= iMaxElementIndex; ++index) {
++    CreateButton(9, static_cast<int>(index - iQPeakIndex - 1));  // Deuterium
++  }
++
++  LayoutViewport();
++  std::weak_ptr<Alive> weak = alive_;
++  SetResizeReceiver([weak]() {
++    if (auto life = weak.lock(); life && life->owner) {
++      life->owner->OnResize.Execute(life->owner, nullptr);
++      life->owner->LayoutViewport();
++    }
++  });
++}
++
++TPTableDlg::~TPTableDlg() {
++  alive_->owner = nullptr;
++}
++
++void TPTableDlg::LayoutViewport() {
++  const int bodyWidth = Body().GetWidth();
++  const int bodyHeight = Body().GetHeight();
++  scroll_->SetWidth(std::max(120, bodyWidth - 24));
++  scroll_->SetHeight(std::max(40, bodyHeight - 24));
++  table_->SetWidth(18 * 37);
++  table_->SetHeight(10 * 37 + 5);
++}
++
++void TPTableDlg::CreateButton(int row, int column) {
++  int index = static_cast<int>(++createdButtons_);
++  if (index == 57 || index == 75) return;
++  if (index > 57 && index < 75) index += 14;
++  else if (index > 75 && index <= 76) index += 28;
++  else if (index > 76 && index <= 91) index -= 20;
++  else if (index > 91 && index < 107) index -= 3;
++  if (index >= 107) index -= 2;
++
++  const short elementIndex = static_cast<short>(index - 1);
++  const auto& element = XElementLib::GetByIndex(elementIndex);
++  const auto encoded = TUtf8::Encode(element.symbol);
++  const std::string label(encoded.c_str(), encoded.Length());
++  std::weak_ptr<Alive> weak = alive_;
++  auto button = std::make_shared<EventWidget>(Window().Backend(),
++    NodeKind::Button,
++    cells_.at(static_cast<size_t>(row)).at(static_cast<size_t>(column)).get(),
++    std::vector<EventKind>{EventKind::Click},
++    [weak, elementIndex](const NodeEvent&) {
++      if (auto life = weak.lock(); life && life->owner) {
++        life->owner->Select(elementIndex);
++      }
++    });
++  Retain(button);
++  button->SetText(TextProperty::Content, label);
++  button->SetText(TextProperty::Accessibility, "Element " + label);
++  button->SetWidth(36);
++  button->SetHeight(36);
++  button->SetNumber(Property::Focusable, 1);
++  button->SetNumber(Property::ButtonRectangular, 1);
++  buttons_.push_back(std::move(button));
++}
++
++void TPTableDlg::Select(short index) {
++  Selected = &XElementLib::GetByIndex(index);
++  EndModal(1);
++}
++#else
+ #include "ptable.h"
+ 
+ TPTableDlg::TPTableDlg(TMainFrame *Parent) :
+@@ -98,3 +236,5 @@
+   wxDialog::EndModal(wxID_OK);
+   return true;
+ }
++
++#endif // native periodic table / original wx
+--- a/upstream/olex/ptable.h
++++ b/upstream/olex/ptable.h
+@@ -7,6 +7,33 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#pragma once
++#include "ctrls.h"
++#include "chemdata.h"
++#include <array>
++#include <vector>
++class TPTableDlg:public TDialog {
++  struct Alive;std::shared_ptr<Alive> alive_;
++  std::shared_ptr<olex2::harmony::ui::Widget> scroll_,table_,spacer_;
++  std::array<std::shared_ptr<olex2::harmony::ui::Widget>,10> rows_;
++  std::array<std::array<std::shared_ptr<olex2::harmony::ui::Widget>,18>,10> cells_;
++  std::vector<std::shared_ptr<olex2::harmony::ui::EventWidget>> buttons_;
++  size_t createdButtons_=0;cm_Element* Selected=nullptr;
++  void CreateButton(int row,int column);
++  void LayoutViewport();
++  void Select(short index);
++public:
++  TPTableDlg(olex2::harmony::ui::NodeBackend&,
++    std::shared_ptr<olex2::harmony::ui::DialogBackend>,
++    std::shared_ptr<olex2::harmony::ui::UiScheduler>,
++    olex2::harmony::ui::Widget* parent,
++    std::shared_ptr<olex2::harmony::ui::DialogPositionStore> positions={});
++  ~TPTableDlg()override;
++  cm_Element* GetSelected(){return Selected;}
++  size_t GetButtonCount()const{return buttons_.size();}
++};
++#else
+ #ifndef __olx_dlg_ptable_H
+ #define __olx_dlg_ptable_H
+ #include "ctrls.h"
+@@ -24,3 +51,5 @@
+   bool Execute(const IOlxObject *Sender, const IOlxObject *Data, TActionQueue *);
+ };
+ #endif
++
++#endif // native periodic table / original wx
+--- a/cmake/Olex2NativeWidgets.cmake
++++ b/cmake/Olex2NativeWidgets.cmake
+@@ -6,6 +6,7 @@
+   endif()
+   target_sources(${target} PRIVATE
+     "${project_root}/upstream/olex/dgenopt.cpp"
++    "${project_root}/upstream/olex/ptable.cpp"
+     "${project_root}/native/generation_options.cpp"
+     "${project_root}/upstream/olex/dgrad.cpp"
+     "${project_root}/upstream/olex/primtvs.cpp"

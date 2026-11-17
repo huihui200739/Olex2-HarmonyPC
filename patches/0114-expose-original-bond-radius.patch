@@ -1,0 +1,52 @@
+--- a/native/original_document_view.cpp
++++ b/native/original_document_view.cpp
+@@ -6,6 +6,7 @@
+ #include "original_document_viewport_objects.h"
+ #include "original_document_visibility.h"
+ #include "xatom.h"
++#include "xbond.h"
+ #include <optional>
+ #include "gl4esinit.h"
+ #include <algorithm>
+@@ -501,7 +502,8 @@
+     <<",\"selectedObjectCount\":"<<(state.loaded?renderer.GetSelection().Count():0)<<",\"selectedParts\":"<<Quote(SelectedParts(app))<<",\"selectionSequence\":"<<state.selectionSequence
+     <<",\"pickHit\":"<<(state.pickHit?"true":"false")<<",\"lastPickedCollection\":"<<Quote(state.lastPickedCollection)
+     <<",\"selectionAction\":"<<Quote(state.selectionAction);
+-  if(state.loaded)out<<",\"labelsVisible\":"<<(app.AreLabelsVisible()?"true":"false")
++  if(state.loaded)out<<",\"bondRadius\":"<<TXBond::GetSettings(app.GetRenderer()).GetRadius()
++    <<",\"labelsVisible\":"<<(app.AreLabelsVisible()?"true":"false")
+     <<",\"hydrogensVisible\":"<<(app.AreHydrogensVisible()?"true":"false")
+     <<",\"hydrogenBondsVisible\":"<<(app.AreHBondsVisible()?"true":"false")
+     <<",\"qPeaksVisible\":"<<(app.AreQPeaksVisible()?"true":"false")
+--- a/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
++++ b/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
+@@ -19,7 +19,7 @@
+   passed: boolean; loaded: boolean; name: string; format: string;
+   byteCount: number; sha256: string; revision: number; frames: number;
+   atomCount: number; bondCount: number; exportByteCount: number;
+-  renderObjects?: number; renderPrimitives?: number; renderCollections?: number;
++  renderObjects?: number; renderPrimitives?: number; renderCollections?: number; bondRadius?: number;
+   error: string; modelMayHaveChanged: boolean; source: string;
+   // Optional for pre-operation and failure envelopes, never synthesized in UI.
+   selectedObjectCount?: number; selectedParts?: string; selectionSequence?: number; pickHit?: boolean;
+@@ -162,7 +162,8 @@
+     !validCounter(core.atomCount) || !validCounter(core.bondCount) || !validCounter(core.exportByteCount) ||
+     (core.renderObjects !== undefined && !validCounter(core.renderObjects)) ||
+     (core.renderPrimitives !== undefined && !validCounter(core.renderPrimitives)) ||
+-    (core.renderCollections !== undefined && !validCounter(core.renderCollections))) {
++    (core.renderCollections !== undefined && !validCounter(core.renderCollections)) ||
++    (core.bondRadius !== undefined && (typeof core.bondRadius !== 'number' || !Number.isFinite(core.bondRadius)))) {
+     throw new Error('原版文档核心状态格式不完整');
+   }
+   if (core.selectedParts !== undefined && typeof core.selectedParts !== 'string') {
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -3598,7 +3598,7 @@
+         .id('olex2-original-document-transfer-status').fontSize(10).fontColor('#64796A').width('100%').maxLines(3)
+       Text(this.originalDocumentStatusError.length > 0 ? this.originalDocumentStatusError :
+         this.originalDocument.core.loaded ?
+-          `${this.originalDocument.core.name} · ${this.originalDocument.core.byteCount} 字节 · 修订 ${this.originalDocument.core.revision} · 原版帧 ${this.originalDocument.core.frames} · ${this.originalDocument.core.atomCount} 原子 / ${this.originalDocument.core.bondCount} 键 · ${this.originalDocument.core.renderObjects === undefined ? 0 : this.originalDocument.core.renderObjects} 渲染对象 / ${this.originalDocument.core.renderPrimitives === undefined ? 0 : this.originalDocument.core.renderPrimitives} 图元 · 集合 ${this.originalDocument.core.renderCollections === undefined ? 0 : this.originalDocument.core.renderCollections}${this.originalDocument.core.labelsVisible === undefined ? '' : this.originalDocument.core.labelsVisible ? ' · 标签显示' : ' · 标签隐藏'}${this.originalDocument.core.selectedParts === undefined || this.originalDocument.core.selectedParts.length === 0 ? '' : ' · Parts ' + this.originalDocument.core.selectedParts}` :
++          `${this.originalDocument.core.name} · ${this.originalDocument.core.byteCount} 字节 · 修订 ${this.originalDocument.core.revision} · 原版帧 ${this.originalDocument.core.frames} · ${this.originalDocument.core.atomCount} 原子 / ${this.originalDocument.core.bondCount} 键 · ${this.originalDocument.core.renderObjects === undefined ? 0 : this.originalDocument.core.renderObjects} 渲染对象 / ${this.originalDocument.core.renderPrimitives === undefined ? 0 : this.originalDocument.core.renderPrimitives} 图元 · 集合 ${this.originalDocument.core.renderCollections === undefined ? 0 : this.originalDocument.core.renderCollections}${this.originalDocument.core.bondRadius === undefined ? '' : ' · 键半径 ' + this.originalDocument.core.bondRadius}${this.originalDocument.core.labelsVisible === undefined ? '' : this.originalDocument.core.labelsVisible ? ' · 标签显示' : ' · 标签隐藏'}${this.originalDocument.core.selectedParts === undefined || this.originalDocument.core.selectedParts.length === 0 ? '' : ' · Parts ' + this.originalDocument.core.selectedParts}` :
+           this.originalDocumentActive() ? '原版视图状态待确认；不沿用演示图元验证资格。' : '当前未载入原版文档；下方为原有平台演示图元。')
+         .id('olex2-original-document-status').fontSize(10).fontColor('#758579').width('100%').maxLines(2)
+       if (this.originalDocumentActive()) { this.OriginalSelectionToolbar() }

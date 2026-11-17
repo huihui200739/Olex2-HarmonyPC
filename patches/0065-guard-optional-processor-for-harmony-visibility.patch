@@ -1,0 +1,35 @@
+--- a/upstream/olex/main_gui.cpp
++++ b/upstream/olex/main_gui.cpp
+@@ -5,20 +5,29 @@
+ #include "integration.h"
+ 
+ namespace olex2::harmony {
++namespace {
++void NotifyHarmonyVisibilityStateChange(size_t state, bool visible) {
++  // Some Harmony display sessions have no application-level processor. The
++  // TGXApp visibility setters already update and redraw the object; state-change
++  // callbacks are optional when there is no processor to receive them.
++  if (olex2::IOlex2Processor::GetInstance() == nullptr) return;
++  TStateRegistry::GetInstance().SetState(state, visible, EmptyString(), true);
++}
++}
+ bool DispatchHarmonyMainGuiAction(gxlib::TGXApp& app, const std::string& action) {
+   if (action == "toggle-cell") {
+     app.SetCellVisible(!app.IsCellVisible());
+-    TStateRegistry::GetInstance().SetState(app.stateCellVisible, app.IsCellVisible(), EmptyString(), true);
++    NotifyHarmonyVisibilityStateChange(app.stateCellVisible, app.IsCellVisible());
+     return true;
+   }
+   if (action == "toggle-basis") {
+     app.SetBasisVisible(!app.IsBasisVisible());
+-    TStateRegistry::GetInstance().SetState(app.stateBasisVisible, app.IsBasisVisible(), EmptyString(), true);
++    NotifyHarmonyVisibilityStateChange(app.stateBasisVisible, app.IsBasisVisible());
+     return true;
+   }
+   if (action == "toggle-frame") {
+     app.Get3DFrame().SetVisible(!app.Get3DFrame().IsVisible());
+-    TStateRegistry::GetInstance().SetState(app.stateWBoxVisible, app.Get3DFrame().IsVisible(), EmptyString(), true);
++    NotifyHarmonyVisibilityStateChange(app.stateWBoxVisible, app.Get3DFrame().IsVisible());
+     return true;
+   }
+   if (action == "show-all") {

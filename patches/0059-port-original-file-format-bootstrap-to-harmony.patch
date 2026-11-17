@@ -1,0 +1,146 @@
+--- a/upstream/olex/xglapp.cpp
++++ b/upstream/olex/xglapp.cpp
+@@ -1,3 +1,52 @@
++#if defined(__OHOS__) && !defined(__WXWIDGETS__)
++#include "original_file_formats.h"
++#include "cif.h"
++#include "xyz.h"
++#include "p4p.h"
++#include "crs.h"
++#include "pdb.h"
++#include "xdmas.h"
++#include "oxmfile.h"
++#include "mol2.h"
++#include "mol.h"
++#include "ins.h"
++#include <stdexcept>
++
++namespace olex2::harmony {
++std::size_t RegisterOriginalFileFormats(gxlib::TGXApp& app) {
++  // Match the original desktop front-end aliases. Parser instances are shared
++  // for extensions that describe the same upstream file grammar.
++  TCif* cif = new TCif;
++  app.RegisterXFileFormat(cif, "cif");
++  app.RegisterXFileFormat(cif, "cfx_LANA");
++  app.RegisterXFileFormat(cif, "cmf");
++  app.RegisterXFileFormat(cif, "fcf");
++  app.RegisterXFileFormat(cif, "fco");
++  app.RegisterXFileFormat(new TMol, "mol");
++  TIns* ins = new TIns;
++  app.RegisterXFileFormat(ins, "ins");
++  app.RegisterXFileFormat(ins, "res");
++  app.RegisterXFileFormat(new TXyz, "xyz");
++  app.RegisterXFileFormat(new TP4PFile, "p4p");
++  app.RegisterXFileFormat(new TCRSFile, "crs");
++  app.RegisterXFileFormat(new TPdb, "pdb");
++  app.RegisterXFileFormat(new TXDMas, "mas");
++  app.RegisterXFileFormat(new TOXMFile(app), "oxm");
++  app.RegisterXFileFormat(new TMol2, "mol2");
++
++  static const char* const extensions[] = {
++    "cif", "cfx_LANA", "cmf", "fcf", "fco", "mol", "ins", "res",
++    "xyz", "p4p", "crs", "pdb", "mas", "oxm", "mol2"
++  };
++  for (const char* extension : extensions) {
++    if (app.XFile().FindFormat(olxstr(extension)) == nullptr) {
++      throw std::runtime_error("Original application file format registration failed");
++    }
++  }
++  return sizeof(extensions) / sizeof(extensions[0]);
++}
++}
++#else
+ /******************************************************************************
+ * Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
+ *                                                                             *
+@@ -434,3 +483,5 @@
+ #endif
+ 
+ IMPLEMENT_APP(TGlXApp)
++
++#endif // Harmony file-format bootstrap / original wx application launcher
+--- a/cmake/Olex2NativeWidgets.cmake
++++ b/cmake/Olex2NativeWidgets.cmake
+@@ -14,6 +14,7 @@
+     "${project_root}/upstream/olex/nui/skeleton.cpp"
+     "${project_root}/upstream/olex/xglcanv.cpp"
+     "${project_root}/upstream/olex/html/imgcellext.cpp"
++    "${project_root}/upstream/olex/xglapp.cpp"
+     "${project_root}/upstream/olex/tasks.cpp"
+     "${project_root}/upstream/olex/edit.cpp"
+     "${project_root}/upstream/olex/updateth.cpp"
+--- a/native/application_runtime.cpp
++++ b/native/application_runtime.cpp
+@@ -1,4 +1,5 @@
+ #include "application_runtime.h"
++#include "original_file_formats.h"
+ #include "gradient_options.h"
+ #include "original_display_options.h"
+ #include "original_interpreter.h"
+@@ -51,6 +52,8 @@
+ public:
+   mutable bool lastSaveCommitted=false;mutable unsigned saveRevision=0;
+   bool optionsRestored=false;
++  unsigned registeredFileFormatCount_=0;
++  unsigned RegisteredFileFormatCount()const{return registeredFileFormatCount_;}
+   PlatformApp(const std::string& base,PlatformWindowScene* scene):PngTextureGXApp(Text(base+"/olex2-harmony"),scene) {}
+   void Configure(const std::string& shared,const std::string& instance,const std::string& config){
+     config_=config;
+@@ -61,11 +64,9 @@
+     if(access(path.c_str(),F_OK)==0){TSettingsFile settings;settings.LoadUtf8Settings(Text(path));for(size_t i=0;i<settings.ParamCount();++i){ValidateOption(settings.ParamName(i),settings.ParamValue(i));UpdateOption(settings.ParamName(i),settings.ParamValue(i));}optionsRestored=true;}
+     persisted_=GetOptions();
+     const char* argv[]={"olex2-harmony"};InitArguments(1,argv);
+-    // The desktop front end registers file formats; an empty TXApp does not.
+-    // Register the original parsers once in this platform front-end lifetime.
+-    XFile().RegisterFileFormat(new TCif, "cif");
+-    XFile().RegisterFileFormat(new TIns, "ins");
+-    XFile().RegisterFileFormat(new TIns, "res");
++    // Use the Harmony branch of the original launcher to register and verify
++    // every native original-format parser without constructing wxWidgets UI.
++    registeredFileFormatCount_=RegisterOriginalFileFormats(*this);
+   }
+   olxstr GetPlatformString_(bool)const override{
+ #ifdef __OHOS__
+@@ -107,7 +108,7 @@
+   std::unique_ptr<ui::GradientStoreLifetime> gradientAccess;
+   ApplicationRuntimeStatus Status()const{
+     ApplicationRuntimeStatus s;s.initialized=bool(app);if(!app)return s;
+-    s.originalCoreInitialized=TBasicApp::HasInstance() && &TXApp::GetInstance()==app.get();s.originalCoreMacroCount=app->GetLibrary().MacroCount();s.originalCoreFunctionCount=app->GetLibrary().FunctionCount();s.originalCoreFileCount=app->XFiles().Count();s.originalCoreEmptyFile=s.originalCoreFileCount==1 && !app->XFile().HasLastLoader();
++    s.originalCoreInitialized=TBasicApp::HasInstance() && &TXApp::GetInstance()==app.get();s.originalCoreMacroCount=app->GetLibrary().MacroCount();s.originalCoreFunctionCount=app->GetLibrary().FunctionCount();s.originalCoreFileCount=app->XFiles().Count();s.originalCoreEmptyFile=s.originalCoreFileCount==1 && !app->XFile().HasLastLoader();s.originalFileFormatCount=app->RegisteredFileFormatCount();
+     s.baseDir=Utf8(TBasicApp::GetBaseDir());s.sharedDir=Utf8(TBasicApp::GetSharedDir());s.instanceDir=Utf8(TBasicApp::GetInstanceDir());s.configDir=Utf8(app->GetConfigDir());
+     s.optionsRestored=app->optionsRestored;s.licenseSha256=Digest(Read(base+"/OLEX2-LICENCE.txt"));s.licenseVerified=s.licenseSha256==OriginalLicenseSha256();s.originalFunctionCount=functionCount;s.optionsCount=app->GetOptions().Count();s.commandHints=app->GetOptions().FindValue("ui.commandHints","true")!="false";
+     s.lastSaveCommitted=app->lastSaveCommitted;s.saveRevision=app->saveRevision;s.platform=Utf8(TBasicApp::GetPlatformString(false));if(access((config+"/.options").c_str(),F_OK)==0)s.optionsSha256=Digest(Read(config+"/.options"));return s;
+--- a/native/application_runtime.h
++++ b/native/application_runtime.h
+@@ -11,7 +11,7 @@
+   bool initialized=false,optionsRestored=false,licenseVerified=false,commandHints=true;
+   bool lastSaveCommitted=false,originalCoreInitialized=false,originalCoreEmptyFile=false;
+   unsigned originalFunctionCount=0,optionsCount=0,saveRevision=0;
+-  unsigned originalCoreMacroCount=0,originalCoreFunctionCount=0,originalCoreFileCount=0;
++  unsigned originalCoreMacroCount=0,originalCoreFunctionCount=0,originalCoreFileCount=0,originalFileFormatCount=0;
+   std::string baseDir,instanceDir,sharedDir,configDir,licenseSha256,optionsSha256,platform,error;
+ };
+ struct ApplicationFunctionResult {
+--- a/native/tests/application_runtime_smoke.cpp
++++ b/native/tests/application_runtime_smoke.cpp
+@@ -40,6 +40,7 @@
+    ApplicationRuntime runtime(owned.root,license);auto s=runtime.Status();
+    Check(s.originalCoreInitialized && s.originalCoreEmptyFile && s.originalCoreFileCount==1,"original TXApp did not create exactly one empty core container");
+    Check(s.originalCoreMacroCount==135 && s.originalCoreFunctionCount==38,"original core registry count changed");
++   Check(s.originalFileFormatCount==15,"Harmony runtime did not register all original desktop file-format aliases");
+    Check(&TXApp::GetInstance()==dynamic_cast<TXApp*>(&TBasicApp::GetInstance()),"runtime is not the genuine original core singleton");
+    Check(s.initialized && s.optionsRestored && s.licenseVerified && s.originalFunctionCount==22,"actual original runtime/registry/licence did not initialize");
+    Check(s.optionsCount==3 && s.commandHints && s.saveRevision==0 && !s.lastSaveCommitted,"original options were not restored accurately");
+--- a/native/original_file_formats.h
++++ b/native/original_file_formats.h
+@@ -0,0 +1,10 @@
++#pragma once
++
++#include "gxapp.h"
++#include <cstddef>
++
++namespace olex2::harmony {
++// Registers the original application's file parsers on a non-wx TGXApp.
++// Throws if an extension alias is missing after registration.
++std::size_t RegisterOriginalFileFormats(gxlib::TGXApp& app);
++}

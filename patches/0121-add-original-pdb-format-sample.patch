@@ -1,0 +1,89 @@
+--- a/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
++++ b/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
+@@ -239,7 +239,7 @@
+     if (length > 240) throw new Error('文档名称不能超过 240 个 UTF-8 字节');
+   }
+   const format: string = originalDocumentFormat(name);
+-  if (format !== 'cif' && format !== 'ins' && format !== 'res' && format !== 'xyz') throw new Error('仅支持 .cif / .ins / .res / .xyz 文档');
++  if (format !== 'cif' && format !== 'ins' && format !== 'res' && format !== 'xyz' && format !== 'pdb') throw new Error('仅支持 .cif / .ins / .res / .xyz / .pdb 文档');
+ }
+ function requireDocumentUri(uri: string): void {
+   if (!uri.startsWith('file://') || uri.length > 16 * 1024 || /[\x00-\x1F\x7F]/.test(uri)) {
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1836,6 +1836,30 @@
+       this.captureOriginalViewportBeforeReplacement('before-new-display-tab');
+       const result: OriginalDocumentTransferResult = await this.originalDocumentTransfer.openSynthetic(bytes,
+         this.originalDocumentBackend(), 'synthetic-view.xyz');
++      this.acceptOriginalDocumentResult(result);
++    } catch (error) {
++      this.failOriginalSessionOperation(error as Error); this.readOriginalDocumentStatus(); this.reconcileOriginalSessionNative();
++    } finally {
++      this.originalDocumentBusy = false; this.syncOriginalDocumentSessions();
++      this.applicationRuntime = nativeBridge.getApplicationRuntimeStatus();
++      this.originalLog = nativeBridge.getOriginalLogs(); this.refreshGraphics(); this.syncOriginalViewportInput();
++    }
++  }
++
++  private async openPdbSyntheticOriginalDocument(): Promise<void> {
++    if (this.originalDocumentOperationBusy() || !this.applicationRuntime.initialized) return;
++    if (!this.originalDocumentSessions.canAdd()) {
++      this.originalDocumentMessage = '会话最多 4 份文档、合计 32 MiB；请先明确关闭一份文档。未替换原生文档。';
++      this.saveRecord(); return;
++    }
++    this.syncOriginalDocumentSessions(); this.beginOriginalSessionOperation('open-synthetic', '');
++    this.originalDocumentBusy = true; this.syncOriginalViewportInput();
++    try {
++      const context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
++      const bytes: Uint8Array = await context.resourceManager.getRawFileContent('synthetic-view.pdb');
++      this.captureOriginalViewportBeforeReplacement('before-new-display-tab');
++      const result: OriginalDocumentTransferResult = await this.originalDocumentTransfer.openSynthetic(bytes,
++        this.originalDocumentBackend(), 'synthetic-view.pdb');
+       this.acceptOriginalDocumentResult(result);
+     } catch (error) {
+       this.failOriginalSessionOperation(error as Error); this.readOriginalDocumentStatus(); this.reconcileOriginalSessionNative();
+@@ -3673,6 +3697,10 @@
+           .fontColor('#536857').backgroundColor('#F2F5EC')
+           .enabled(this.applicationRuntime.initialized && !this.originalDocumentOperationBusy())
+           .onClick(() => this.openXyzSyntheticOriginalDocument())
++        Button('PDB 示例').id('olex2-original-document-pdb').height(26).fontSize(10)
++          .fontColor('#536857').backgroundColor('#F2F5EC')
++          .enabled(this.applicationRuntime.initialized && !this.originalDocumentOperationBusy())
++          .onClick(() => this.openPdbSyntheticOriginalDocument())
+         Button('SHELX 示例').id('olex2-original-document-shelx').height(26).fontSize(10)
+           .fontColor('#536857').backgroundColor('#F2F5EC')
+           .enabled(this.applicationRuntime.initialized && !this.originalDocumentOperationBusy())
+--- a/app/entry/src/main/cpp/application_view.cpp
++++ b/app/entry/src/main/cpp/application_view.cpp
+@@ -208,7 +208,7 @@
+   if(name.empty()||name.size()>240||name.find('\0')!=std::string::npos||name.find_first_of("/\\:")!=std::string::npos){error="Expected a document basename (1..240 UTF-8 bytes), not a path or URI";return false;}
+   size_t dot=name.rfind('.');std::string extension=dot==std::string::npos?"":name.substr(dot);
+   std::transform(extension.begin(),extension.end(),extension.begin(),[](unsigned char c){return char(std::tolower(c));});
+-  if(dot==0||(extension!=".cif"&&extension!=".ins"&&extension!=".res"&&extension!=".xyz")){error="Original document format must be .cif, .ins, .res or .xyz";return false;}
++  if(dot==0||(extension!=".cif"&&extension!=".ins"&&extension!=".res"&&extension!=".xyz"&&extension!=".pdb")){error="Original document format must be .cif, .ins, .res, .xyz or .pdb";return false;}
+   if(bytes.empty()||bytes.size()>MaximumOriginalDocumentBytes||bytes.find('\0')!=std::string::npos){error="Expected nonempty original text bytes without NUL (maximum 8 MiB)";return false;}
+   return true;
+ }
+--- a/native/original_document_view.cpp
++++ b/native/original_document_view.cpp
+@@ -53,7 +53,7 @@
+     throw std::invalid_argument("Document name must be a basename of at most 240 UTF-8 bytes");
+   const auto dot=name.rfind('.');std::string ext=dot==std::string::npos?"":name.substr(dot+1);
+   for(auto& c:ext)c=static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+-  if(ext!="cif"&&ext!="ins"&&ext!="res"&&ext!="xyz")throw std::invalid_argument("Only CIF, INS, RES and XYZ text documents are supported");
++  if(ext!="cif"&&ext!="ins"&&ext!="res"&&ext!="xyz"&&ext!="pdb")throw std::invalid_argument("Only CIF, INS, RES, XYZ and PDB text documents are supported");
+   return ext;
+ }
+ class CurrentDirectory {
+--- a/app/entry/src/main/resources/rawfile/synthetic-view.pdb
++++ b/app/entry/src/main/resources/rawfile/synthetic-view.pdb
+@@ -0,0 +1,9 @@
++HEADER    SYNTHETIC NON-BIOLOGICAL DISPLAY FIXTURE
++TITLE     SYNTHETIC MARKER COORDINATES, NOT RESEARCH DATA
++CRYST1   10.000   10.000   10.000  90.00  90.00  90.00 P 1           1
++ATOM      1 C    MOL A   1       0.000   0.000   0.000  1.00  0.00           C
++ATOM      2 H1   MOL A   1       0.630   0.630   0.630  1.00  0.00           H
++ATOM      3 H2   MOL A   1      -0.670  -0.670   0.630  1.00  0.00           H
++ATOM      4 H3   MOL A   1      -0.670   0.630  -0.670  1.00  0.00           H
++ATOM      5 H4   MOL A   1       0.630  -0.670  -0.670  1.00  0.00           H
++END

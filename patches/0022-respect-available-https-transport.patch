@@ -1,0 +1,34 @@
+--- a/repository/httpfs.cpp
++++ b/repository/httpfs.cpp
+@@ -746,8 +746,11 @@
+   if (url.GetProtocol() == "https") {
+ #ifdef __WIN32__
+     return new TWinHttpFileSystem(url);
++#elif defined(_OPENSSL)
++    return new TSSLHttpFileSystem(url);
+ #else
+-    return new TSSLHttpFileSystem(url);
++    throw TFunctionFailedException(__OlxSourceInfo,
++      "HTTPS transport is unavailable in this build");
+ #endif
+   }
+   return 0;
+--- a/repository/updateapi.cpp
++++ b/repository/updateapi.cpp
+@@ -482,10 +482,14 @@
+         FS = _fs;
+       }
+       else if (url.GetProtocol() == "https") {
++        AnHttpFileSystem* _fs = 0;
+ #ifdef __WIN32__
+-        TWinHttpFileSystem* _fs = new TWinHttpFileSystem(url);
++        _fs = new TWinHttpFileSystem(url);
++#elif defined(_OPENSSL)
++        _fs = new TSSLHttpFileSystem(url);
+ #else
+-        TSSLHttpFileSystem* _fs = new TSSLHttpFileSystem(url);
++        throw TFunctionFailedException(__OlxSourceInfo,
++          "HTTPS transport is unavailable in this build");
+ #endif
+         _fs->SetExtraHeaders(httpHeaderPlatform);
+         olxstr tfn = TBasicApp::GetSharedDir() + "app.token";

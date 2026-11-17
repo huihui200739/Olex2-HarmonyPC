@@ -1,0 +1,188 @@
+--- a/native/original_renderer_host.h
++++ b/native/original_renderer_host.h
+@@ -5,7 +5,7 @@
+ #include "display_font_metrics.h"
+ // Private same-build document-view request; both DSOs use the same libc++.
+ // This is not a stable third-party plugin ABI or a security sandbox.
+-enum class Olex2DocumentOperation { Render, Open, Close, Export, ResetView, Pick, ClearSelection, SelectAll, InvertSelection, CaptureViewport, RestoreViewport, ToggleCellVisibility, ToggleBasisVisibility, ToggleFrameVisibility, ToggleGridVisibility, ShowAllVisible, CenterModel, ViewAlong100, ViewAlong010, ViewAlong001, ViewAlong110, ViewAlong101, ViewAlong011, ViewAlong111, ViewAlongSelection, HideSelection, SetDrawingQualityLow, SetDrawingQualityMedium, SetDrawingQualityHigh };
++enum class Olex2DocumentOperation { Render, Open, Close, Export, ResetView, Pick, ClearSelection, SelectAll, InvertSelection, CaptureViewport, RestoreViewport, ToggleCellVisibility, ToggleBasisVisibility, ToggleFrameVisibility, ToggleGridVisibility, ShowAllVisible, CenterModel, ViewAlong100, ViewAlong010, ViewAlong001, ViewAlong110, ViewAlong101, ViewAlong011, ViewAlong111, ViewAlongSelection, HideSelection, SetDrawingQualityLow, SetDrawingQualityMedium, SetDrawingQualityHigh, ToggleHydrogensVisibility, ToggleHydrogenBondsVisibility, ToggleQPeaksVisibility, ToggleQPeakBondsVisibility };
+ struct Olex2DocumentRequest {
+   Olex2DocumentOperation operation=Olex2DocumentOperation::Render;
+   std::string name,bytes;
+--- a/native/original_document_view.cpp
++++ b/native/original_document_view.cpp
+@@ -241,7 +241,9 @@
+     op==Olex2DocumentOperation::ViewAlong001||op==Olex2DocumentOperation::ViewAlong110||
+     op==Olex2DocumentOperation::ViewAlong101||op==Olex2DocumentOperation::ViewAlong011||
+     op==Olex2DocumentOperation::ViewAlong111||op==Olex2DocumentOperation::SetDrawingQualityLow||
+-    op==Olex2DocumentOperation::SetDrawingQualityMedium||op==Olex2DocumentOperation::SetDrawingQualityHigh;
++    op==Olex2DocumentOperation::SetDrawingQualityMedium||op==Olex2DocumentOperation::SetDrawingQualityHigh||
++    op==Olex2DocumentOperation::ToggleHydrogensVisibility||op==Olex2DocumentOperation::ToggleHydrogenBondsVisibility||
++    op==Olex2DocumentOperation::ToggleQPeaksVisibility||op==Olex2DocumentOperation::ToggleQPeakBondsVisibility;
+ }
+ void ResetSelectionObservation(OriginalDocumentState& state){
+   state.selectionSequence=0;state.originalPickingCalls=0;state.pickHit=false;
+@@ -314,6 +316,15 @@
+       request.operation==Olex2DocumentOperation::SetDrawingQualityMedium?"quality-2":"quality-3";
+     if(!DispatchHarmonyMainGuiAction(app,action))
+       throw std::runtime_error("Harmony main-form drawing quality action is unavailable");
++  }else if(request.operation==Olex2DocumentOperation::ToggleHydrogensVisibility||
++      request.operation==Olex2DocumentOperation::ToggleHydrogenBondsVisibility||
++      request.operation==Olex2DocumentOperation::ToggleQPeaksVisibility||
++      request.operation==Olex2DocumentOperation::ToggleQPeakBondsVisibility){
++    action=request.operation==Olex2DocumentOperation::ToggleHydrogensVisibility?"toggle-hydrogens":
++      request.operation==Olex2DocumentOperation::ToggleHydrogenBondsVisibility?"toggle-hydrogen-bonds":
++      request.operation==Olex2DocumentOperation::ToggleQPeaksVisibility?"toggle-qpeaks":"toggle-qpeak-bonds";
++    if(!DispatchHarmonyMainGuiAction(app,action))
++      throw std::runtime_error("Original atom, hydrogen-bond, or Q-peak visibility action is unavailable");
+   }else if(request.operation==Olex2DocumentOperation::CenterModel){
+     if(!DispatchHarmonyMainGuiAction(app,"center-model"))throw std::runtime_error("Harmony main-form center action is unavailable");
+     // The original action changes only the camera centre. Keep the neutral
+@@ -402,6 +413,10 @@
+   else if(state.selectionAction=="hide-selection")interactionSource="original TMainForm::OnGraphics/GXLibMacros::macHide";
+   else if(state.selectionAction=="quality-1"||state.selectionAction=="quality-2"||state.selectionAction=="quality-3")
+     interactionSource="original TMainForm::OnDrawQChange/GXLibMacros::macQual/TGXApp::Quality";
++  else if(state.selectionAction=="toggle-hydrogens"||state.selectionAction=="toggle-hydrogen-bonds")
++    interactionSource="original GXLibMacros::macShowH/TGXApp hydrogen visibility setters";
++  else if(state.selectionAction=="toggle-qpeaks"||state.selectionAction=="toggle-qpeak-bonds")
++    interactionSource="original GXLibMacros::macShowQ/TGXApp Q-peak visibility setters";
+   else if(state.selectionAction.rfind("view-along-",0)==0)interactionSource=state.selectionAction=="view-along-selection"?
+     "original TMainForm::OnBond/OnPlane/GXLibMacros::macSetView":"original TMainForm::OnViewAlong/GXLibMacros::macMatr";
+   std::ostringstream out;out<<"{\"passed\":"<<(passed?"true":"false")<<",\"loaded\":"<<(state.loaded?"true":"false")
+--- a/upstream/olex/main_gui.cpp
++++ b/upstream/olex/main_gui.cpp
+@@ -22,6 +22,53 @@
+   if (action == "quality-1") { app.Quality(qaLow); return true; }
+   if (action == "quality-2") { app.Quality(qaMedium); return true; }
+   if (action == "quality-3") { app.Quality(qaHigh); return true; }
++  if (action == "toggle-hydrogens" || action == "toggle-hydrogen-bonds" ||
++      action == "toggle-qpeaks" || action == "toggle-qpeak-bonds") {
++    struct RestoreBasis {
++      TGlRenderer& renderer;
++      TEBasis basis;
++      explicit RestoreBasis(TGlRenderer& r) : renderer(r), basis(r.GetBasis()) {}
++      ~RestoreBasis() { renderer.SetBasis(basis); }
++    } restoreBasis(app.GetRenderer());
++    if (action == "toggle-hydrogens") {
++      const bool visible = !app.AreHydrogensVisible();
++      app.SetHydrogensVisible(visible);
++      // Match GXLibMacros::macShowH's explicit `ShowH a <bool>` path.
++      TGXApp::AtomIterator atoms = app.GetAtoms();
++      while (atoms.HasNext()) {
++        TXAtom& atom = atoms.Next();
++        if (atom.GetType() == iHydrogenZ && !atom.IsDeleted()) atom.SetVisible(visible);
++      }
++      TGXApp::BondIterator bonds = app.GetBonds();
++      while (bonds.HasNext()) {
++        TXBond& bond = bonds.Next();
++        if (!bond.IsDeleted() &&
++            (bond.A().GetType() == iHydrogenZ || bond.B().GetType() == iHydrogenZ))
++          bond.SetVisible(visible);
++      }
++      NotifyHarmonyVisibilityStateChange(app.stateHydrogensVisible, visible);
++    }
++    else if (action == "toggle-hydrogen-bonds") {
++      const bool visible = !app.AreHBondsVisible();
++      app.SetHBondsVisible(visible);
++      NotifyHarmonyVisibilityStateChange(app.stateHydrogenBondsVisible, visible);
++    }
++    else if (action == "toggle-qpeaks") {
++      if (!app.XFile().HasLastLoader()) return false;
++      const bool visible = !app.AreQPeaksVisible();
++      app.SetQPeaksVisible(visible);
++      NotifyHarmonyVisibilityStateChange(app.stateQPeaksVisible, visible);
++    }
++    else {
++      if (!app.XFile().HasLastLoader()) return false;
++      const bool visible = !app.AreQPeakBondsVisible();
++      app.SetQPeakBondsVisible(visible);
++      NotifyHarmonyVisibilityStateChange(app.stateQPeakBondsVisible, visible);
++    }
++    // The original ShowH/ShowQ commands preserve the user's camera while
++    // connectivity and visibility are recalculated; RestoreBasis also covers errors.
++    return true;
++  }
+   if (action == "toggle-cell") {
+     app.SetCellVisible(!app.IsCellVisible());
+     NotifyHarmonyVisibilityStateChange(app.stateCellVisible, app.IsCellVisible());
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -121,8 +121,9 @@
+          action!="toggle-cell"&&action!="toggle-basis"&&action!="toggle-frame"&&action!="toggle-grid"&&action!="show-all"&&action!="center-model"&&
+         action!="view-along-100"&&action!="view-along-010"&&action!="view-along-001"&&action!="view-along-110"&&
+         action!="view-along-101"&&action!="view-along-011"&&action!="view-along-111"&&action!="view-along-selection"&&
+-        action!="hide-selection"&&action!="quality-1"&&action!="quality-2"&&action!="quality-3"))
+-      return reject("Allowed: pick, clear-selection, select-all, invert-selection, toggle-cell, toggle-basis, toggle-frame, toggle-grid, show-all, center-model, hide-selection, quality-1/2/3, view-along-100/010/001/110/101/011/111/selection");
++        action!="hide-selection"&&action!="quality-1"&&action!="quality-2"&&action!="quality-3"&&action!="toggle-hydrogens"&&
++        action!="toggle-hydrogen-bonds"&&action!="toggle-qpeaks"&&action!="toggle-qpeak-bonds"))
++      return reject("Allowed: pick, clear-selection, select-all, invert-selection, toggle-cell, toggle-basis, toggle-frame, toggle-grid, show-all, center-model, hide-selection, quality-1/2/3, toggle-hydrogens/hydrogen-bonds/qpeaks/qpeak-bonds, view-along-100/010/001/110/101/011/111/selection");
+     double x=0,y=0,mode=0;
+     if(napi_get_value_double(env,args[1],&x)!=napi_ok||napi_get_value_double(env,args[2],&y)!=napi_ok||
+         napi_get_value_double(env,args[3],&mode)!=napi_ok||!std::isfinite(x)||!std::isfinite(y)||
+--- a/app/entry/src/main/cpp/renderer.cpp
++++ b/app/entry/src/main/cpp/renderer.cpp
+@@ -694,6 +694,10 @@
+   else if(action=="quality-1")request.operation=Olex2DocumentOperation::SetDrawingQualityLow;
+   else if(action=="quality-2")request.operation=Olex2DocumentOperation::SetDrawingQualityMedium;
+   else if(action=="quality-3")request.operation=Olex2DocumentOperation::SetDrawingQualityHigh;
++  else if(action=="toggle-hydrogens")request.operation=Olex2DocumentOperation::ToggleHydrogensVisibility;
++  else if(action=="toggle-hydrogen-bonds")request.operation=Olex2DocumentOperation::ToggleHydrogenBondsVisibility;
++  else if(action=="toggle-qpeaks")request.operation=Olex2DocumentOperation::ToggleQPeaksVisibility;
++  else if(action=="toggle-qpeak-bonds")request.operation=Olex2DocumentOperation::ToggleQPeakBondsVisibility;
+   else return reject("Unknown original document interaction action");
+   if(!std::isfinite(x)||!std::isfinite(y)||x<0||x>1||y<0||y>1||mode>2)
+     return reject("Expected finite normalized viewport coordinates in [0,1] and selection mode 0, 1 or 2");
+--- a/app/entry/src/main/cpp/types/libolex2native/index.d.ts
++++ b/app/entry/src/main/cpp/types/libolex2native/index.d.ts
+@@ -108,7 +108,7 @@
+ // Private candidate38 ABI: JSON envelopes are parsed/validated by the document UI.
+ export const openOriginalDocument: (name: string, bytes: Uint8Array) => string;
+ // Existing original viewport only. x/y: finite normalized top-left [0,1].
+-// action: pick | clear-selection | select-all | invert-selection | toggle-cell | toggle-basis | toggle-frame | toggle-grid | show-all | center-model | hide-selection | quality-1/2/3 | view-along-100/010/001/110/101/011/111/selection.
++// action: pick | clear-selection | select-all | invert-selection | toggle-cell | toggle-basis | toggle-frame | toggle-grid | show-all | center-model | hide-selection | quality-1/2/3 | toggle-hydrogens/hydrogen-bonds/qpeaks/qpeak-bonds | view-along-100/010/001/110/101/011/111/selection.
+ // mode: integer 0 replace, 1 add, 2 toggle; all four arguments are required.
+ // Returns the actual document/core/presentation envelope (including failures).
+ export const interactOriginalDocument: (action: string, x: number, y: number, mode: number) => string;
+--- a/app/entry/src/main/ets/model/OriginalViewportInput.ts
++++ b/app/entry/src/main/ets/model/OriginalViewportInput.ts
+@@ -10,7 +10,8 @@
+ export function originalSelectionRequest(action: string, x: number, y: number, mode: number): OriginalSelectionRequest {
+   if ((action !== 'pick' && action !== 'clear-selection' && action !== 'select-all' && action !== 'invert-selection' && action !== 'toggle-cell' && action !== 'toggle-basis' && action !== 'toggle-frame' && action !== 'show-all' && action !== 'center-model' && action !== 'view-along-100' && action !== 'view-along-010' &&
+       action !== 'view-along-001' && action !== 'view-along-110' && action !== 'view-along-101' &&
+-      action !== 'view-along-011' && action !== 'view-along-111' && action !== 'view-along-selection' && action !== 'hide-selection' && action !== 'toggle-grid' && action !== 'quality-1' && action !== 'quality-2' && action !== 'quality-3') ||
++      action !== 'view-along-011' && action !== 'view-along-111' && action !== 'view-along-selection' && action !== 'hide-selection' && action !== 'toggle-grid' && action !== 'quality-1' && action !== 'quality-2' && action !== 'quality-3' && action !== 'toggle-hydrogens' &&
++      action !== 'toggle-hydrogen-bonds' && action !== 'toggle-qpeaks' && action !== 'toggle-qpeak-bonds') ||
+     !Number.isFinite(x) || !Number.isFinite(y) || x < 0 || x > 1 || y < 0 || y > 1 ||
+     !Number.isInteger(mode) || mode < 0 || mode > 2) {
+     throw new Error('选择动作、视口坐标或选择模式不合法');
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -533,6 +533,10 @@
+             validated.action === 'toggle-grid' ? '已切换网格显示' : validated.action === 'center-model' ? '模型已居中' :
+               validated.action === 'hide-selection' ? '已隐藏所选图形' : validated.action === 'quality-1' ? '已切换至低绘图质量' :
+                 validated.action === 'quality-2' ? '已切换至中绘图质量' : validated.action === 'quality-3' ? '已切换至高绘图质量' :
++                  validated.action === 'toggle-hydrogens' ? '已切换氢原子显示' :
++                    validated.action === 'toggle-hydrogen-bonds' ? '已切换氢键显示' :
++                      validated.action === 'toggle-qpeaks' ? '已切换 Q 峰显示' :
++                        validated.action === 'toggle-qpeak-bonds' ? '已切换 Q 峰键显示' :
+                   validated.action === 'view-along-selection' ? '已沿所选键/平面调整视向' : validated.action.startsWith('view-along-') ?
+             `视向已切换至 ${validated.action.substring('view-along-'.length)}` : '已显示全部分子并重新居中';
+       this.originalSelectionMessage = `${actionLabel} · 选中 ${core.selectedObjectCount} · 选择序号 ${core.selectionSequence}` +
+@@ -2690,6 +2694,17 @@
+         Button('切换网格').id('olex2-original-toggle-grid').height(25).fontSize(10)
+           .enabled(this.originalSelectionEnabled()).onClick(() => this.selectOriginalDocument('toggle-grid'))
+         Text('需先载入晶体学网格数据').fontSize(10).fontColor('#758579').layoutWeight(1)
++      }.width('100%')
++      Row({ space: 5 }) {
++        Button('原子/键显示').id('olex2-original-atom-bond-visibility').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled())
++          .bindMenu([
++            { value: '切换氢原子', action: () => this.selectOriginalDocument('toggle-hydrogens') },
++            { value: '切换氢键', action: () => this.selectOriginalDocument('toggle-hydrogen-bonds') },
++            { value: '切换 Q 峰', action: () => this.selectOriginalDocument('toggle-qpeaks') },
++            { value: '切换 Q 峰键', action: () => this.selectOriginalDocument('toggle-qpeak-bonds') }
++          ])
++        Text('保留原版可见性与连接重算行为').fontSize(10).fontColor('#758579').layoutWeight(1)
+       }.width('100%')
+       Row({ space: 5 }) {
+         Button('绘图质量').id('olex2-original-drawing-quality').height(25).fontSize(10)

@@ -1,0 +1,35 @@
+--- a/upstream/olex/updateoptions.cpp
++++ b/upstream/olex/updateoptions.cpp
+@@ -74,6 +74,10 @@
+       const auto draft=GetDraft();SingleLine(draft.proxy);SingleLine(draft.repository);SingleLine(draft.interval);
+       if(cbRepository->GetSelection()<0||rbUpdateInterval->GetSelection()<0)throw std::invalid_argument("Select the update options before saving");
+       store->Save(draft);
++    }catch(const std::exception& e){
++      if(life->owner!=this)return false;
++      saveError_=std::string("Could not save update settings: ")+e.what()+". Your edits are kept; retry or cancel.";
++      status_->SetText(TextProperty::Content,saveError_);return false;
+     }catch(...){
+       if(life->owner!=this)return false;
+       saveError_="Could not save update settings. Your edits are kept; retry or cancel.";
+--- a/native/original_update_options_store.cpp
++++ b/native/original_update_options_store.cpp
+@@ -17,9 +17,18 @@
+   }
+   UpdateOptionsSnapshot Load()override{
+     const auto& s=api_.GetSettings();UpdateOptionsSnapshot result;
+-    result.values={s.proxy,api_.AddTagPart(s.repository,true),s.update_interval,s.ask_for_update};
+     TStrList mirrors;api_.GetAvailableMirrors(mirrors);
+     for(size_t i=0;i<mirrors.Count();++i)result.repositories.Add(api_.AddTagPart(mirrors[i],true));
++    // A fresh installation has no mirrors file; the original UI would then have
++    // an empty repository list and refuse to save. Populate the original default
++    // repositories and preselect one so the dialog can be applied.
++    if(result.repositories.IsEmpty()){
++      const TStrList& defaults=updater::UpdateAPI::GetDefaultRepositories();
++      for(size_t i=0;i<defaults.Count();++i)result.repositories.Add(api_.AddTagPart(defaults[i],true));
++    }
++    olxstr repository=api_.AddTagPart(s.repository,true);
++    if(repository.IsEmpty()&&!result.repositories.IsEmpty())repository=result.repositories[0];
++    result.values={s.proxy,repository,s.update_interval,s.ask_for_update};
+     result.lastUpdatedCaption=olxstr("Last updated: ")+(s.last_updated?TETime::FormatDateTime(s.last_updated):olxstr("Never"));
+     return result;
+   }

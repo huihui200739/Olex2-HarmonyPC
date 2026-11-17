@@ -1,0 +1,80 @@
+--- a/upstream/olex/nui/nui.h
++++ b/upstream/olex/nui/nui.h
+@@ -108,4 +108,50 @@
+   void processSkeleton();
+ };
+ #endif //__WIN32__
++
++// The original skeleton mesh is also useful to render externally supplied
++// joint frames on Harmony. Keep the Kinect capture implementation Windows-only,
++// but share the original renderer and its Kinect-compatible joint ordering.
++#if defined(__OHOS__)
++enum {
++  NUI_SKELETON_COUNT = 6,
++  NUI_SKELETON_POSITION_COUNT = 20,
++  NUI_SKELETON_POSITION_HIP_CENTER = 0,
++  NUI_SKELETON_POSITION_SPINE = 1,
++  NUI_SKELETON_POSITION_SHOULDER_CENTER = 2,
++  NUI_SKELETON_POSITION_HEAD = 3,
++  NUI_SKELETON_POSITION_SHOULDER_LEFT = 4,
++  NUI_SKELETON_POSITION_ELBOW_LEFT = 5,
++  NUI_SKELETON_POSITION_WRIST_LEFT = 6,
++  NUI_SKELETON_POSITION_HAND_LEFT = 7,
++  NUI_SKELETON_POSITION_SHOULDER_RIGHT = 8,
++  NUI_SKELETON_POSITION_ELBOW_RIGHT = 9,
++  NUI_SKELETON_POSITION_WRIST_RIGHT = 10,
++  NUI_SKELETON_POSITION_HAND_RIGHT = 11,
++  NUI_SKELETON_POSITION_HIP_LEFT = 12,
++  NUI_SKELETON_POSITION_KNEE_LEFT = 13,
++  NUI_SKELETON_POSITION_ANKLE_LEFT = 14,
++  NUI_SKELETON_POSITION_FOOT_LEFT = 15,
++  NUI_SKELETON_POSITION_HIP_RIGHT = 16,
++  NUI_SKELETON_POSITION_KNEE_RIGHT = 17,
++  NUI_SKELETON_POSITION_ANKLE_RIGHT = 18,
++  NUI_SKELETON_POSITION_FOOT_RIGHT = 19
+ };
++
++class Skeleton : public AGDrawObject {
++protected:
++  void DrawQuad(const vec3d &p1, const vec3d &p2,
++    const vec3d &p3, const vec3d &p4);
++  void DrawLimp(const vec3d &shoulder, const vec3d &wrist,
++    const vec3d &body, const vec3d &p_shoulder, const vec3d &p_elbow,
++    const vec3d &p_wrist, bool cw);
++public:
++  Skeleton(TGlRenderer& renderer, const olxstr& collectionName)
++    : AGDrawObject(renderer, collectionName), points(NUI_SKELETON_COUNT) {}
++  void Create(const olxstr& cName=EmptyString());
++  bool Orient(TGlPrimitive& primitive);
++  bool GetDimensions(vec3d& Max, vec3d& Min) { return false; }
++  TArrayList<vec3d_alist> points;
++};
++#endif // __OHOS__ skeleton renderer
++};
+--- a/upstream/olex/nui/skeleton.cpp
++++ b/upstream/olex/nui/skeleton.cpp
+@@ -15,7 +15,7 @@
+ #include "styles.h"
+ #include "gxapp.h"
+ 
+-#if defined(__WIN32__) && !defined(_WIN64) && defined(__OLX_USE_NUI__)
++#if (defined(__WIN32__) && !defined(_WIN64) && defined(__OLX_USE_NUI__)) || defined(__OHOS__)
+ using namespace olx_nui;
+ 
+ void Skeleton::Create(const olxstr& cName) {
+@@ -225,4 +225,4 @@
+ 
+ /*****************************************************************************/
+ 
+-#endif //__WIN32__
++#endif // Windows Kinect or Harmony skeleton renderer
+--- a/cmake/Olex2NativeWidgets.cmake
++++ b/cmake/Olex2NativeWidgets.cmake
+@@ -11,6 +11,7 @@
+     "${project_root}/upstream/olex/dgenopt.cpp"
+     "${project_root}/upstream/olex/ptable.cpp"
+     "${project_root}/upstream/olex/nui/nui.cpp"
++    "${project_root}/upstream/olex/nui/skeleton.cpp"
+     "${project_root}/upstream/olex/tasks.cpp"
+     "${project_root}/upstream/olex/edit.cpp"
+     "${project_root}/upstream/olex/updateth.cpp"

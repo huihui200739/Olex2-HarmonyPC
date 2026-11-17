@@ -1,0 +1,18 @@
+--- a/upstream/olex/main_gui.cpp
++++ b/upstream/olex/main_gui.cpp
+@@ -31,8 +31,13 @@
+     return true;
+   }
+   if (action == "show-all") {
+-    auto* processor = olex2::IOlex2Processor::GetInstance();
+-    return processor != nullptr && processor->processMacro("fmol");
++    // Keep the original GXLibMacros::macFmol behavior without requiring a
++    // desktop-only macro processor in the Harmony renderer session.
++    app.AllVisible(true);
++    app.CenterView();
++    app.GetRenderer().GetBasis().SetZoom(
++      app.GetRenderer().CalcZoom() * app.GetExtraZoom());
++    return true;
+   }
+   return false;
+ }

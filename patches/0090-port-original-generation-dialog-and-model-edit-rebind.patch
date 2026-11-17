@@ -1,0 +1,350 @@
+--- a/app/entry/src/main/cpp/napi_init.cpp
++++ b/app/entry/src/main/cpp/napi_init.cpp
+@@ -3,6 +3,7 @@
+ #include "utility_checks.h"
+ #include "application_runtime.h"
+ #include "original_interpreter.h"
++#include "native_dialog_factory.h"
+ #include "eutf8.h"
+ #include <memory>
+ #include <mutex>
+@@ -279,6 +280,53 @@
+   auto& owner=Runtime();std::lock_guard<std::mutex> lock(owner.mutex);olex2::harmony::ApplicationCommandResult result;result.input=input;
+   try{if(!owner.runtime)throw std::runtime_error("Original application runtime is not initialized");result=owner.runtime->ExecuteCommand(input);}catch(const std::exception& e){result.error=e.what();}
+   napi_value out;napi_create_object(env,&out);Boolean(env,out,"passed",result.passed);Property(env,out,"input",String(env,result.input));Property(env,out,"text",String(env,result.text));Property(env,out,"output",String(env,result.output));Property(env,out,"error",String(env,result.error));Property(env,out,"runtime",RuntimeObject(env,result.runtime));return out;
++}
++struct GenerateDialogState {
++  std::mutex mutex;void* handle=nullptr;bool done=false;int result=0;
++};
++GenerateDialogState& GenerateDialog(){static auto* state=new GenerateDialogState;return *state;}
++int GenerateDialogCompleted(void*,int result,const char*){
++  auto& state=GenerateDialog();std::lock_guard<std::mutex> lock(state.mutex);
++  state.done=true;state.result=result;return 0;
++}
++napi_value OpenOriginalGenerateDialog(napi_env env,napi_callback_info){
++  napi_value out;napi_create_object(env,&out);
++  auto& owner=Runtime();std::lock_guard<std::mutex> ownerLock(owner.mutex);
++  auto& state=GenerateDialog();
++  {
++    std::lock_guard<std::mutex> lock(state.mutex);
++    if(!owner.runtime){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,"Original application runtime is not initialized"));return out;}
++    if(state.handle){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,"A generation dialog is already open"));return out;}
++    char error[512]={};
++    void* handle=olex2_native_generate_create(env,GenerateDialogCompleted,nullptr,error,sizeof(error));
++    if(!handle){Boolean(env,out,"opened",false);Property(env,out,"error",String(env,error[0]?error:"Original generation dialog could not be created"));return out;}
++    state.handle=handle;state.done=false;state.result=0;
++  }
++  char error[512]={};
++  if(olex2_native_dialog_show(state.handle,true,error,sizeof(error))!=0){
++    std::lock_guard<std::mutex> lock(state.mutex);
++    char releaseError[512]={};olex2_native_dialog_release(state.handle,releaseError,sizeof(releaseError));state.handle=nullptr;
++    Boolean(env,out,"opened",false);Property(env,out,"error",String(env,error[0]?error:"Original generation dialog could not be shown"));return out;
++  }
++  Boolean(env,out,"opened",true);Property(env,out,"error",String(env,""));return out;
++}
++napi_value PollOriginalGenerateDialog(napi_env env,napi_callback_info){
++  napi_value out;napi_create_object(env,&out);
++  auto& state=GenerateDialog();std::lock_guard<std::mutex> lock(state.mutex);
++  if(!state.handle){Property(env,out,"state",String(env,"none"));Property(env,out,"error",String(env,""));return out;}
++  if(!state.done){Property(env,out,"state",String(env,"open"));Property(env,out,"error",String(env,""));return out;}
++  double values[7]={0};char error[512]={};
++  const int rc=olex2_native_generate_values(state.handle,values,error,sizeof(error));
++  std::string readError=rc!=0?(error[0]?error:"Original generation values could not be read"):"";
++  char releaseError[512]={};olex2_native_dialog_release(state.handle,releaseError,sizeof(releaseError));
++  state.handle=nullptr;state.done=false;
++  Property(env,out,"state",String(env,"done"));
++  Boolean(env,out,"accepted",values[0]!=0);
++  napi_value array;napi_create_array_with_length(env,6,&array);
++  for(int i=0;i<6;i++){napi_value number;napi_create_double(env,values[i+1],&number);napi_set_element(env,array,i,number);}
++  Property(env,out,"values",array);
++  Property(env,out,"error",String(env,readError));
++  return out;
+ }
+ napi_value OriginalLogsObject(napi_env env,const olex2::harmony::OriginalLogSnapshot& s,const std::string& error){
+   napi_value out,entries;napi_create_object(env,&out);napi_create_array_with_length(env,s.entries.size(),&entries);
+@@ -574,6 +622,8 @@
+     {"restoreOriginalDocumentViewport",nullptr,RestoreOriginalDocumentViewport,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"evaluateApplicationFunction",nullptr,EvaluateApplicationFunction,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"executeOriginalCommand",nullptr,ExecuteOriginalCommand,nullptr,nullptr,nullptr,napi_default,nullptr},
++    {"openOriginalGenerateDialog",nullptr,OpenOriginalGenerateDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
++    {"pollOriginalGenerateDialog",nullptr,PollOriginalGenerateDialog,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"getOriginalLogs",nullptr,GetOriginalLogs,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"clearOriginalLogs",nullptr,ClearOriginalLogs,nullptr,nullptr,nullptr,napi_default,nullptr},
+     {"runCoreCatalog",nullptr,RunCoreCatalog,nullptr,nullptr,nullptr,napi_default,nullptr},
+--- a/app/entry/src/main/cpp/types/libolex2native/index.d.ts
++++ b/app/entry/src/main/cpp/types/libolex2native/index.d.ts
+@@ -66,6 +66,17 @@
+ // plus the ported Harmony main-form actions. Output is the bounded original log
+ // text produced by the command; no separate macro parser is used.
+ export const executeOriginalCommand: (command: string) => OriginalCommandReport;
++export interface OriginalGenerateDialogReport {
++  state: 'none' | 'open' | 'done';
++  accepted?: boolean;
++  values?: number[];
++  error: string;
++}
++// Original Structure -> Generate... dialog (native ArkUI dialog host). Open it,
++// then poll until the modal result is available; on OK run the original pack
++// command with the returned A/B/C ranges.
++export const openOriginalGenerateDialog: () => { opened: boolean; error: string };
++export const pollOriginalGenerateDialog: () => OriginalGenerateDialogReport;
+ 
+ export interface ApplicationOptionsTransferReport {
+   passed: boolean; optionsChanged: boolean; importedOptions: number;
+--- a/app/entry/src/main/ets/model/OriginalDocumentSessions.ts
++++ b/app/entry/src/main/ets/model/OriginalDocumentSessions.ts
+@@ -218,6 +218,26 @@
+     if (session.draftDirty === draftDirty && session.documentDirty === documentDirty) return;
+     session.draftDirty = draftDirty;
+     session.documentDirty = documentDirty;
++    this.changed();
++  }
++
++  // A successful original command can change the live model (for example pack
++  // adds atoms) without touching the source bytes or revision. Re-derive the
++  // presented identity for the active source so the session binding survives the
++  // model edit; mismatched or unloaded sources are left to the normal reconcile.
++  refreshPresentedIdentity(document: OriginalDocumentEnvelope): void {
++    if (this.activeId === '' || this.nativeSessionId !== this.activeId) return;
++    let checked: OriginalDocumentEnvelope;
++    try { checked = parseOriginalDocument(JSON.stringify(document)); } catch (_) { return; }
++    if (!originalDocumentPresented(checked)) return;
++    const session: OriginalDocumentSessionRecord = this.requireSession(this.activeId);
++    if (checked.core.name !== session.document.core.name || checked.core.sha256 !== session.document.core.sha256 ||
++      checked.core.byteCount !== session.document.core.byteCount ||
++      checked.core.revision !== session.document.core.revision) return;
++    const identity: string = presentedIdentity(checked);
++    if (identity === session.identity) return;
++    session.document = checked;
++    session.identity = identity;
+     this.changed();
+   }
+ 
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -1,4 +1,4 @@
+-import nativeBridge, { GraphicsStatus, UtilityReport, CheckResult, ApplicationRuntimeStatus, OriginalLogSnapshot, CoreCatalogReport, PythonRuntimeStatus, OriginalLinePathGpuProbe, PythonExecutionReport, ApplicationFunctionReport, OriginalCommandReport, DesktopCommandReport } from 'libolex2native.so';
++import nativeBridge, { GraphicsStatus, UtilityReport, CheckResult, ApplicationRuntimeStatus, OriginalLogSnapshot, CoreCatalogReport, PythonRuntimeStatus, OriginalLinePathGpuProbe, PythonExecutionReport, ApplicationFunctionReport, OriginalCommandReport, OriginalGenerateDialogReport, DesktopCommandReport } from 'libolex2native.so';
+ import { fileIo } from '@kit.CoreFileKit';
+ import { common } from '@kit.AbilityKit';
+ import { OptionsDocumentTransfer, OptionsDocumentStatus, OptionsDocumentBackend, emptyOptionsDocumentStatus } from '../model/OptionsDocumentTransfer';
+@@ -222,6 +222,8 @@
+   private desktopShortcutLatch: DesktopShortcutLatch = new DesktopShortcutLatch();
+   private desktopMetaKeys: Set<number> = new Set<number>();
+   @State private commandText: string = 'pc.help';
++  private generateDialogTimer: number = -1;
++  private generateDialogOpen: boolean = false;
+   @State private commandMessage: string = '原版解析器已接入视图命令；完整命令库未接通';
+   @State private commandError: string = '';
+   @State private commandPassed: boolean = false;
+@@ -391,6 +393,8 @@
+     this.flushDesktopState();
+     if (this.timer >= 0) clearInterval(this.timer);
+     this.timer = -1;
++    if (this.generateDialogTimer >= 0) clearInterval(this.generateDialogTimer);
++    this.generateDialogTimer = -1;
+   }
+ 
+   private submitCommand(): void {
+@@ -1781,6 +1785,7 @@
+       this.commandMessage = output.length > 0 ? output : (result.passed ? result.text : '原版命令未通过');
+       this.originalLog = nativeBridge.getOriginalLogs();
+       this.refreshGraphics();
++      this.rebindPresentedSessionAfterModelChange();
+       if (result.passed && this.originalDocumentActive()) {
+         // Original commands can change renderer state without drawing. Redraw the
+         // retained document so the effect is visible immediately; a redraw failure
+@@ -1818,6 +1823,18 @@
+     } catch (error) {
+       AlertDialog.show({ title: '原版原子信息', message: (error as Error).message || '原版 Info 命令失败',
+         confirm: { value: '关闭', action: () => {} } });
++    }
++  }
++
++  private rebindPresentedSessionAfterModelChange(): void {
++    // Model-changing original commands can alter atom/bond counts while the
++    // source bytes and revision stay unchanged; refresh the presented identity
++    // before the status read reconciles and would drop the native binding.
++    try {
++      const parsed: OriginalDocumentEnvelope = parseOriginalDocument(nativeBridge.getOriginalDocumentStatus());
++      this.originalDocumentSessions.refreshPresentedIdentity(parsed);
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版文档状态读回失败';
+     }
+   }
+ 
+@@ -1835,10 +1852,65 @@
+       if (result.passed) {
+         try { nativeBridge.redrawOriginalDocument(); } catch (redrawError) { this.originalLog = nativeBridge.getOriginalLogs(); }
+       }
++      this.rebindPresentedSessionAfterModelChange();
+       this.readOriginalDocumentStatus();
+       this.refreshGraphics();
+     } catch (error) {
+       this.originalSelectionMessage = (error as Error).message || '原版选择命令失败';
++    }
++  }
++
++  private openOriginalGenerateDialog(): void {
++    if (this.generateDialogOpen || !this.originalDocumentActive()) return;
++    try {
++      const opened = nativeBridge.openOriginalGenerateDialog();
++      if (!opened.opened) {
++        this.originalSelectionMessage = opened.error || '原版生成选项未打开';
++        return;
++      }
++      this.generateDialogOpen = true;
++      this.originalSelectionMessage = '已打开原版生成选项…';
++      if (this.generateDialogTimer < 0) {
++        this.generateDialogTimer = setInterval(() => { this.pollOriginalGenerateDialog(); }, 400);
++      }
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版生成选项调用失败';
++    }
++  }
++
++  private pollOriginalGenerateDialog(): void {
++    if (!this.generateDialogOpen) return;
++    try {
++      const report: OriginalGenerateDialogReport = nativeBridge.pollOriginalGenerateDialog();
++      if (report.state === 'open') return;
++      if (this.generateDialogTimer >= 0) clearInterval(this.generateDialogTimer);
++      this.generateDialogTimer = -1;
++      this.generateDialogOpen = false;
++      if (report.state !== 'done') return;
++      if (!report.accepted) {
++        this.originalSelectionMessage = '已取消原版生成选项';
++        return;
++      }
++      const values: number[] = report.values === undefined ? [] : report.values;
++      if (values.length !== 6 || values.some((value: number) => !Number.isFinite(value))) {
++        this.originalSelectionMessage = '原版生成选项未返回完整的 A/B/C 范围';
++        return;
++      }
++      const command: string = `pack ${values[0]} ${values[1]} ${values[2]} ${values[3]} ${values[4]} ${values[5]}`;
++      const result: OriginalCommandReport = nativeBridge.executeOriginalCommand(command);
++      this.commandPassed = result.passed;
++      this.commandError = result.error;
++      const output: string = result.output.trim();
++      this.commandMessage = output.length > 0 ? output : (result.passed ? result.text : '原版 pack 未通过');
++      this.originalSelectionMessage = result.passed ? `已按原版生成选项执行 ${command}` : (result.error || '原版 pack 未通过');
++      if (result.passed) {
++        try { nativeBridge.redrawOriginalDocument(); } catch (redrawError) { this.originalLog = nativeBridge.getOriginalLogs(); }
++      }
++      this.rebindPresentedSessionAfterModelChange();
++      this.readOriginalDocumentStatus();
++      this.refreshGraphics();
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版生成选项轮询失败';
+     }
+   }
+ 
+@@ -2962,6 +3034,10 @@
+           .fontColor('#355443').backgroundColor('#EDF3EF')
+           .enabled(this.originalDocumentActive() && !this.originalDocumentOperationBusy())
+           .onClick(() => this.transferOriginalDocument('close'))
++        Button('生成…').id('olex2-original-generate').height(28).fontSize(10)
++          .fontColor('#355443').backgroundColor('#EDF3EF')
++          .enabled(this.originalDocumentViewPresented() && !this.originalDocumentOperationBusy() && !this.generateDialogOpen)
++          .onClick(() => this.openOriginalGenerateDialog())
+         Blank()
+       }.width('100%')
+       Row({ space: 6 }) {
+--- a/cmake/original_renderer.exports
++++ b/cmake/original_renderer.exports
+@@ -4,6 +4,8 @@
+   olex2_native_frame_request;
+   olex2_native_frame_unmount;
+   olex2_native_update_options_create;
++  olex2_native_generate_create;
++  olex2_native_generate_values;
+   olex2_native_options_mount;
+   olex2_native_options_update;
+   olex2_native_options_unmount;
+--- a/native/arkui_input_events.cpp
++++ b/native/arkui_input_events.cpp
+@@ -31,6 +31,7 @@
+ }}
+ void Need(int32_t value,const char* what){if(value)throw std::runtime_error(std::string("ArkUI input ")+what+" failed ("+std::to_string(value)+")");}
+ }
++bool NativeKeyboardAvailable(){return Keys().Available();}
+ void RequireNativeKeyboard(){if(!Keys().Available())throw std::runtime_error("Original native input controls require the platform's API14 hardware-key interface; API12 base widgets remain available");}
+ void DispatchNativeKeyboard(ArkUI_NodeEvent* event,const std::function<void(const NodeEvent&)>& receiver)noexcept{
+   try{
+--- a/native/arkui_input_events.h
++++ b/native/arkui_input_events.h
+@@ -7,6 +7,7 @@
+ // No strong imports of API14 functions are introduced into the API12 library.
+ // Controls requesting hardware keys require the real API14 symbols at runtime;
+ // absent capability is an explicit construction error, never a fabricated key.
++bool NativeKeyboardAvailable();
+ void RequireNativeKeyboard();
+ void DispatchNativeKeyboard(ArkUI_NodeEvent*,const std::function<void(const NodeEvent&)>&)noexcept;
+ class ArkUiDoubleClick {
+--- a/native/arkui_widget_backend.cpp
++++ b/native/arkui_widget_backend.cpp
+@@ -256,7 +256,13 @@
+         if(kind==EventKind::DoubleClick) {
+           if(!record.list&&!record.doubleClick){auto* stable=&record;record.doubleClick=std::make_unique<ArkUiDoubleClick>(record.handle,[stable]{auto receiver=stable->receiver;if(receiver)receiver(NodeEvent{EventKind::DoubleClick});});}continue;
+         }
+-        if(kind==EventKind::Key)RequireNativeKeyboard();subscribe(NativeEvent(record.kind,kind));
++        if(kind==EventKind::Key) {
++          // Hardware-key conversion is an optional platform extension. When the
++          // API14 interface is absent, keep the base text widget usable and skip
++          // key events instead of failing the whole dialog.
++          if(!NativeKeyboardAvailable()) continue;
++        }
++        subscribe(NativeEvent(record.kind,kind));
+       }
+     }catch(...){Unsubscribe(node);throw;}
+   }
+--- a/native/native_dialog_factory.cpp
++++ b/native/native_dialog_factory.cpp
+@@ -1,4 +1,5 @@
+ #include "updateoptions.h"
++#include "dgenopt.h"
+ #include "native_dialog_factory.h"
+ #include "ctrls.h"
+ #include "msgbox.h"
+@@ -46,6 +47,28 @@
+ extern "C" int olex2_native_dialog_close(void* key,int result,char* error,std::size_t capacity){try{Error(error,capacity,"");auto owner=Find(key);owner->Check();if(owner->dialog->IsClosing())owner->dialog->RetryClose();else owner->dialog->EndModal(result);return 0;}catch(const std::exception& e){Error(error,capacity,e.what());}catch(...){Error(error,capacity,"Native dialog close failed; owner retained");}return -1;}
+ extern "C" int olex2_native_dialog_release(void* key,char* error,std::size_t capacity){try{Error(error,capacity,"");auto owner=Find(key);owner->Check();if(owner->dialog->IsShown()||owner->dialog->IsClosing()){if(owner->dialog->IsClosing())owner->dialog->RetryClose();else owner->dialog->EndModal(DialogCancelled);if(owner->dialog->IsShown()||owner->dialog->IsClosing())return 1;}auto& registry=Owners();std::lock_guard<std::mutex> lock(registry.mutex);registry.owners.erase(key);return 0;}catch(const std::exception& e){Error(error,capacity,e.what());}catch(...){Error(error,capacity,"Native dialog release failed; owner retained");}return -1;}
+ 
++extern "C" void* olex2_native_generate_create(void* environment,Olex2NativeDialogCompleted completed,void* context,char* error,std::size_t capacity){
++  try{
++    Error(error,capacity,"");if(!environment)throw std::invalid_argument("Generate dialog requires its UI environment");
++    auto owner=std::make_shared<Owner>();owner->scheduler=CreateNapiUiScheduler(environment);owner->backend=CreateArkUiDialogBackend(owner->scheduler);owner->completed=completed;owner->context=context;
++    owner->dialog=std::make_unique<TdlgGenerate>(ArkUiBackend(),owner->backend,owner->scheduler,nullptr,Positions());
++    auto& registry=Owners();std::lock_guard<std::mutex> lock(registry.mutex);
++    if(registry.next==std::numeric_limits<uintptr_t>::max())throw std::overflow_error("Native dialog handles exhausted");
++    auto key=reinterpret_cast<void*>(++registry.next);registry.owners.emplace(key,std::move(owner));return key;
++  }catch(const std::exception& e){Error(error,capacity,e.what());}catch(...){Error(error,capacity,"Original generation dialog failed");}
++  return nullptr;
++}
++extern "C" int olex2_native_generate_values(void* key,double* values,char* error,std::size_t capacity){
++  try{
++    Error(error,capacity,"");if(!values)throw std::invalid_argument("Generate values destination is absent");
++    auto owner=Find(key);auto* dialog=dynamic_cast<TdlgGenerate*>(owner->dialog.get());
++    if(!dialog)throw std::invalid_argument("Native dialog is not a generation dialog");
++    values[0]=dialog->ResultAccepted()?1:0;values[1]=dialog->GetAFrom();values[2]=dialog->GetATo();
++    values[3]=dialog->GetBFrom();values[4]=dialog->GetBTo();values[5]=dialog->GetCFrom();values[6]=dialog->GetCTo();
++    return 0;
++  }catch(const std::exception& e){Error(error,capacity,e.what());}catch(...){Error(error,capacity,"Generate values read failed");}
++  return -1;
++}
+ extern "C" void* olex2_native_update_options_create(void* environment,Olex2NativeDialogCompleted completed,void* context,char* error,std::size_t capacity){
+   try{
+     Error(error,capacity,"");if(!environment)throw std::invalid_argument("Update options require their UI environment");
+--- a/native/native_dialog_factory.h
++++ b/native/native_dialog_factory.h
+@@ -17,6 +17,10 @@
+ extern "C" {
+ // Creates the real original update-options window; reuse dialog show/close/release.
+ void* olex2_native_update_options_create(void* napiEnvironment,Olex2NativeDialogCompleted,void* context,char* error,std::size_t);
++// Original generation-options dialog (Structure -> Generate...). Values are read
++// by the caller before release: [accepted, AFrom, ATo, BFrom, BTo, CFrom, CTo].
++void* olex2_native_generate_create(void* napiEnvironment,Olex2NativeDialogCompleted,void* context,char* error,std::size_t);
++int olex2_native_generate_values(void* owner,double* values,char* error,std::size_t);
+ void* olex2_native_dialog_create(void* napiEnvironment,const Olex2NativeDialogValues*,Olex2NativeDialogCompleted,void* context,char* error,std::size_t);
+ int olex2_native_dialog_show(void* owner,bool modal,char* error,std::size_t);
+ int olex2_native_dialog_update(void* owner,const Olex2NativeDialogLayout*,char* error,std::size_t);

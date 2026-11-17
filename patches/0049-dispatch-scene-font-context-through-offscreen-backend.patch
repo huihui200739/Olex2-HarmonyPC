@@ -1,0 +1,11 @@
+--- a/upstream/gxlib/wxglscene.cpp
++++ b/upstream/gxlib/wxglscene.cpp
+@@ -28,7 +28,7 @@
+   return IsEnabled()&&bound_&&host_.make_current&&host_.make_current()!=0;
+ }
+ void TwxGlScene::RequireCurrent() const {
+-  if(!bound_||!IsEnabled()||!host_.make_current||!host_.make_current())
++  if(!const_cast<TwxGlScene*>(this)->MakeCurrent())
+     throw std::runtime_error("No current leased context for original scene fonts");
+ }
+ TGlFont& TwxGlScene::DoCreateFont(TGlFont& font,bool half) const {

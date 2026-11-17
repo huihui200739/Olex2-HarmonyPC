@@ -1,0 +1,111 @@
+diff --git a/native/original_document_view.cpp b/native/original_document_view.cpp
+--- a/native/original_document_view.cpp
++++ b/native/original_document_view.cpp
+@@ -447,7 +447,11 @@
+     <<",\"hydrogenBondsVisible\":"<<(app.AreHBondsVisible()?"true":"false")
+     <<",\"qPeaksVisible\":"<<(app.AreQPeaksVisible()?"true":"false")
+     <<",\"qPeakBondsVisible\":"<<(app.AreQPeakBondsVisible()?"true":"false")
+-    <<",\"structureVisible\":"<<(app.IsStructureVisible()?"true":"false");
++    <<",\"structureVisible\":"<<(app.IsStructureVisible()?"true":"false")
++    <<",\"cellVisible\":"<<(app.IsCellVisible()?"true":"false")
++    <<",\"basisVisible\":"<<(app.IsBasisVisible()?"true":"false")
++    <<",\"frameVisible\":"<<(app.Get3DFrame().IsVisible()?"true":"false")
++    <<",\"gridVisible\":"<<(app.IsGridVisible()?"true":"false");
+   out<<",\"originalPickingCalls\":"<<state.originalPickingCalls
+     <<",\"lastPickPixelX\":"<<state.lastPickPixelX<<",\"lastPickPixelY\":"<<state.lastPickPixelY
+     <<",\"selectionSource\":"<<Quote(interactionSource)
+diff --git a/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts b/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
+--- a/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
++++ b/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
+@@ -24,6 +24,7 @@
+   lastPickedCollection?: string; selectionAction?: string; selectionSource?: string;
+   labelsVisible?: boolean; hydrogensVisible?: boolean; hydrogenBondsVisible?: boolean;
+   qPeaksVisible?: boolean; qPeakBondsVisible?: boolean; structureVisible?: boolean;
++  cellVisible?: boolean; basisVisible?: boolean; frameVisible?: boolean; gridVisible?: boolean;
+ }
+ export interface OriginalDocumentEnvelope {
+   passed: boolean; surfacePresented: boolean; parentContextRestored: boolean;
+@@ -99,6 +100,10 @@
+     (fields.indexOf('qPeaksVisible') >= 0 && typeof core.qPeaksVisible !== 'boolean') ||
+     (fields.indexOf('qPeakBondsVisible') >= 0 && typeof core.qPeakBondsVisible !== 'boolean') ||
+     (fields.indexOf('structureVisible') >= 0 && typeof core.structureVisible !== 'boolean') ||
++    (fields.indexOf('cellVisible') >= 0 && typeof core.cellVisible !== 'boolean') ||
++    (fields.indexOf('basisVisible') >= 0 && typeof core.basisVisible !== 'boolean') ||
++    (fields.indexOf('frameVisible') >= 0 && typeof core.frameVisible !== 'boolean') ||
++    (fields.indexOf('gridVisible') >= 0 && typeof core.gridVisible !== 'boolean') ||
+     (fields.indexOf('lastPickedCollection') >= 0 && (typeof core.lastPickedCollection !== 'string' ||
+       !validPickedCollection(core.lastPickedCollection))) ||
+     (fields.indexOf('selectionAction') >= 0 && (typeof core.selectionAction !== 'string' ||
+diff --git a/app/entry/src/main/ets/pages/Index.ets b/app/entry/src/main/ets/pages/Index.ets
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -31,7 +31,8 @@
+   OriginalDocumentTransferResult, OriginalDocumentBackend, OriginalDocumentCoreStatus, emptyOriginalDocument,
+   emptyOriginalDocumentTransfer, parseOriginalDocument, originalDocumentPresented,
+   ORIGINAL_MAIN_GUI_LABELS_SOURCE, ORIGINAL_MAIN_GUI_STRUCTURE_SOURCE, ORIGINAL_MAIN_GUI_HYDROGEN_SOURCE,
+-  ORIGINAL_MAIN_GUI_QPEAK_SOURCE } from '../model/OriginalDocumentTransfer';
++  ORIGINAL_MAIN_GUI_QPEAK_SOURCE, ORIGINAL_MAIN_GUI_CELL_SOURCE, ORIGINAL_MAIN_GUI_BASIS_SOURCE,
++  ORIGINAL_MAIN_GUI_FRAME_SOURCE, ORIGINAL_MAIN_GUI_GRID_SOURCE } from '../model/OriginalDocumentTransfer';
+ import { HarmonyOriginalDocumentPort } from '../model/OriginalDocumentStore';
+ import { OriginalDocumentSaveTargets, OriginalDocumentSaveTarget } from '../model/OriginalDocumentSaveTargets';
+ import { OriginalDocumentSaveTransport, OriginalDocumentSerializedSnapshot } from '../model/OriginalDocumentSaveTransport';
+@@ -516,10 +517,16 @@
+       // The page already imports the actual NAPI bridge directly. Do not add a
+       // second wrapper or silently fall back to demo/local selection state.
+       const validated: OriginalSelectionRequest = originalSelectionRequest(request.action, request.x, request.y, request.mode);
+-      const visibilityAction: boolean = validated.action === 'toggle-structure' || validated.action === 'toggle-labels' || validated.action === 'toggle-hydrogens' ||
++      const visibilityAction: boolean = validated.action === 'toggle-cell' || validated.action === 'toggle-basis' ||
++        validated.action === 'toggle-frame' || validated.action === 'toggle-grid' || validated.action === 'toggle-structure' ||
++        validated.action === 'toggle-labels' || validated.action === 'toggle-hydrogens' ||
+         validated.action === 'toggle-hydrogen-bonds' || validated.action === 'toggle-qpeaks' ||
+         validated.action === 'toggle-qpeak-bonds';
+-      if (validated.action === 'toggle-structure') previousVisibility = previousCore.structureVisible;
++      if (validated.action === 'toggle-cell') previousVisibility = previousCore.cellVisible;
++      else if (validated.action === 'toggle-basis') previousVisibility = previousCore.basisVisible;
++      else if (validated.action === 'toggle-frame') previousVisibility = previousCore.frameVisible;
++      else if (validated.action === 'toggle-grid') previousVisibility = previousCore.gridVisible;
++      else if (validated.action === 'toggle-structure') previousVisibility = previousCore.structureVisible;
+       else if (validated.action === 'toggle-labels') previousVisibility = previousCore.labelsVisible;
+       else if (validated.action === 'toggle-hydrogens') previousVisibility = previousCore.hydrogensVisible;
+       else if (validated.action === 'toggle-hydrogen-bonds') previousVisibility = previousCore.hydrogenBondsVisible;
+@@ -535,7 +542,11 @@
+       }
+       const core = document.core;
+       let actualVisibility: boolean | undefined;
+-      if (validated.action === 'toggle-structure') actualVisibility = core.structureVisible;
++      if (validated.action === 'toggle-cell') actualVisibility = core.cellVisible;
++      else if (validated.action === 'toggle-basis') actualVisibility = core.basisVisible;
++      else if (validated.action === 'toggle-frame') actualVisibility = core.frameVisible;
++      else if (validated.action === 'toggle-grid') actualVisibility = core.gridVisible;
++      else if (validated.action === 'toggle-structure') actualVisibility = core.structureVisible;
+       else if (validated.action === 'toggle-labels') actualVisibility = core.labelsVisible;
+       else if (validated.action === 'toggle-hydrogens') actualVisibility = core.hydrogensVisible;
+       else if (validated.action === 'toggle-hydrogen-bonds') actualVisibility = core.hydrogenBondsVisible;
+@@ -546,6 +557,10 @@
+       }
+       if (core.selectedObjectCount === undefined || core.selectionSequence === undefined || core.pickHit === undefined ||
+         core.lastPickedCollection === undefined || core.selectionSource === undefined || core.selectionAction !== validated.action ||
++        (validated.action === 'toggle-cell' && core.selectionSource !== ORIGINAL_MAIN_GUI_CELL_SOURCE) ||
++        (validated.action === 'toggle-basis' && core.selectionSource !== ORIGINAL_MAIN_GUI_BASIS_SOURCE) ||
++        (validated.action === 'toggle-frame' && core.selectionSource !== ORIGINAL_MAIN_GUI_FRAME_SOURCE) ||
++        (validated.action === 'toggle-grid' && core.selectionSource !== ORIGINAL_MAIN_GUI_GRID_SOURCE) ||
+         (validated.action === 'toggle-structure' && core.selectionSource !== ORIGINAL_MAIN_GUI_STRUCTURE_SOURCE) ||
+         (validated.action === 'toggle-labels' && core.selectionSource !== ORIGINAL_MAIN_GUI_LABELS_SOURCE) ||
+         ((validated.action === 'toggle-hydrogens' || validated.action === 'toggle-hydrogen-bonds') &&
+@@ -571,10 +586,12 @@
+                   validated.action === 'view-along-selection' ? '已沿所选键/平面调整视向' : validated.action.startsWith('view-along-') ?
+             `视向已切换至 ${validated.action.substring('view-along-'.length)}` : '已显示全部分子并重新居中';
+       if (actualVisibility !== undefined) {
+-        const visibilityLabel: string = validated.action === 'toggle-structure' ? '整体结构' :
+-          validated.action === 'toggle-labels' ? '标签' :
+-          validated.action === 'toggle-hydrogens' ? '氢原子' : validated.action === 'toggle-hydrogen-bonds' ? '氢键' :
+-            validated.action === 'toggle-qpeaks' ? 'Q 峰' : 'Q 峰键';
++        const visibilityLabel: string = validated.action === 'toggle-cell' ? '晶胞' :
++          validated.action === 'toggle-basis' ? '基矢' : validated.action === 'toggle-frame' ? '包围框' :
++            validated.action === 'toggle-grid' ? '网格' : validated.action === 'toggle-structure' ? '整体结构' :
++              validated.action === 'toggle-labels' ? '标签' : validated.action === 'toggle-hydrogens' ? '氢原子' :
++                validated.action === 'toggle-hydrogen-bonds' ? '氢键' :
++                  validated.action === 'toggle-qpeaks' ? 'Q 峰' : 'Q 峰键';
+         actionLabel = `${visibilityLabel}已${actualVisibility ? '显示' : '隐藏'}（原生状态已核对）`;
+       }
+       this.originalSelectionMessage = `${actionLabel} · 选中 ${core.selectedObjectCount} · 选择序号 ${core.selectionSequence}` +

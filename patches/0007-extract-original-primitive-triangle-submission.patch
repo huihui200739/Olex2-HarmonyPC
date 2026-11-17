@@ -1,0 +1,164 @@
+diff --git a/glib/glprimitive.cpp b/glib/glprimitive.cpp
+--- a/glib/glprimitive.cpp
++++ b/glib/glprimitive.cpp
+@@ -8,11 +8,26 @@
+ ******************************************************************************/
+ 
+ #include "glprimitive.h"
++#include "trianglesubmit.h"
+ #include "glmaterial.h"
+ #include "glrender.h"
+ #include "gpcollection.h"
+ #include "glfont.h"
+ #include "gltexture.h"
++
++// Desktop wrapper retains the real GL calls and original helper methods.
++struct TGlPrimitive::TriangleSubmissionSink {
++  const TGlPrimitive& primitive;
++  explicit TriangleSubmissionSink(const TGlPrimitive& value) : primitive(value) {}
++  bool IsSelecting() const { return primitive.GetRenderer().IsSelecting(); }
++  void SetNormal(const vec3f& value) { primitive.SetNormal(value); }
++  void DrawVertex(const vec3f& value) { primitive.DrawVertex(value); }
++  void DrawVertex(const vec3f& value, const uint32_t& color) {
++    primitive.DrawVertex(value, color);
++  }
++  void DrawVertex3(size_t i) { primitive.DrawVertex3(i); }
++  void DrawVertex3c(size_t i) { primitive.DrawVertex3c(i); }
++};
+ 
+ TGlPrimitive::TGlPrimitive(TObjectGroup& ParentG, TGlRenderer& ParentR, short type)
+   : AGroupObject(ParentG), Renderer(ParentR)
+@@ -371,48 +386,8 @@
+   }
+   case sgloTriangles: {
+     PrepareColorRendering(GL_TRIANGLES);
+-    if (Normals.IsEmpty()) {
+-      if (Colors.IsEmpty() || GetRenderer().IsSelecting()) {
+-        for (size_t i = 0; i < Vertices.Count(); i++) {
+-          DrawVertex(Vertices[i]);
+-        }
+-      }
+-      else if (Colors.Count() == Vertices.Count()) {
+-        for (size_t i = 0; i < Vertices.Count(); i++) {
+-          DrawVertex(Vertices[i], Colors[i]);
+-        }
+-      }
+-    }
+-    else {
+-      if (Colors.IsEmpty() || GetRenderer().IsSelecting()) {
+-        if (Normals.Count() == Vertices.Count()) {  //+normal
+-          for (size_t i = 0; i < Normals.Count(); i++) {
+-            SetNormal(Normals[i]);
+-            DrawVertex(Vertices[i]);
+-          }
+-        }
+-        else if (Normals.Count() * 3 == Vertices.Count()) {  //+normal
+-          for (size_t i = 0; i < Normals.Count(); i++) {
+-            SetNormal(Normals[i]);
+-            DrawVertex3(i * 3);
+-          }
+-        }
+-      }
+-      else if (Colors.Count() == Vertices.Count()) {
+-        if (Normals.Count() == Vertices.Count()) {  //+normal
+-          for (size_t i = 0; i < Normals.Count(); i++) {
+-            SetNormal(Normals[i]);
+-            DrawVertex(Vertices[i], Colors[i]);
+-          }
+-        }
+-        else if (Normals.Count() * 3 == Vertices.Count()) {  //+normal
+-          for (size_t i = 0; i < Normals.Count(); i++) {
+-            SetNormal(Normals[i]);
+-            DrawVertex3c(i * 3);
+-          }
+-        }
+-      }
+-    }
++    TriangleSubmissionSink sink(*this);
++    SubmitPrimitiveTriangles(Vertices, Normals, Colors, sink);
+     EndColorRendering();
+     break;
+   }
+diff --git a/glib/glprimitive.h b/glib/glprimitive.h
+--- a/glib/glprimitive.h
++++ b/glib/glprimitive.h
+@@ -90,6 +90,8 @@
+ 
+   void SetType(short T);
+ 
++  struct TriangleSubmissionSink;
++
+   // helper functions
+   void DrawVertex2(size_t i) const {
+     DrawVertex(Vertices[i]);
+diff --git a/glib/trianglesubmit.h b/glib/trianglesubmit.h
+new file mode 100644
+--- /dev/null
++++ b/glib/trianglesubmit.h
+@@ -0,0 +1,66 @@
++/******************************************************************************
++* Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
++*                                                                             *
++* This file is part of the OlexSys Development Framework.                     *
++*                                                                             *
++* This source file is distributed under the terms of the licence located in   *
++* the root folder.                                                            *
++******************************************************************************/
++
++// The vertex/normal/color branch of TGlPrimitive::Draw(sgloTriangles).
++// Begin/end, material, transforms, clipping, texture and display lists remain
++// the caller's responsibility. This header does not implement desktop OpenGL.
++#ifndef __olx_primitive_triangle_submit_H
++#define __olx_primitive_triangle_submit_H
++#include <cstddef>
++#include "glnamespace.h"
++BeginGlNamespace()
++template <class V, class N, class C, class Sink>
++void SubmitPrimitiveTriangles(const V& Vertices, const N& Normals,
++  const C& Colors, Sink& sink)
++{
++    if (Normals.IsEmpty()) {
++      if (Colors.IsEmpty() || sink.IsSelecting()) {
++        for (size_t i = 0; i < Vertices.Count(); i++) {
++          sink.DrawVertex(Vertices[i]);
++        }
++      }
++      else if (Colors.Count() == Vertices.Count()) {
++        for (size_t i = 0; i < Vertices.Count(); i++) {
++          sink.DrawVertex(Vertices[i], Colors[i]);
++        }
++      }
++    }
++    else {
++      if (Colors.IsEmpty() || sink.IsSelecting()) {
++        if (Normals.Count() == Vertices.Count()) {  //+normal
++          for (size_t i = 0; i < Normals.Count(); i++) {
++            sink.SetNormal(Normals[i]);
++            sink.DrawVertex(Vertices[i]);
++          }
++        }
++        else if (Normals.Count() * 3 == Vertices.Count()) {  //+normal
++          for (size_t i = 0; i < Normals.Count(); i++) {
++            sink.SetNormal(Normals[i]);
++            sink.DrawVertex3(i * 3);
++          }
++        }
++      }
++      else if (Colors.Count() == Vertices.Count()) {
++        if (Normals.Count() == Vertices.Count()) {  //+normal
++          for (size_t i = 0; i < Normals.Count(); i++) {
++            sink.SetNormal(Normals[i]);
++            sink.DrawVertex(Vertices[i], Colors[i]);
++          }
++        }
++        else if (Normals.Count() * 3 == Vertices.Count()) {  //+normal
++          for (size_t i = 0; i < Normals.Count(); i++) {
++            sink.SetNormal(Normals[i]);
++            sink.DrawVertex3c(i * 3);
++          }
++        }
++      }
++    }
++}
++EndGlNamespace()
++#endif

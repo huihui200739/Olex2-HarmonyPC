@@ -1,0 +1,102 @@
+diff --git a/olex/dgenopt.cpp b/olex/dgenopt.cpp
+--- a/olex/dgenopt.cpp
++++ b/olex/dgenopt.cpp
+@@ -7,6 +7,42 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#include "dgenopt.h"
++#include "generation_options.h"
++#include <algorithm>
++#include <stdexcept>
++using namespace olex2::harmony::ui;
++namespace {constexpr int ResizeEvent=1,RangeAEvent=2,RangeBEvent=3,RangeCEvent=4;const char* AxisName(size_t i){return i==0?"A":i==1?"B":"C";}}
++struct TdlgGenerate::Alive {TdlgGenerate* owner=nullptr;};
++TdlgGenerate::TdlgGenerate(NodeBackend& nodes,std::shared_ptr<DialogBackend> dialogs,std::shared_ptr<UiScheduler> scheduler,Widget* parent,std::shared_ptr<DialogPositionStore> positions)
++ :TDialog(nodes,std::move(dialogs),std::move(scheduler),parent,"Generation options","dlgGenerate",DialogGeometry{Point{0,0},Size{640,340},true},std::move(positions)),alive_(std::make_shared<Alive>()){
++  alive_->owner=this;std::weak_ptr<Alive> weak=alive_;auto retain=[&](const std::shared_ptr<Widget>& value){Retain(value);};
++  scroll_=std::make_shared<Widget>(nodes,NodeKind::Scroll,&Body());retain(scroll_);rows_=std::make_shared<Widget>(nodes,NodeKind::Column,scroll_.get());retain(rows_);rows_->SetNumber(Property::RowSpacing,8);
++  for(size_t i=0;i<axes_.size();++i){auto& a=axes_[i];a.row=std::make_shared<Widget>(nodes,NodeKind::Row,rows_.get());retain(a.row);a.row->SetNumber(Property::RowSpacing,6);a.row->SetHeight(52);
++    a.labelFrom=std::make_shared<Widget>(nodes,NodeKind::Text,a.row.get());retain(a.labelFrom);a.labelFrom->SetText(TextProperty::Content,std::string(AxisName(i))+" from");a.labelFrom->SetHeight(42);
++    a.from=std::make_shared<TTextEdit>(nodes,a.row.get(),-1,"-1");retain(a.from);a.from->SetHeight(42);a.from->Widget::SetText(TextProperty::Accessibility,std::string(AxisName(i))+" generation lower bound");
++    a.labelTo=std::make_shared<Widget>(nodes,NodeKind::Text,a.row.get());retain(a.labelTo);a.labelTo->SetText(TextProperty::Content,"to");a.labelTo->SetHeight(42);
++    a.to=std::make_shared<TTextEdit>(nodes,a.row.get(),-1,"1");retain(a.to);a.to->SetHeight(42);a.to->Widget::SetText(TextProperty::Accessibility,std::string(AxisName(i))+" generation upper bound");
++    a.range=std::make_shared<TComboBox>(nodes,a.row.get());retain(a.range);a.range->SetHeight(42);a.range->Widget::SetText(TextProperty::Accessibility,std::string(AxisName(i))+" generation range selector");
++    for(int n=1;n<=8;++n)a.range->AddObject(olxstr(n));a.range->SetText("2");a.range->OnChange.Add(this,static_cast<short>(RangeAEvent+i),msiExecute);
++  }
++  status_=std::make_shared<Widget>(nodes,NodeKind::Text,rows_.get());retain(status_);status_->SetText(TextProperty::Accessibility,"Generation options help");status_->SetHeight(42);status_->Hide();
++  buttons_=std::make_shared<Widget>(nodes,NodeKind::Row,&Body());retain(buttons_);buttons_->SetNumber(Property::RowSpacing,8);buttons_->SetHeight(46);
++  for(int action=0;action<3;++action){auto button=std::make_shared<EventWidget>(nodes,NodeKind::Button,buttons_.get(),std::vector<EventKind>{EventKind::Click},[weak,action](const NodeEvent&){auto life=weak.lock();if(!life||!life->owner)return;if(action==0)life->owner->OnOK();else if(action==1)life->owner->OnCancel();else life->owner->ToggleHelp();});retain(button);button->SetText(TextProperty::Content,action==0?"OK":action==1?"Cancel":"Help");button->SetHeight(40);button->SetNumber(Property::Focusable,1);actionButtons_.push_back(button);}
++  OnResize.Add(this,ResizeEvent,msiExecute);Layout();
++}
++TdlgGenerate::~TdlgGenerate(){alive_->owner=nullptr;OnResize.Remove(this);for(auto& axis:axes_)axis.range->OnChange.Clear();}
++void TdlgGenerate::Layout(){const int width=std::max(200,GetWidth()-24);scroll_->SetWidth(width);scroll_->SetHeight(std::max(40,GetHeight()-110));rows_->SetWidth(width);rows_->SetHeight(190);buttons_->SetWidth(width);status_->SetWidth(width);for(auto& a:axes_){a.row->SetWidth(width);a.labelFrom->SetWidth(std::max(42,width/8));a.from->SetWidth(std::max(48,width/4));a.labelTo->SetWidth(32);a.to->SetWidth(std::max(48,width/4));a.range->SetWidth(std::max(64,width/5));}for(auto& b:actionButtons_)b->SetWidth(std::max(32,(width-16)/3));}
++void TdlgGenerate::UpdateRange(size_t i){const double value=ParseOriginalGenerationValue(GetRangeText(i),2);SetFromText(i,olxstr(-value/2));SetToText(i,olxstr(value/2));}
++bool TdlgGenerate::Dispatch(int event,short,const IOlxObject* sender,const IOlxObject*,TActionQueue*){if(event==ResizeEvent){Layout();return true;}if(event>=RangeAEvent&&event<=RangeCEvent){const size_t i=static_cast<size_t>(event-RangeAEvent);if(sender==axes_[i].range.get())UpdateRange(i);return true;}return false;}
++void TdlgGenerate::ToggleHelp(){helpVisible_=!helpVisible_;status_->SetText(TextProperty::Content,helpVisible_?"Each A, B and C row sets a numeric generation interval. Selecting an integer from 1 to 8 centers that interval at zero; the endpoints remain editable.":"");status_->Show(helpVisible_);}
++void TdlgGenerate::SetFromText(size_t i,const olxstr& value){axes_.at(i).from->SetText(value);}void TdlgGenerate::SetToText(size_t i,const olxstr& value){axes_.at(i).to->SetText(value);}
++olxstr TdlgGenerate::GetFromText(size_t i)const{return axes_.at(i).from->GetText();}olxstr TdlgGenerate::GetToText(size_t i)const{return axes_.at(i).to->GetText();}olxstr TdlgGenerate::GetRangeText(size_t i)const{return axes_.at(i).range->GetValue();}
++void TdlgGenerate::OnCancel(){if(IsClosing()){RetryClose();return;}EndModal(DialogCancelled);}
++bool TdlgGenerate::OnOK(){if(IsClosing())return false;if(!accepted_){double value=2;value=ParseOriginalGenerationValue(GetFromText(0),value);AFrom=static_cast<float>(value);value=ParseOriginalGenerationValue(GetFromText(1),value);BFrom=static_cast<float>(value);value=ParseOriginalGenerationValue(GetFromText(2),value);CFrom=static_cast<float>(value);value=ParseOriginalGenerationValue(GetToText(0),value);ATo=static_cast<float>(value);value=ParseOriginalGenerationValue(GetToText(1),value);BTo=static_cast<float>(value);value=ParseOriginalGenerationValue(GetToText(2),value);CTo=static_cast<float>(value);accepted_=true;}EndModal(1);return true;}
++
++#else
+ #include "dgenopt.h"
+ #include "ctrls/frameext.h"
+ 
+@@ -123,3 +159,5 @@
+   tcCTo->GetValue().ToDouble(&v);  CTo = v;
+   EndModal(wxID_OK);
+ }
++
++#endif // native generation options / original wx
+diff --git a/olex/dgenopt.h b/olex/dgenopt.h
+--- a/olex/dgenopt.h
++++ b/olex/dgenopt.h
+@@ -7,6 +7,40 @@
+ * the root folder.                                                            *
+ ******************************************************************************/
+ 
++#if defined(OLEX2_NATIVE_WIDGETS) && !defined(__WXWIDGETS__)
++#pragma once
++#include "ctrls.h"
++#include "ctrls/comboext.h"
++#include "ctrls/texteditext.h"
++#include <array>
++namespace olex2::harmony::ui {class ApplicationRuntime;}
++class TdlgGenerate:public TDialog,public AEventsDispatcher {
++  struct Alive;std::shared_ptr<Alive> alive_;
++  struct Axis {
++    std::shared_ptr<olex2::harmony::ui::Widget> row,labelFrom,labelTo;
++    std::shared_ptr<TTextEdit> from,to;
++    std::shared_ptr<TComboBox> range;
++  };
++  std::array<Axis,3> axes_;
++  std::shared_ptr<olex2::harmony::ui::Widget> scroll_,rows_,buttons_,status_;
++  std::vector<std::shared_ptr<olex2::harmony::ui::EventWidget>> actionButtons_;
++  bool accepted_=false,helpVisible_=false;
++  void Layout();void UpdateRange(size_t);void ToggleHelp();
++  bool Dispatch(int,short,const IOlxObject*,const IOlxObject*,TActionQueue*)override;
++  void SetFromText(size_t,const olxstr&);void SetToText(size_t,const olxstr&);
++  olxstr GetFromText(size_t)const;olxstr GetToText(size_t)const;olxstr GetRangeText(size_t)const;
++public:
++  TdlgGenerate(olex2::harmony::ui::NodeBackend&,std::shared_ptr<olex2::harmony::ui::DialogBackend>,std::shared_ptr<olex2::harmony::ui::UiScheduler>,olex2::harmony::ui::Widget*,std::shared_ptr<olex2::harmony::ui::DialogPositionStore> positions={});
++  ~TdlgGenerate()override;
++  bool OnOK();void OnCancel();
++  bool ResultAccepted()const{return accepted_;}
++  DefPropP(float,AFrom) DefPropP(float,BFrom) DefPropP(float,CFrom)
++  DefPropP(float,ATo) DefPropP(float,BTo) DefPropP(float,CTo)
++private:
++  float AFrom=-1,BFrom=-1,CFrom=-1,ATo=1,BTo=1,CTo=1;
++};
++
++#else
+ #ifndef __olx_dlg_genoptdlg_H
+ #define __olx_dlg_genoptdlg_H
+ #include "ctrls.h"
+@@ -36,3 +70,5 @@
+   DefPropP(float, CTo)
+ };
+ #endif
++
++#endif // native generation options / original wx

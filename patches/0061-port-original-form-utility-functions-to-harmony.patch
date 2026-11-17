@@ -1,0 +1,195 @@
+--- a/cmake/Olex2GraphicsRuntime.cmake
++++ b/cmake/Olex2GraphicsRuntime.cmake
+@@ -23,7 +23,7 @@
+ file(GLOB GLIB_SOURCES CONFIGURE_DEPENDS "${OLEX2_ROOT}/upstream/glib/*.cpp")
+ add_library(olex2core_graphics SHARED "${OLEX2_ROOT}/native/original_renderer_bridge.cpp" ${GLIB_SOURCES}
+  "${OLEX2_ROOT}/native/application_runtime.cpp" "${OLEX2_ROOT}/native/original_log.cpp"
+- "${OLEX2_ROOT}/native/original_interpreter.cpp" "${OLEX2_ROOT}/native/desktop_commands.cpp")
++ "${OLEX2_ROOT}/native/original_interpreter.cpp" "${OLEX2_ROOT}/native/desktop_commands.cpp" "${OLEX2_ROOT}/upstream/olex/mainform.cpp" "${OLEX2_ROOT}/upstream/olex/xpprocs.cpp")
+ target_include_directories(olex2core_graphics PRIVATE "${GLU_ROOT}/include" "${GL4ES_ROOT}/include" "${OLEX2_ROOT}/upstream/glib" "${OLEX2_ROOT}/native")
+ target_link_libraries(olex2core_graphics PRIVATE legacy_core legacy_glu GL m dl)
+ set(OLEX2_EXPORT_SCRIPT "${OLEX2_ROOT}/cmake/original_renderer.exports" CACHE FILEPATH "Private shared-runtime export list")
+--- a/native/application_runtime.cpp
++++ b/native/application_runtime.cpp
+@@ -3,6 +3,7 @@
+ #include "gradient_options.h"
+ #include "original_display_options.h"
+ #include "original_interpreter.h"
++#include "harmony_mainform.h"
+ #include "png_gx_texture_app.h"
+ #include "persistent_gx_window.h"
+ #include "original_document_view.h"
+@@ -177,7 +178,11 @@
+   std::lock_guard<std::mutex> lock(impl_->mutex);OriginalInterpreterGuard guard;ApplicationFunctionResult r;r.input=input;const auto before=OptionsKey(impl_->app->GetOptions());
+   try{
+     if(input.empty() || input.size()>4096 || input.find('\0')!=std::string::npos || input.find('(')==std::string::npos)throw std::invalid_argument("Expected an original application function expression, at most 4096 UTF-8 bytes");
+-    OriginalProcessor processor;processor.GetLibrary().AttachLibrary(impl_->app->ExportLibrary("app"));r.runtime.originalFunctionCount=processor.GetLibrary().GetLibraryByName("app")->FunctionCount();
++    OriginalProcessor processor;
++    std::unique_ptr<TLibrary> appLibrary(impl_->app->ExportLibrary("app"));
++    r.runtime.originalFunctionCount=appLibrary->FunctionCount();
++    processor.GetLibrary().AttachLibrary(appLibrary.release());
++    processor.GetLibrary().AttachLibrary(CreateHarmonyMainFormLibrary());
+     olxstr text=Text(input);TMacroData error;error.SetQuiet(true);error.SetLocation("HarmonyPC original application function");r.passed=processor.Evaluate(text,error);if(r.passed)r.text=Utf8(text);else r.error=Utf8(error.GetInfo());
+   }catch(const TExceptionBase& e){r.error=Utf8(e.GetException()->GetFullMessage());}catch(const std::exception& e){r.error=e.what();}
+   if(!r.passed && r.error.empty())r.error="Original application function failed";
+--- a/native/harmony_mainform.h
++++ b/native/harmony_mainform.h
+@@ -0,0 +1,7 @@
++#pragma once
++#include "library.h"
++namespace olex2::harmony {
++// Owns a Harmony-only compatibility library backed by implementations from
++// the original xpprocs translation unit.
++esdl::TLibrary* CreateHarmonyMainFormLibrary();
++}
+--- a/native/original_xpprocs.h
++++ b/native/original_xpprocs.h
+@@ -0,0 +1,8 @@
++#pragma once
++#include "library.h"
++#include <cstddef>
++namespace olex2::harmony {
++// Register original application utility functions whose behavior is not
++// coupled to the wx desktop controls.
++std::size_t RegisterHarmonyXpprocs(esdl::TLibrary& library);
++}
+--- a/native/tests/application_runtime_smoke.cpp
++++ b/native/tests/application_runtime_smoke.cpp
+@@ -54,6 +54,14 @@
+    Eval(runtime,"app.SetOption(ui.commandHints,false)");s=runtime.Status();Check(!s.commandHints && s.saveRevision==1 && s.lastSaveCommitted,"original SetOption did not invoke actual atomic save override");
+    saved=Read(options);Check(saved.find("# isolated synthetic settings; preserve this comment")!=std::string::npos && saved.find("untouched.key=keep")!=std::string::npos && saved.find("ui.commandHints=false")!=std::string::npos,"atomic original format save lost comments/options");
+    Check(Eval(runtime,"app.OptValue(ui.commandHints)")=="false","original saved option return differs from real file");
++   Check(Eval(runtime,"form.HasGUI()") == "true", "Harmony form GUI capability function differs");
++   Check(Eval(runtime,"form.IsOS(harmony)") == "true" && Eval(runtime,"form.IsOS(ohos)") == "true" && Eval(runtime,"form.IsOS(linux)") == "false", "Harmony form OS function differs");
++   Check(Eval(runtime,"form.Strcat(left,right)") == "leftright", "original form Strcat behavior differs");
++   Check(Eval(runtime,"form.Strcmp(same,same)") == "true" && Eval(runtime,"form.Strcmp(left,right)") == "false", "original form Strcmp behavior differs");
++   Check(Eval(runtime,"form.RGB(1,2,3)") == "197121" && Eval(runtime,"form.RGB(1,2,3,4)") == "67305985", "original form RGB packing differs");
++   setenv("OLEX2_HARMONY_FORM_TEST", "preserved-value", 1);
++   Check(Eval(runtime,"form.GetEnv(OLEX2_HARMONY_FORM_TEST)") == "preserved-value", "original form GetEnv behavior differs");
++   unsetenv("OLEX2_HARMONY_FORM_TEST");
+    for(const auto& expression:{"app.Unknown()","app.SetOption(ui.commandHints,sometimes)","app.SetOption('bad key',value)","app.SetOption(ui.commandHints,false,extra)","app.OptValue()","literal"}){
+     const auto r=runtime.Evaluate(expression);Check(!r.passed && !r.error.empty() && Read(options)==saved && !runtime.Status().commandHints,"invalid original function changed real settings or appeared successful");
+    }
+--- a/upstream/olex/mainform.cpp
++++ b/upstream/olex/mainform.cpp
+@@ -1,3 +1,19 @@
++#if defined(__OHOS__) && !defined(__WXWIDGETS__)
++// TMainForm's wx window/event system is replaced by the native ArkUI host.
++// Keep a small, real compatibility library for the pure form functions that
++// xpprocs.cpp can provide without a desktop window.
++#include "harmony_mainform.h"
++#include "original_xpprocs.h"
++#include <memory>
++
++namespace olex2::harmony {
++esdl::TLibrary* CreateHarmonyMainFormLibrary() {
++  std::unique_ptr<esdl::TLibrary> library(new esdl::TLibrary("form"));
++  RegisterHarmonyXpprocs(*library);
++  return library.release();
++}
++}
++#else
+ /******************************************************************************
+ * Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
+ *                                                                             *
+@@ -4543,3 +4559,5 @@
+ #endif
+ }
+ //..............................................................................
++
++#endif // __OHOS__ && !__WXWIDGETS__
+--- a/upstream/olex/xpprocs.cpp
++++ b/upstream/olex/xpprocs.cpp
+@@ -1,12 +1,77 @@
+-/******************************************************************************
+-* Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
+-*                                                                             *
+-* This file is part of the OlexSys Development Framework.                     *
+-*                                                                             *
+-* This source file is distributed under the terms of the licence located in   *
+-* the root folder.                                                            *
+-******************************************************************************/
+-
++/******************************************************************************
++* Copyright (c) 2004-2011 O. Dolomanov, OlexSys                               *
++*                                                                             *
++* This file is part of the OlexSys Development Framework.                     *
++*                                                                             *
++* This source file is distributed under the terms of the licence located in   *
++* the root folder.                                                            *
++******************************************************************************/
++
++#if defined(__OHOS__) && !defined(__WXWIDGETS__)
++// The original desktop extension set is registered by TMainForm. Harmony has
++// no wx form, so this translation unit registers the subset whose original
++// behavior is independent of desktop widgets. The remaining commands stay
++// unavailable instead of being replaced with placeholders.
++#include "original_xpprocs.h"
++#include "function.h"
++#include "library.h"
++#include "os_util.h"
++#include "bapp.h"
++#include "gldefs.h"
++#include <cstdlib>
++
++extern char** environ;
++
++namespace {
++void HarmonyFunHasGUI(const TStrObjList&, TMacroData& result) {
++  result.SetRetVal(true);
++}
++void HarmonyFunIsOS(const TStrObjList& params, TMacroData& result) {
++  result.SetRetVal(params[0].Equalsi("ohos") || params[0].Equalsi("harmony"));
++}
++void HarmonyFunStrcat(const TStrObjList& params, TMacroData& result) {
++  result.SetRetVal(params[0] + params[1]);
++}
++void HarmonyFunStrcmp(const TStrObjList& params, TMacroData& result) {
++  result.SetRetVal(params[0] == params[1]);
++}
++void HarmonyFunGetEnv(const TStrObjList& params, TMacroData& result) {
++  if (params.IsEmpty()) {
++    if (environ != nullptr) {
++      for (size_t i = 0; environ[i] != nullptr; ++i)
++        TBasicApp::NewLogEntry() << environ[i];
++    }
++  }
++  else {
++    result.SetRetVal(olx_getenv(params[0]));
++  }
++}
++void HarmonyFunRGB(const TStrObjList& params, TMacroData& result) {
++  if (params.Count() == 3) {
++    result.SetRetVal((uint32_t)OLX_RGB(params[0].ToInt(), params[1].ToInt(),
++      params[2].ToInt()));
++  }
++  else if (params.Count() == 4) {
++    result.SetRetVal((uint32_t)OLX_RGBA(params[0].ToInt(), params[1].ToInt(),
++      params[2].ToInt(), params[3].ToInt()));
++  }
++}
++}
++
++namespace olex2::harmony {
++std::size_t RegisterHarmonyXpprocs(esdl::TLibrary& library) {
++  library.Register(new esdl::TStaticFunction(&HarmonyFunHasGUI, "HasGUI", fpNone,
++    "Returns whether the Harmony application has a graphical interface"));
++  library.Register(new esdl::TStaticFunction(&HarmonyFunIsOS, "IsOS", fpOne,
++    "Returns true for Harmony (ohos or harmony)"));
++  library.Register(new esdl::TStaticFunction(&HarmonyFunStrcat, "Strcat", fpTwo));
++  library.Register(new esdl::TStaticFunction(&HarmonyFunStrcmp, "Strcmp", fpTwo));
++  library.Register(new esdl::TStaticFunction(&HarmonyFunGetEnv, "GetEnv", fpNone | fpOne));
++  library.Register(new esdl::TStaticFunction(&HarmonyFunRGB, "RGB", fpThree | fpFour));
++  return 6;
++}
++}
++#else
+ #include "mainform.h"
+ #include "xglcanv.h"
+ #include "xglapp.h"
+@@ -6446,3 +6511,5 @@
+   }
+ #endif
+ }
++
++#endif // __OHOS__ && !__WXWIDGETS__

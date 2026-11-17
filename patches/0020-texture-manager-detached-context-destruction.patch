@@ -1,0 +1,15 @@
+--- a/glib/gltexture.cpp
++++ b/glib/gltexture.cpp
+@@ -339,7 +339,11 @@
+   for (size_t i = 0; i < Textures.Count(); i++) {
+     TGlTexture* tex = Textures.GetValue(i);
+     GLuint texId = tex->GetId();
+-    olx_gl::deleteTextures(1, (GLuint*)&texId);
++    // BeforeContextChange already retired detached GPU names. Destruction may
++    // occur after the compatibility context has closed; never dispatch GL then.
++    if (texId != ~GLuint(0)) {
++      olx_gl::deleteTextures(1, &texId);
++    }
+     delete tex;
+   }
+   TextureData.Clear();

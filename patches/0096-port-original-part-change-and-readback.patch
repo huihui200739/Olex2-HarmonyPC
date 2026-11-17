@@ -1,0 +1,113 @@
+--- a/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
++++ b/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
+@@ -22,7 +22,7 @@
+   renderObjects?: number; renderPrimitives?: number;
+   error: string; modelMayHaveChanged: boolean; source: string;
+   // Optional for pre-operation and failure envelopes, never synthesized in UI.
+-  selectedObjectCount?: number; selectionSequence?: number; pickHit?: boolean;
++  selectedObjectCount?: number; selectedParts?: string; selectionSequence?: number; pickHit?: boolean;
+   lastPickedCollection?: string; selectionAction?: string; selectionSource?: string;
+   labelsVisible?: boolean; hydrogensVisible?: boolean; hydrogenBondsVisible?: boolean;
+   qPeaksVisible?: boolean; qPeakBondsVisible?: boolean; structureVisible?: boolean;
+@@ -164,6 +164,9 @@
+     (core.renderPrimitives !== undefined && !validCounter(core.renderPrimitives))) {
+     throw new Error('原版文档核心状态格式不完整');
+   }
++  if (core.selectedParts !== undefined && typeof core.selectedParts !== 'string') {
++    throw new Error('原版文档选择 Part 状态格式不合法');
++  }
+   validateOptionalSelection(core);
+   return result;
+ }
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -2053,6 +2053,33 @@
+       this.refreshGraphics();
+     } catch (error) {
+       this.originalSelectionMessage = (error as Error).message || '原版材质对话框轮询失败';
++    }
++  }
++
++  private runOriginalPartCommand(value: number): void {
++    if (!this.originalSelectionEnabled()) return;
++    try {
++      const result: OriginalCommandReport = nativeBridge.executeOriginalCommand(`part ${value}`);
++      this.commandPassed = result.passed;
++      this.commandError = result.error;
++      const output: string = result.output.trim();
++      this.commandMessage = output.length > 0 ? output : (result.passed ? result.text : '原版 part 未通过');
++      let parts: string = '';
++      try {
++        const parsed: OriginalDocumentEnvelope = parseOriginalDocument(nativeBridge.getOriginalDocumentStatus());
++        parts = parsed.core.selectedParts === undefined ? '' : parsed.core.selectedParts;
++      } catch (statusError) {
++        parts = '';
++      }
++      this.originalSelectionMessage = result.passed ? `原版 Part=${value}；选中原子 Parts=${parts}` : (result.error || '原版 part 未通过');
++      if (result.passed) {
++        try { nativeBridge.redrawOriginalDocument(); } catch (redrawError) { this.originalLog = nativeBridge.getOriginalLogs(); }
++      }
++      this.rebindPresentedSessionAfterModelChange();
++      this.readOriginalDocumentStatus();
++      this.refreshGraphics();
++    } catch (error) {
++      this.originalSelectionMessage = (error as Error).message || '原版 Part 命令失败';
+     }
+   }
+ 
+@@ -3154,6 +3181,19 @@
+         Text('原版 Draw style 材质对话框 · 应用于当前选择').fontSize(10).fontColor('#758579').layoutWeight(1)
+       }.width('100%')
+       Row({ space: 5 }) {
++        Button('Part').id('olex2-original-part').height(25).fontSize(10)
++          .enabled(this.originalSelectionEnabled() && this.originalDocument.core.selectedObjectCount !== undefined &&
++            this.originalDocument.core.selectedObjectCount > 0)
++          .bindMenu([
++            { value: '0', action: () => this.runOriginalPartCommand(0) },
++            { value: '1', action: () => this.runOriginalPartCommand(1) },
++            { value: '2', action: () => this.runOriginalPartCommand(2) },
++            { value: '3', action: () => this.runOriginalPartCommand(3) },
++            { value: '4', action: () => this.runOriginalPartCommand(4) }
++          ])
++        Text('原版 Part · 设置当前选择的 part 编号').fontSize(10).fontColor('#758579').layoutWeight(1)
++      }.width('100%')
++      Row({ space: 5 }) {
+         Button('切换网格').id('olex2-original-toggle-grid').height(25).fontSize(10)
+           .enabled(this.originalSelectionEnabled()).onClick(() => this.selectOriginalDocument('toggle-grid'))
+         Text('需先载入晶体学网格数据').fontSize(10).fontColor('#758579').layoutWeight(1)
+--- a/native/original_document_view.cpp
++++ b/native/original_document_view.cpp
+@@ -5,6 +5,7 @@
+ #include "platform_sha256.h"
+ #include "original_document_viewport_objects.h"
+ #include "original_document_visibility.h"
++#include "xatom.h"
+ #include <optional>
+ #include "gl4esinit.h"
+ #include <algorithm>
+@@ -29,6 +30,16 @@
+ constexpr size_t MaximumDocumentBytes=8*1024*1024;
+ olxstr Text(const std::string& s){return TUtf8::Decode(s.c_str());}
+ std::string Utf8(const olxstr& s){return TUtf8::Encode(s).c_str();}
++std::string SelectedParts(TGXApp& app){
++  std::string result;const auto& selection=app.GetRenderer().GetSelection();
++  for(size_t i=0;i<selection.Count()&&result.size()<200;++i){
++    auto* atom=dynamic_cast<TXAtom*>(const_cast<AGDrawObject*>(&selection[i]));
++    if(!atom)continue;
++    if(!result.empty())result+=',';
++    result+=std::to_string(atom->CAtom().GetPart());
++  }
++  return result;
++}
+ std::string Quote(const std::string& s){std::ostringstream o;o<<'"';for(unsigned char c:s){if(c=='"'||c=='\\')o<<'\\'<<c;else if(c>=32)o<<c;else o<<"\\u00"<<"0123456789abcdef"[c>>4]<<"0123456789abcdef"[c&15];}o<<'"';return o.str();}
+ std::string Hash(const std::string& bytes){return PlatformSha256(bytes);}
+ std::string CurrentExceptionText(){
+@@ -487,7 +498,7 @@
+     <<",\"sampleWidth\":"<<state.sampleWidth<<",\"sampleHeight\":"<<state.sampleHeight<<",\"sampleNonBackgroundPixels\":"<<state.nonBackgroundPixels
+     <<",\"sampleStrategy\":\"bounded-complete-framebuffer-tiles\",\"sampleReadPixels\":"<<state.sampleReadPixels<<",\"sampleTileCount\":"<<state.sampleTileCount
+     <<",\"centralSampleWidth\":"<<state.centralSampleWidth<<",\"centralSampleHeight\":"<<state.centralSampleHeight<<",\"centralSampleNonBackgroundPixels\":"<<state.centralSampleNonBackgroundPixels
+-    <<",\"selectedObjectCount\":"<<(state.loaded?renderer.GetSelection().Count():0)<<",\"selectionSequence\":"<<state.selectionSequence
++    <<",\"selectedObjectCount\":"<<(state.loaded?renderer.GetSelection().Count():0)<<",\"selectedParts\":"<<Quote(SelectedParts(app))<<",\"selectionSequence\":"<<state.selectionSequence
+     <<",\"pickHit\":"<<(state.pickHit?"true":"false")<<",\"lastPickedCollection\":"<<Quote(state.lastPickedCollection)
+     <<",\"selectionAction\":"<<Quote(state.selectionAction);
+   if(state.loaded)out<<",\"labelsVisible\":"<<(app.AreLabelsVisible()?"true":"false")

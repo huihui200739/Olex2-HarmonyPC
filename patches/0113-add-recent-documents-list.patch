@@ -1,0 +1,126 @@
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -190,6 +190,12 @@
+   originalLogView: boolean;
+ }
+ 
++interface OriginalRecentDocument {
++  key: string;
++  name: string;
++  bytes: Uint8Array;
++}
++
+ @Entry
+ @Component
+ struct Index {
+@@ -224,6 +230,8 @@
+   @State private commandText: string = 'pc.help';
+   @State private commandHistory: string[] = [];
+   private commandHistoryIndex: number = -1;
++  @State private originalRecentLabels: string[] = [];
++  private originalRecentList: OriginalRecentDocument[] = [];
+   private generateDialogTimer: number = -1;
+   private generateDialogOpen: boolean = false;
+   private periodicTableTimer: number = -1;
+@@ -1625,6 +1633,7 @@
+         const observed: OriginalDocumentEnvelope = parseOriginalDocument(nativeBridge.getOriginalDocumentStatus());
+         this.originalDocument = observed;
+         if (!this.sameOriginalSource(result.document, observed)) throw new Error('新文档实际源读取后身份改变，旧标签和草稿保留');
++        this.recordOriginalRecent(observed.core.name, bytes);
+         const id: string = this.originalDocumentSessions.add(observed, bytes, result.status.sourceKind);
+         const ui: OriginalDocumentSessionUi = { id: id, editor: new OriginalDocumentEditor(), history: new OriginalTextHistory(),
+           editorVisible: false, findVisible: false, query: '', replacement: '', selectionStart: 0, selectionEnd: 0,
+@@ -1973,6 +1982,41 @@
+       this.refreshGraphics();
+     } catch (error) {
+       this.originalSelectionMessage = (error as Error).message || '原版选择命令失败';
++    }
++  }
++
++  private recordOriginalRecent(name: string, bytes: Uint8Array): void {
++    const key: string = name + ':' + originalDocumentSha256(bytes);
++    if (this.originalRecentList.some((item) => item.key === key)) return;
++    const entry: OriginalRecentDocument = { key: key, name: name, bytes: bytes };
++    this.originalRecentList.push(entry);
++    this.originalRecentLabels = this.originalRecentList.map((item) => item.name);
++    if (this.originalRecentList.length > 8) {
++      this.originalRecentList.shift();
++      this.originalRecentLabels = this.originalRecentList.map((item) => item.name);
++    }
++  }
++
++  private async openOriginalRecent(index: number): Promise<void> {
++    if (this.originalDocumentOperationBusy() || !this.applicationRuntime.initialized) return;
++    const item = this.originalRecentList[index];
++    if (item === undefined) return;
++    if (!this.originalDocumentSessions.canAdd()) {
++      this.originalDocumentMessage = '会话最多 4 份文档、合计 32 MiB；请先明确关闭一份文档。未打开最近文件。';
++      this.saveRecord(); return;
++    }
++    this.syncOriginalDocumentSessions(); this.beginOriginalSessionOperation('open-synthetic', '');
++    this.originalDocumentBusy = true; this.syncOriginalViewportInput();
++    try {
++      const result: OriginalDocumentTransferResult = await this.originalDocumentTransfer.reopenRecorded(
++        item.bytes, this.originalDocumentBackend(), item.name);
++      this.acceptOriginalDocumentResult(result);
++    } catch (error) {
++      this.failOriginalSessionOperation(error as Error); this.readOriginalDocumentStatus(); this.reconcileOriginalSessionNative();
++    } finally {
++      this.originalDocumentBusy = false; this.syncOriginalDocumentSessions();
++      this.applicationRuntime = nativeBridge.getApplicationRuntimeStatus();
++      this.originalLog = nativeBridge.getOriginalLogs(); this.refreshGraphics(); this.syncOriginalViewportInput();
+     }
+   }
+ 
+@@ -3456,6 +3500,16 @@
+           .onClick(() => this.openOriginalPrimitiveDialog())
+         Text('原版图元显示对话框 · 应用于当前选择').fontSize(10).fontColor('#758579').layoutWeight(1)
+       }.width('100%')
++      if (this.originalRecentLabels.length > 0) {
++        Row({ space: 5 }) {
++          ForEach(this.originalRecentLabels, (label: string, index: number) => {
++            Button('最近 ' + label).id('olex2-recent-' + index).height(25).fontSize(10)
++              .enabled(this.applicationRuntime.initialized && !this.originalDocumentOperationBusy())
++              .onClick(() => { this.openOriginalRecent(index); })
++          }, (label: string, index: number) => label + '-' + index)
++          Text('最近打开的文档').fontSize(10).fontColor('#758579').layoutWeight(1)
++        }.width('100%')
++      }
+       Row({ space: 5 }) {
+         Button('切换网格').id('olex2-original-toggle-grid').height(25).fontSize(10)
+           .enabled(this.originalSelectionEnabled()).onClick(() => this.selectOriginalDocument('toggle-grid'))
+--- a/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
++++ b/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
+@@ -356,8 +356,17 @@
+ 
+   async openSynthetic(bytes: Uint8Array, backend: OriginalDocumentBackend,
+     name: string = 'synthetic-display.cif'): Promise<OriginalDocumentTransferResult> {
++    return this.openBytes(bytes, backend, name, 'synthetic-platform-display', '合成显示示例');
++  }
++
++  async reopenRecorded(bytes: Uint8Array, backend: OriginalDocumentBackend, name: string): Promise<OriginalDocumentTransferResult> {
++    return this.openBytes(bytes, backend, name, 'recent-original-source', '最近文件');
++  }
++
++  private async openBytes(bytes: Uint8Array, backend: OriginalDocumentBackend, name: string,
++    sourceKind: string, label: string): Promise<OriginalDocumentTransferResult> {
+     if (this.active) return this.current;
+-    const result: OriginalDocumentTransferResult = this.begin('import', 'synthetic-platform-display');
++    const result: OriginalDocumentTransferResult = this.begin('import', sourceKind);
+     result.status.name = name;
+     let nativeResponseReceived: boolean = false;
+     try {
+@@ -368,11 +377,11 @@
+       nativeResponseReceived = true;
+       requireNativeSuccess(result.document, true);
+       if (result.document.core.name !== result.status.name || result.document.core.byteCount !== bytes.byteLength) {
+-        throw new Error('合成显示示例的原版载入状态不一致');
++        throw new Error(label + '的原版载入状态不一致');
+       }
+       result.status.state = 'passed';
+     } catch (error) {
+-      result.status.state = 'failed'; result.status.error = (error as Error).message || '合成显示示例未能打开';
++      result.status.state = 'failed'; result.status.error = (error as Error).message || (label + '未能打开');
+       if (!nativeResponseReceived) this.refreshAfterFailure(result, backend);
+     } finally { this.active = false; }
+     return result;

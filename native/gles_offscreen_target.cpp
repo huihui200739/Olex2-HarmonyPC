@@ -1,0 +1,147 @@
+#include "gles_offscreen_target.h"
+#if defined(OLEX2_GLES_OFFSCREEN_HOST_TEST)
+#include <GLES3/gl3.h>
+#else
+#ifndef GL_GLEXT_PROTOTYPES
+#define GL_GLEXT_PROTOTYPES 1
+#endif
+#include <GL/gl.h> // Keep GL4ES wrapper state coherent with the original renderer.
+#endif
+#include <stdexcept>
+#include <string>
+#include <type_traits>
+
+namespace olex2::harmony {
+namespace {
+static_assert(std::is_same_v<GLuint,uint32_t> && std::is_same_v<GLint,int32_t>);
+[[noreturn]] void GlError(const char* operation,GLenum error) {
+  throw std::runtime_error(std::string(operation)+" GLES="+std::to_string(error));
+}
+void CheckGl(const char* operation) {
+  const auto error=glGetError();if(error!=GL_NO_ERROR)GlError(operation,error);
+}
+void Require(bool value,const char* message) {
+  if(!value)throw std::runtime_error(message);
+}
+}
+GlesOffscreenTarget::~GlesOffscreenTarget() noexcept {
+  try {Close();} catch(...) {}
+}
+void GlesOffscreenTarget::RequireOwner() const {
+  if(!IsOpen()||thread_!=std::this_thread::get_id()||
+     eglGetCurrentDisplay()!=display_||eglGetCurrentContext()!=context_)
+    throw std::logic_error("Offscreen target requires its creating thread and EGL context");
+}
+void GlesOffscreenTarget::CreateFromCurrent(int width,int height) {
+  if(IsOpen())throw std::logic_error("Offscreen target already open");
+  if(width<1||height<1||width>8192||height>8192||uint64_t(width)*height>64u*1024u*1024u)
+    throw std::invalid_argument("Offscreen dimensions exceed the bounded pixel budget");
+  const EGLDisplay display=eglGetCurrentDisplay();const EGLContext context=eglGetCurrentContext();
+  Require(display!=EGL_NO_DISPLAY&&context!=EGL_NO_CONTEXT,"An existing EGL context must be current");
+  EGLint api=0,version=0;
+  if(!eglQueryContext(display,context,EGL_CONTEXT_CLIENT_TYPE,&api)||
+     !eglQueryContext(display,context,EGL_CONTEXT_CLIENT_VERSION,&version))
+    throw std::runtime_error("Could not query current EGL context");
+  Require(api==EGL_OPENGL_ES_API&&version>=3,"Offscreen target requires the application's ES3 context");
+  GLint draw=0,read=0,renderbuffer=0,texture=0,unpack=0,activeTexture=0,viewport[4]={0,0,0,0};
+  glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING,&draw);glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING,&read);
+  glGetIntegerv(GL_RENDERBUFFER_BINDING,&renderbuffer);glGetIntegerv(GL_TEXTURE_BINDING_2D,&texture);
+  glGetIntegerv(GL_PIXEL_UNPACK_BUFFER_BINDING,&unpack);glGetIntegerv(GL_ACTIVE_TEXTURE,&activeTexture);glGetIntegerv(GL_VIEWPORT,viewport);
+  CheckGl("Query prior GL state");
+  GLuint fbo=0,color=0,depth=0;
+  glGenFramebuffers(1,&fbo);glGenTextures(1,&color);glGenRenderbuffers(1,&depth);
+  GLenum error=glGetError();
+  if(error!=GL_NO_ERROR||!fbo||!color||!depth) {
+    if(depth)glDeleteRenderbuffers(1,&depth);
+    if(color)glDeleteTextures(1,&color);
+    if(fbo)glDeleteFramebuffers(1,&fbo);
+    if(error!=GL_NO_ERROR)GlError("Allocate offscreen target",error);
+    throw std::runtime_error("GLES returned an empty offscreen object");
+  }
+  // nullptr must mean no upload, rather than an offset into a caller's PBO.
+  glBindBuffer(GL_PIXEL_UNPACK_BUFFER,0);
+  glBindTexture(GL_TEXTURE_2D,color);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+  glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA8,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,nullptr);
+  glBindFramebuffer(GL_FRAMEBUFFER,fbo);
+  glFramebufferTexture2D(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,GL_TEXTURE_2D,color,0);
+  glBindRenderbuffer(GL_RENDERBUFFER,depth);
+  glRenderbufferStorage(GL_RENDERBUFFER,GL_DEPTH_COMPONENT24,width,height);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_RENDERBUFFER,depth);
+  const GLenum status=glCheckFramebufferStatus(GL_FRAMEBUFFER);error=glGetError();
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER,static_cast<GLuint>(draw));
+  glBindFramebuffer(GL_READ_FRAMEBUFFER,static_cast<GLuint>(read));
+  glBindRenderbuffer(GL_RENDERBUFFER,static_cast<GLuint>(renderbuffer));
+  glBindTexture(GL_TEXTURE_2D,static_cast<GLuint>(texture));
+  glBindBuffer(GL_PIXEL_UNPACK_BUFFER,static_cast<GLuint>(unpack));
+  const GLenum restore=glGetError();
+  if(status!=GL_FRAMEBUFFER_COMPLETE||error!=GL_NO_ERROR||restore!=GL_NO_ERROR) {
+    glDeleteRenderbuffers(1,&depth);glDeleteTextures(1,&color);glDeleteFramebuffers(1,&fbo);
+    if(error!=GL_NO_ERROR)GlError("Create offscreen framebuffer",error);
+    if(restore!=GL_NO_ERROR)GlError("Restore GL state",restore);
+    throw std::runtime_error("Offscreen framebuffer is incomplete, status="+std::to_string(status));
+  }
+  display_=display;context_=context;framebuffer_=fbo;color_=color;depth_=depth;
+  previousDraw_=draw;previousRead_=read;
+  previousTexture_=texture;previousRenderbuffer_=renderbuffer;previousActiveTexture_=activeTexture;
+  for(int i=0;i<4;++i)previousViewport_[i]=viewport[i];
+  width_=width;height_=height;thread_=std::this_thread::get_id();
+}
+bool GlesOffscreenTarget::MakeCurrent() {
+  if(!IsOpen()||thread_!=std::this_thread::get_id()||
+     eglGetCurrentDisplay()!=display_||eglGetCurrentContext()!=context_)return false;
+  glBindFramebuffer(GL_FRAMEBUFFER,framebuffer_);glViewport(0,0,width_,height_);
+  return glGetError()==GL_NO_ERROR;
+}
+void GlesOffscreenTarget::Close() {
+  if(!IsOpen())return;
+  RequireOwner();
+  GLint draw=0,read=0,activeTexture=0,renderbuffer=0;
+  glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING,&draw);glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING,&read);
+  glGetIntegerv(GL_ACTIVE_TEXTURE,&activeTexture);glGetIntegerv(GL_RENDERBUFFER_BINDING,&renderbuffer);
+  CheckGl("Query framebuffer state before close");
+  const bool restoreDraw=static_cast<GLuint>(draw)==framebuffer_;
+  const bool restoreRead=static_cast<GLuint>(read)==framebuffer_;
+  if(restoreDraw)glBindFramebuffer(GL_DRAW_FRAMEBUFFER,static_cast<GLuint>(previousDraw_));
+  if(restoreRead)glBindFramebuffer(GL_READ_FRAMEBUFFER,static_cast<GLuint>(previousRead_));
+  if(activeTexture!=previousActiveTexture_)glActiveTexture(static_cast<GLenum>(previousActiveTexture_));
+  GLint texture=0;glGetIntegerv(GL_TEXTURE_BINDING_2D,&texture);
+  if(static_cast<GLuint>(texture)==color_)glBindTexture(GL_TEXTURE_2D,static_cast<GLuint>(previousTexture_));
+  if(activeTexture!=previousActiveTexture_)glActiveTexture(static_cast<GLenum>(activeTexture));
+  if(static_cast<GLuint>(renderbuffer)==depth_)glBindRenderbuffer(GL_RENDERBUFFER,static_cast<GLuint>(previousRenderbuffer_));
+  if(restoreDraw)glViewport(previousViewport_[0],previousViewport_[1],previousViewport_[2],previousViewport_[3]);
+  const GLenum restore=glGetError();
+  glDeleteRenderbuffers(1,&depth_);glDeleteTextures(1,&color_);glDeleteFramebuffers(1,&framebuffer_);
+  const GLenum deletion=glGetError();
+  framebuffer_=color_=depth_=0;display_=EGL_NO_DISPLAY;context_=EGL_NO_CONTEXT;
+  previousDraw_=previousRead_=previousTexture_=previousRenderbuffer_=previousActiveTexture_=0;
+  width_=height_=0;thread_=std::thread::id{};
+  if(restore!=GL_NO_ERROR)GlError("Restore application GL state",restore);
+  if(deletion!=GL_NO_ERROR)GlError("Delete offscreen objects",deletion);
+}
+std::vector<uint8_t> GlesOffscreenTarget::ReadRGBA() {
+  RequireOwner();
+  GLint currentRead=0,buffer=0,alignment=0,row=0,skipRows=0,skipPixels=0;
+  glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING,&currentRead);glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING,&buffer);
+  glGetIntegerv(GL_PACK_ALIGNMENT,&alignment);glGetIntegerv(GL_PACK_ROW_LENGTH,&row);
+  glGetIntegerv(GL_PACK_SKIP_ROWS,&skipRows);glGetIntegerv(GL_PACK_SKIP_PIXELS,&skipPixels);
+  CheckGl("Query pixel-pack state");
+  if(static_cast<GLuint>(currentRead)!=framebuffer_)throw std::logic_error("Offscreen framebuffer is not selected for readback");
+  std::vector<uint8_t> pixels(size_t(width_)*size_t(height_)*4);
+  glBindBuffer(GL_PIXEL_PACK_BUFFER,0);glPixelStorei(GL_PACK_ALIGNMENT,1);
+  glPixelStorei(GL_PACK_ROW_LENGTH,0);glPixelStorei(GL_PACK_SKIP_ROWS,0);glPixelStorei(GL_PACK_SKIP_PIXELS,0);
+  const GLenum setup=glGetError();
+  if(setup==GL_NO_ERROR)glReadPixels(0,0,width_,height_,GL_RGBA,GL_UNSIGNED_BYTE,pixels.data());
+  const GLenum read=glGetError();
+  glPixelStorei(GL_PACK_ALIGNMENT,alignment);glPixelStorei(GL_PACK_ROW_LENGTH,row);
+  glPixelStorei(GL_PACK_SKIP_ROWS,skipRows);glPixelStorei(GL_PACK_SKIP_PIXELS,skipPixels);
+  glBindBuffer(GL_PIXEL_PACK_BUFFER,static_cast<GLuint>(buffer));const GLenum restore=glGetError();
+  if(setup!=GL_NO_ERROR)GlError("Configure pixel readback",setup);
+  if(read!=GL_NO_ERROR)GlError("Read offscreen pixels",read);
+  if(restore!=GL_NO_ERROR)GlError("Restore pixel-pack state",restore);
+  return pixels;
+}
+}

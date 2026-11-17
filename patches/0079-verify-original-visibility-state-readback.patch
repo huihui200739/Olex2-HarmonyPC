@@ -1,0 +1,201 @@
+diff --git a/native/original_document_view.cpp b/native/original_document_view.cpp
+--- a/native/original_document_view.cpp
++++ b/native/original_document_view.cpp
+@@ -414,6 +414,7 @@
+   else if(state.selectionAction=="show-all")interactionSource="original TMainForm::OnShowAll/GXLibMacros::macFmol";
+   else if(state.selectionAction=="center-model")interactionSource="original TMainForm::OnModelCenter/GXLibMacros::macCenter";
+   else if(state.selectionAction=="hide-selection")interactionSource="original TMainForm::OnGraphics/GXLibMacros::macHide";
++  else if(state.selectionAction=="toggle-labels")interactionSource="original TGXApp::AreLabelsVisible/TGXApp::SetLabelsVisible/stateLabelsVisible";
+   else if(state.selectionAction=="quality-1"||state.selectionAction=="quality-2"||state.selectionAction=="quality-3")
+     interactionSource="original TMainForm::OnDrawQChange/GXLibMacros::macQual/TGXApp::Quality";
+   else if(state.selectionAction=="toggle-hydrogens"||state.selectionAction=="toggle-hydrogen-bonds")
+@@ -435,7 +436,13 @@
+     <<",\"centralSampleWidth\":"<<state.centralSampleWidth<<",\"centralSampleHeight\":"<<state.centralSampleHeight<<",\"centralSampleNonBackgroundPixels\":"<<state.centralSampleNonBackgroundPixels
+     <<",\"selectedObjectCount\":"<<(state.loaded?renderer.GetSelection().Count():0)<<",\"selectionSequence\":"<<state.selectionSequence
+     <<",\"pickHit\":"<<(state.pickHit?"true":"false")<<",\"lastPickedCollection\":"<<Quote(state.lastPickedCollection)
+-    <<",\"selectionAction\":"<<Quote(state.selectionAction)<<",\"originalPickingCalls\":"<<state.originalPickingCalls
++    <<",\"selectionAction\":"<<Quote(state.selectionAction);
++  if(state.loaded)out<<",\"labelsVisible\":"<<(app.AreLabelsVisible()?"true":"false")
++    <<",\"hydrogensVisible\":"<<(app.AreHydrogensVisible()?"true":"false")
++    <<",\"hydrogenBondsVisible\":"<<(app.AreHBondsVisible()?"true":"false")
++    <<",\"qPeaksVisible\":"<<(app.AreQPeaksVisible()?"true":"false")
++    <<",\"qPeakBondsVisible\":"<<(app.AreQPeakBondsVisible()?"true":"false");
++  out<<",\"originalPickingCalls\":"<<state.originalPickingCalls
+     <<",\"lastPickPixelX\":"<<state.lastPickPixelX<<",\"lastPickPixelY\":"<<state.lastPickPixelY
+     <<",\"selectionSource\":"<<Quote(interactionSource)
+     <<FramingStatusFields(state.lastFraming)
+diff --git a/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts b/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
+--- a/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
++++ b/app/entry/src/main/ets/model/OriginalDocumentTransfer.ts
+@@ -7,6 +7,12 @@
+ export const ORIGINAL_MAIN_GUI_SHOW_ALL_SOURCE: string = 'original TMainForm::OnShowAll/GXLibMacros::macFmol';
+ export const ORIGINAL_MAIN_GUI_CENTER_SOURCE: string = 'original TMainForm::OnModelCenter/GXLibMacros::macCenter';
+ export const ORIGINAL_MAIN_GUI_VIEW_SOURCE: string = 'original TMainForm::OnViewAlong/GXLibMacros::macMatr';
++export const ORIGINAL_MAIN_GUI_LABELS_SOURCE: string = 'original TGXApp::AreLabelsVisible/TGXApp::SetLabelsVisible/stateLabelsVisible';
++export const ORIGINAL_MAIN_GUI_GRID_SOURCE: string = 'original TMainForm::GridVChange/TGXApp::ShowGrid';
++export const ORIGINAL_MAIN_GUI_HIDE_SOURCE: string = 'original TMainForm::OnGraphics/GXLibMacros::macHide';
++export const ORIGINAL_MAIN_GUI_QUALITY_SOURCE: string = 'original TMainForm::OnDrawQChange/GXLibMacros::macQual/TGXApp::Quality';
++export const ORIGINAL_MAIN_GUI_HYDROGEN_SOURCE: string = 'original GXLibMacros::macShowH/TGXApp hydrogen visibility setters';
++export const ORIGINAL_MAIN_GUI_QPEAK_SOURCE: string = 'original GXLibMacros::macShowQ/TGXApp Q-peak visibility setters';
+ export interface OriginalDocumentCoreStatus {
+   passed: boolean; loaded: boolean; name: string; format: string;
+   byteCount: number; sha256: string; revision: number; frames: number;
+@@ -15,6 +21,8 @@
+   // Optional for pre-operation and failure envelopes, never synthesized in UI.
+   selectedObjectCount?: number; selectionSequence?: number; pickHit?: boolean;
+   lastPickedCollection?: string; selectionAction?: string; selectionSource?: string;
++  labelsVisible?: boolean; hydrogensVisible?: boolean; hydrogenBondsVisible?: boolean;
++  qPeaksVisible?: boolean; qPeakBondsVisible?: boolean;
+ }
+ export interface OriginalDocumentEnvelope {
+   passed: boolean; surfacePresented: boolean; parentContextRestored: boolean;
+@@ -84,6 +92,11 @@
+   if ((fields.indexOf('selectedObjectCount') >= 0 && !validCounter(core.selectedObjectCount as number)) ||
+     (fields.indexOf('selectionSequence') >= 0 && !validCounter(core.selectionSequence as number)) ||
+     (fields.indexOf('pickHit') >= 0 && typeof core.pickHit !== 'boolean') ||
++    (fields.indexOf('labelsVisible') >= 0 && typeof core.labelsVisible !== 'boolean') ||
++    (fields.indexOf('hydrogensVisible') >= 0 && typeof core.hydrogensVisible !== 'boolean') ||
++    (fields.indexOf('hydrogenBondsVisible') >= 0 && typeof core.hydrogenBondsVisible !== 'boolean') ||
++    (fields.indexOf('qPeaksVisible') >= 0 && typeof core.qPeaksVisible !== 'boolean') ||
++    (fields.indexOf('qPeakBondsVisible') >= 0 && typeof core.qPeakBondsVisible !== 'boolean') ||
+     (fields.indexOf('lastPickedCollection') >= 0 && (typeof core.lastPickedCollection !== 'string' ||
+       !validPickedCollection(core.lastPickedCollection))) ||
+     (fields.indexOf('selectionAction') >= 0 && (typeof core.selectionAction !== 'string' ||
+@@ -93,14 +106,26 @@
+        core.selectionAction !== 'show-all' && core.selectionAction !== 'center-model' && core.selectionAction !== 'view-along-100' &&
+        core.selectionAction !== 'view-along-010' && core.selectionAction !== 'view-along-001' &&
+        core.selectionAction !== 'view-along-110' && core.selectionAction !== 'view-along-101' &&
+-       core.selectionAction !== 'view-along-011' && core.selectionAction !== 'view-along-111'))) ||
++       core.selectionAction !== 'view-along-011' && core.selectionAction !== 'view-along-111' &&
++       core.selectionAction !== 'view-along-selection' && core.selectionAction !== 'hide-selection' &&
++       core.selectionAction !== 'toggle-grid' && core.selectionAction !== 'quality-1' &&
++       core.selectionAction !== 'quality-2' && core.selectionAction !== 'quality-3' &&
++       core.selectionAction !== 'toggle-labels' && core.selectionAction !== 'toggle-hydrogens' &&
++       core.selectionAction !== 'toggle-hydrogen-bonds' && core.selectionAction !== 'toggle-qpeaks' &&
++       core.selectionAction !== 'toggle-qpeak-bonds'))) ||
+     (fields.indexOf('selectionSource') >= 0 && (typeof core.selectionSource !== 'string' ||
+       core.selectionSource !== ORIGINAL_SELECTION_SOURCE && core.selectionSource !== ORIGINAL_MAIN_GUI_CELL_SOURCE &&
+       core.selectionSource !== ORIGINAL_MAIN_GUI_BASIS_SOURCE &&
+       core.selectionSource !== ORIGINAL_MAIN_GUI_FRAME_SOURCE &&
+       core.selectionSource !== ORIGINAL_MAIN_GUI_SHOW_ALL_SOURCE &&
+       core.selectionSource !== ORIGINAL_MAIN_GUI_CENTER_SOURCE &&
+-      core.selectionSource !== ORIGINAL_MAIN_GUI_VIEW_SOURCE))) {
++      core.selectionSource !== ORIGINAL_MAIN_GUI_VIEW_SOURCE &&
++      core.selectionSource !== ORIGINAL_MAIN_GUI_LABELS_SOURCE &&
++      core.selectionSource !== ORIGINAL_MAIN_GUI_GRID_SOURCE &&
++      core.selectionSource !== ORIGINAL_MAIN_GUI_HIDE_SOURCE &&
++      core.selectionSource !== ORIGINAL_MAIN_GUI_QUALITY_SOURCE &&
++      core.selectionSource !== ORIGINAL_MAIN_GUI_HYDROGEN_SOURCE &&
++      core.selectionSource !== ORIGINAL_MAIN_GUI_QPEAK_SOURCE))) {
+     throw new Error('原版文档选择状态格式不合法');
+   }
+ }
+diff --git a/app/entry/src/main/ets/model/OriginalViewportInput.ts b/app/entry/src/main/ets/model/OriginalViewportInput.ts
+--- a/app/entry/src/main/ets/model/OriginalViewportInput.ts
++++ b/app/entry/src/main/ets/model/OriginalViewportInput.ts
+@@ -25,6 +25,9 @@
+     widthVp <= 0 || heightVp <= 0 || xVp < 0 || yVp < 0 || xVp > widthVp || yVp > heightVp) return undefined;
+   // Top-left stays top-left; pixel conversion belongs exclusively to native.
+   return { x: xVp / widthVp, y: yVp / heightVp };
++}
++export function originalVisibilityStateChanged(previous: boolean | undefined, actual: boolean | undefined): boolean {
++  return typeof previous === 'boolean' && typeof actual === 'boolean' && previous !== actual;
+ }
+ export function originalSelectionMode(baseMode: number, ctrl: boolean, shift: boolean): number {
+   if (!Number.isInteger(baseMode) || baseMode < 0 || baseMode > 2) throw new Error('选择模式不合法');
+diff --git a/app/entry/src/main/ets/pages/Index.ets b/app/entry/src/main/ets/pages/Index.ets
+--- a/app/entry/src/main/ets/pages/Index.ets
++++ b/app/entry/src/main/ets/pages/Index.ets
+@@ -29,13 +29,15 @@
+   desktopMenuFocusTarget, desktopMenuScrollOffset } from '../model/DesktopMenuNavigation';
+ import { OriginalDocumentTransfer, OriginalDocumentEnvelope, OriginalDocumentTransferStatus,
+   OriginalDocumentTransferResult, OriginalDocumentBackend, OriginalDocumentCoreStatus, emptyOriginalDocument,
+-  emptyOriginalDocumentTransfer, parseOriginalDocument, originalDocumentPresented } from '../model/OriginalDocumentTransfer';
++  emptyOriginalDocumentTransfer, parseOriginalDocument, originalDocumentPresented,
++  ORIGINAL_MAIN_GUI_LABELS_SOURCE, ORIGINAL_MAIN_GUI_HYDROGEN_SOURCE,
++  ORIGINAL_MAIN_GUI_QPEAK_SOURCE } from '../model/OriginalDocumentTransfer';
+ import { HarmonyOriginalDocumentPort } from '../model/OriginalDocumentStore';
+ import { OriginalDocumentSaveTargets, OriginalDocumentSaveTarget } from '../model/OriginalDocumentSaveTargets';
+ import { OriginalDocumentSaveTransport, OriginalDocumentSerializedSnapshot } from '../model/OriginalDocumentSaveTransport';
+ import { originalDocumentSha256 } from '../model/OriginalDocumentHash';
+ import { OriginalViewportInput, OriginalSelectionRequest, OriginalViewportKeyResult, OriginalViewportDrag,
+-  originalSelectionRequest, originalSelectionMode } from '../model/OriginalViewportInput';
++  originalSelectionRequest, originalSelectionMode, originalVisibilityStateChanged } from '../model/OriginalViewportInput';
+ import { KeyCode } from '@kit.InputKit';
+ import { hilog } from '@kit.PerformanceAnalysisKit';
+ import { ViewportLayoutBudget, viewportLayoutBudget } from '../model/ViewportLayout';
+@@ -507,11 +509,21 @@
+     if (!this.originalSelectionEnabled()) return;
+     this.originalSelectionBusy = true;
+     this.syncOriginalViewportInput();
+-    const previousSequence: number | undefined = this.originalDocument.core.selectionSequence;
++    const previousCore: OriginalDocumentCoreStatus = this.originalDocument.core;
++    const previousSequence: number | undefined = previousCore.selectionSequence;
++    let previousVisibility: boolean | undefined;
+     try {
+       // The page already imports the actual NAPI bridge directly. Do not add a
+       // second wrapper or silently fall back to demo/local selection state.
+       const validated: OriginalSelectionRequest = originalSelectionRequest(request.action, request.x, request.y, request.mode);
++      const visibilityAction: boolean = validated.action === 'toggle-labels' || validated.action === 'toggle-hydrogens' ||
++        validated.action === 'toggle-hydrogen-bonds' || validated.action === 'toggle-qpeaks' ||
++        validated.action === 'toggle-qpeak-bonds';
++      if (validated.action === 'toggle-labels') previousVisibility = previousCore.labelsVisible;
++      else if (validated.action === 'toggle-hydrogens') previousVisibility = previousCore.hydrogensVisible;
++      else if (validated.action === 'toggle-hydrogen-bonds') previousVisibility = previousCore.hydrogenBondsVisible;
++      else if (validated.action === 'toggle-qpeaks') previousVisibility = previousCore.qPeaksVisible;
++      else if (validated.action === 'toggle-qpeak-bonds') previousVisibility = previousCore.qPeakBondsVisible;
+       const raw: string = nativeBridge.interactOriginalDocument(validated.action, validated.x, validated.y, validated.mode);
+       const document: OriginalDocumentEnvelope = parseOriginalDocument(raw);
+       this.originalDocumentLastOperation = document;
+@@ -521,25 +533,45 @@
+         throw new Error(document.error || document.core.error || '选择后原版视口未确认呈现；可关闭文档。');
+       }
+       const core = document.core;
++      let actualVisibility: boolean | undefined;
++      if (validated.action === 'toggle-labels') actualVisibility = core.labelsVisible;
++      else if (validated.action === 'toggle-hydrogens') actualVisibility = core.hydrogensVisible;
++      else if (validated.action === 'toggle-hydrogen-bonds') actualVisibility = core.hydrogenBondsVisible;
++      else if (validated.action === 'toggle-qpeaks') actualVisibility = core.qPeaksVisible;
++      else if (validated.action === 'toggle-qpeak-bonds') actualVisibility = core.qPeakBondsVisible;
++      if (visibilityAction && !originalVisibilityStateChanged(previousVisibility, actualVisibility)) {
++        throw new Error('未收到原生可见性状态变化的读回，不能确认本次切换。');
++      }
+       if (core.selectedObjectCount === undefined || core.selectionSequence === undefined || core.pickHit === undefined ||
+         core.lastPickedCollection === undefined || core.selectionSource === undefined || core.selectionAction !== validated.action ||
++        (validated.action === 'toggle-labels' && core.selectionSource !== ORIGINAL_MAIN_GUI_LABELS_SOURCE) ||
++        ((validated.action === 'toggle-hydrogens' || validated.action === 'toggle-hydrogen-bonds') &&
++          core.selectionSource !== ORIGINAL_MAIN_GUI_HYDROGEN_SOURCE) ||
++        ((validated.action === 'toggle-qpeaks' || validated.action === 'toggle-qpeak-bonds') &&
++          core.selectionSource !== ORIGINAL_MAIN_GUI_QPEAK_SOURCE) ||
+         core.selectionSequence === 0 || (previousSequence !== undefined && core.selectionSequence <= previousSequence)) {
+         throw new Error('未收到本次实际选择动作的完整状态；不推测选中结果。');
+       }
+-      const actionLabel: string = validated.action === 'pick' ? (core.pickHit ? '单击命中' : '单击未命中') :
++      let actionLabel: string = validated.action === 'pick' ? (core.pickHit ? '单击命中' : '单击未命中') :
+         validated.action === 'clear-selection' ? '已清除选择' : validated.action === 'select-all' ? '已全选' :
+         validated.action === 'invert-selection' ? '已反选' : validated.action === 'toggle-cell' ? '已切换晶胞显示' :
+           validated.action === 'toggle-basis' ? '已切换基矢显示' : validated.action === 'toggle-frame' ? '已切换包围框显示' :
+             validated.action === 'toggle-grid' ? '已切换网格显示' : validated.action === 'center-model' ? '模型已居中' :
+               validated.action === 'hide-selection' ? '已隐藏所选图形' : validated.action === 'quality-1' ? '已切换至低绘图质量' :
+                 validated.action === 'quality-2' ? '已切换至中绘图质量' : validated.action === 'quality-3' ? '已切换至高绘图质量' :
+-                  validated.action === 'toggle-labels' ? '已切换标签显示' :
+-                  validated.action === 'toggle-hydrogens' ? '已切换氢原子显示' :
+-                    validated.action === 'toggle-hydrogen-bonds' ? '已切换氢键显示' :
+-                      validated.action === 'toggle-qpeaks' ? '已切换 Q 峰显示' :
+-                        validated.action === 'toggle-qpeak-bonds' ? '已切换 Q 峰键显示' :
++                  validated.action === 'toggle-labels' ? '标签显示状态已读回' :
++                  validated.action === 'toggle-hydrogens' ? '氢原子显示状态已读回' :
++                    validated.action === 'toggle-hydrogen-bonds' ? '氢键显示状态已读回' :
++                      validated.action === 'toggle-qpeaks' ? 'Q 峰显示状态已读回' :
++                        validated.action === 'toggle-qpeak-bonds' ? 'Q 峰键显示状态已读回' :
+                   validated.action === 'view-along-selection' ? '已沿所选键/平面调整视向' : validated.action.startsWith('view-along-') ?
+             `视向已切换至 ${validated.action.substring('view-along-'.length)}` : '已显示全部分子并重新居中';
++      if (actualVisibility !== undefined) {
++        const visibilityLabel: string = validated.action === 'toggle-labels' ? '标签' :
++          validated.action === 'toggle-hydrogens' ? '氢原子' : validated.action === 'toggle-hydrogen-bonds' ? '氢键' :
++            validated.action === 'toggle-qpeaks' ? 'Q 峰' : 'Q 峰键';
++        actionLabel = `${visibilityLabel}已${actualVisibility ? '显示' : '隐藏'}（原生状态已核对）`;
++      }
+       this.originalSelectionMessage = `${actionLabel} · 选中 ${core.selectedObjectCount} · 选择序号 ${core.selectionSequence}` +
+         (core.lastPickedCollection.length > 0 ? ` · 集合 ${core.lastPickedCollection}` : '');
+     } catch (error) {
